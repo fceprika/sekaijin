@@ -32,12 +32,21 @@ class ProfileController extends Controller
             'youtube_username' => 'nullable|string|max:255|regex:/^@[a-zA-Z0-9_.-]+$/',
             'instagram_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9_.]+$/',
             'tiktok_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_.]+$/',
-            'linkedin_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\-]+$/',
+            'linkedin_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\-_.]+$/',
             'twitter_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_]+$/',
-            'facebook_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9.]+$/',
+            'facebook_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9._-]+$/',
             'telegram_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_]+$/',
             'current_password' => 'nullable|required_with:new_password|current_password',
             'new_password' => 'nullable|string|min:8|confirmed|different:current_password',
+        ], [
+            'phone.regex' => 'Le numéro de téléphone doit contenir uniquement des chiffres, espaces, tirets et parenthèses.',
+            'youtube_username.regex' => 'Le nom d\'utilisateur YouTube doit commencer par @ (ex: @monusername).',
+            'instagram_username.regex' => 'Le nom d\'utilisateur Instagram peut contenir seulement des lettres, chiffres, points et underscores.',
+            'tiktok_username.regex' => 'Le nom d\'utilisateur TikTok peut contenir seulement des lettres, chiffres, points et underscores (@ optionnel).',
+            'linkedin_username.regex' => 'Le nom d\'utilisateur LinkedIn peut contenir des lettres, chiffres, tirets, points et underscores.',
+            'twitter_username.regex' => 'Le nom d\'utilisateur Twitter peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
+            'facebook_username.regex' => 'Le nom d\'utilisateur Facebook peut contenir des lettres, chiffres, points, underscores et tirets.',
+            'telegram_username.regex' => 'Le nom d\'utilisateur Telegram peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
         ]);
 
         if ($validator->fails()) {
