@@ -29,6 +29,7 @@ class ProfileController extends Controller
             'country_residence' => 'required|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
+            'youtube_username' => 'nullable|string|max:255|regex:/^@[a-zA-Z0-9_.-]+$/',
             'current_password' => 'nullable|required_with:new_password|current_password',
             'new_password' => 'nullable|string|min:8|confirmed|different:current_password',
         ]);
@@ -48,6 +49,7 @@ class ProfileController extends Controller
             'country_residence' => $request->country_residence,
             'city_residence' => $request->city_residence,
             'bio' => $request->bio,
+            'youtube_username' => $request->youtube_username,
         ];
 
         // Ajouter le nouveau mot de passe s'il est fourni

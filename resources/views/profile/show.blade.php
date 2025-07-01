@@ -8,8 +8,25 @@
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
             <!-- En-tête du profil -->
             <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
-                <h1 class="text-3xl font-bold text-white">Mon Profil</h1>
-                <p class="text-blue-100 mt-2">Gérez vos informations personnelles</p>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">Mon Profil</h1>
+                        <p class="text-blue-100 mt-2">Gérez vos informations personnelles</p>
+                    </div>
+                    <div>
+                        <a href="{{ route('public.profile', $user->name) }}" target="_blank" 
+                           class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg font-medium transition duration-200 backdrop-blur-sm border border-white border-opacity-20">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Voir mon profil public
+                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Messages de succès/erreur -->
@@ -114,16 +131,35 @@
                     </div>
                 </div>
 
-                <!-- Biographie -->
+                <!-- Biographie et Réseaux sociaux -->
                 <div class="border-b border-gray-200 pb-8">
                     <h2 class="text-xl font-semibold text-gray-800 mb-6">À propos de moi</h2>
                     
-                    <div>
-                        <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
-                        <textarea id="bio" name="bio" rows="4"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                            placeholder="Parlez-nous de vous, votre parcours d'expatrié, vos passions...">{{ old('bio', $user->bio) }}</textarea>
-                        <p class="text-xs text-gray-500 mt-1">Maximum 1000 caractères</p>
+                    <div class="space-y-6">
+                        <!-- Biographie -->
+                        <div>
+                            <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
+                            <textarea id="bio" name="bio" rows="4"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                placeholder="Parlez-nous de vous, votre parcours d'expatrié, vos passions...">{{ old('bio', $user->bio) }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">Maximum 1000 caractères</p>
+                        </div>
+                        
+                        <!-- Chaîne YouTube -->
+                        <div>
+                            <label for="youtube_username" class="block text-sm font-medium text-gray-700 mb-2">Chaîne YouTube</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    </svg>
+                                </div>
+                                <input type="text" id="youtube_username" name="youtube_username" value="{{ old('youtube_username', $user->youtube_username) }}"
+                                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                    placeholder="@WeckoTV">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Entrez votre nom d'utilisateur YouTube avec le @ (ex: @WeckoTV)</p>
+                        </div>
                     </div>
                 </div>
 
