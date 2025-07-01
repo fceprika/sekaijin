@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer create-project:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init:*)",
+      "Bash(npm run build:*)",
+      "Bash(php artisan:*)",
+      "Bash(brew services:*)",
+      "Bash(mysql:*)",
+      "Bash(curl:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(mkdir:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": []
+  }
+}
