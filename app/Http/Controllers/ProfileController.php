@@ -25,23 +25,16 @@ class ProfileController extends Controller
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'birth_date' => 'nullable|date|before:today',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
             'country_residence' => 'required|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
-            'current_password' => 'nullable|required_with:new_password',
-            'new_password' => 'nullable|string|min:8|confirmed',
+            'current_password' => 'nullable|required_with:new_password|current_password',
+            'new_password' => 'nullable|string|min:8|confirmed|different:current_password',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
-        }
-
-        // Vérifier le mot de passe actuel si un nouveau mot de passe est fourni
-        if ($request->filled('new_password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'Le mot de passe actuel est incorrect.'])->withInput();
-            }
         }
 
         // Mettre à jour les informations de l'utilisateur

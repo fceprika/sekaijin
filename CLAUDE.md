@@ -157,6 +157,14 @@ Migration files:
 ### Simplified Registration & Profile Management
 - Simplified registration form to essential fields only (pseudo, email, country, password)
 - Added comprehensive user profile management system
-- Complete world country list (195 countries) organized by continent
-- Secure password change functionality within profile
+- Complete world country list (195 countries) organized by continent using reusable partial
+- Secure password change functionality with enhanced validation (current_password rule)
 - Made personal information fields optional for flexible user experience
+- Added phone number regex validation for international formats
+- Improved database migration safety with NULL value cleanup in rollbacks
+
+### Performance Considerations
+- Country selection uses reusable `@include('partials.countries')` to reduce code duplication
+- Consider implementing JavaScript-based country selector for better UX at scale
+- Country list could be cached or loaded via AJAX for improved performance
+- Phone validation regex: `/^[\+]?[0-9\s\-\(\)]+$/` supports international formats
