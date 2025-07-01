@@ -39,6 +39,9 @@ Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout
 // API Routes
 Route::get('/api/expats-by-country', [App\Http\Controllers\Api\ExpatController::class, 'expatsByCountry']);
 
+// Profils publics
+Route::get('/membre/{name}', [App\Http\Controllers\PublicProfileController::class, 'show'])->name('public.profile');
+
 // Routes protégées pour les utilisateurs connectés
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');

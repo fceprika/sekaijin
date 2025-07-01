@@ -27,6 +27,7 @@ class User extends Authenticatable
         'country_residence',
         'city_residence',
         'bio',
+        'youtube_username',
         'password',
         'is_verified',
         'last_login',

@@ -1,0 +1,172 @@
+@extends('layout')
+
+@section('title', 'Profil de ' . $user->name . ' - Sekaijin')
+
+@section('content')
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header Section -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-white relative">
+                <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                <div class="relative">
+                    <!-- Info principale -->
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <h1 class="text-3xl font-bold">{{ $user->name }}</h1>
+                            @if($user->is_verified)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Membre vérifié
+                                </span>
+                            @endif
+                        </div>
+                        
+                        <!-- Localisation -->
+                        @if($user->country_residence || $user->city_residence)
+                            <div class="flex items-center text-blue-100 text-lg">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                @if($user->city_residence && $user->country_residence)
+                                    {{ $user->city_residence }}, {{ $user->country_residence }}
+                                @elseif($user->country_residence)
+                                    {{ $user->country_residence }}
+                                @endif
+                            </div>
+                        @endif
+                        
+                        <!-- Date d'inscription -->
+                        <div class="flex items-center text-blue-100 text-sm mt-2">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Membre depuis {{ $user->created_at->diffForHumans() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Biographie -->
+            <div class="lg:col-span-2">
+                @if($user->bio)
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            À propos
+                        </h2>
+                        <div class="prose prose-gray max-w-none">
+                            <p class="text-gray-700 leading-relaxed text-lg">{{ $user->bio }}</p>
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                        <div class="text-gray-400 mb-4">
+                            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-500 mb-2">Biographie non renseignée</h3>
+                        <p class="text-gray-400">Ce membre n'a pas encore ajouté de biographie.</p>
+                    </div>
+                @endif
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Informations -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Informations
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        @if($user->country_residence)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Pays de résidence</p>
+                                    <p class="text-gray-800">{{ $user->country_residence }}</p>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        @if($user->city_residence)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Ville</p>
+                                    <p class="text-gray-800">{{ $user->city_residence }}</p>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Membre depuis</p>
+                                <p class="text-gray-800">{{ $user->created_at->locale('fr')->translatedFormat('F Y') }}</p>
+                            </div>
+                        </div>
+                        
+                        @if($user->youtube_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Chaîne YouTube</p>
+                                    <a href="https://www.youtube.com/{{ $user->youtube_username }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-red-600 hover:text-red-700 font-medium flex items-center group">
+                                        {{ $user->youtube_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                
+                <!-- Call to Action -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Rejoignez la communauté</h3>
+                    <p class="text-gray-600 text-sm mb-4">Connectez-vous avec des expatriés français du monde entier.</p>
+                    <a href="/inscription" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        S'inscrire
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
