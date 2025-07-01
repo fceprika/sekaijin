@@ -134,12 +134,13 @@ The application uses a MySQL database named `sekaijin`. The User model includes 
 
 // Optional fields (nullable) for enhanced profile
 'first_name', 'last_name', 'birth_date', 'phone',
-'city_residence', 'bio', 'is_verified', 'last_login'
+'city_residence', 'bio', 'youtube_username', 'is_verified', 'last_login'
 ```
 
 Migration files:
 - `2025_06_29_160323_add_expat_fields_to_users_table.php` - Initial expat fields
 - `2025_07_01_124618_make_user_fields_nullable.php` - Make personal fields optional
+- `2025_07_01_154430_add_youtube_username_to_users_table.php` - YouTube integration field
 
 ### Environment Configuration
 
@@ -154,14 +155,16 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 
 ## Key Files for Modifications
 
-- **Routes**: `routes/web.php` - includes page routes, auth routes, and protected profile routes
-- **Auth Logic**: `app/Http/Controllers/AuthController.php` - simplified registration/login
-- **Profile Management**: `app/Http/Controllers/ProfileController.php` - user profile CRUD operations
+- **Routes**: `routes/web.php` - includes page routes, auth routes, protected profile routes, and public profile routes
+- **Auth Logic**: `app/Http/Controllers/AuthController.php` - simplified registration/login with unique username validation
+- **Profile Management**: `app/Http/Controllers/ProfileController.php` - user profile CRUD operations with YouTube validation
 - **User Model**: `app/Models/User.php` - extended with expat fields and proper casting
 - **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state and profile link
 - **Registration Form**: `resources/views/auth/register.blade.php` - simplified with complete country list
-- **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing
+- **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing with public profile link
 - **Countries Component**: `resources/views/partials/countries.blade.php` - reusable country selection
+- **Public Profiles**: `app/Http/Controllers/PublicProfileController.php` - public profile display
+- **Public Profile View**: `resources/views/profile/public.blade.php` - public profile page with YouTube integration
 - **API Controllers**: `app/Http/Controllers/Api/ExpatController.php` - API endpoints for map data
 - **Map Integration**: `public/js/country-coordinates.js` - country coordinates mapping
 - **Frontend Assets**: `resources/css/app.css`, `resources/js/app.js` 
@@ -187,6 +190,16 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Country coordinates mapping for 195+ countries worldwide
 - Real-time data loading via AJAX with error handling
 - Mapbox API key configured via `.env` file (`MAPBOX_ACCESS_TOKEN`)
+
+### Public Profile System with Social Integration
+- Public profile pages accessible via `/membre/{pseudo}` URLs
+- Unique username validation enforced during registration
+- YouTube channel integration with `@username` format validation
+- Clean responsive design without sensitive information exposure
+- Member verification badge system for trusted users
+- Cross-linking between private profile management and public profile
+- Proper 404 handling for non-existent profiles
+- French date formatting and localization throughout
 
 ### Performance Considerations
 - Country selection uses reusable `@include('partials.countries')` to reduce code duplication
