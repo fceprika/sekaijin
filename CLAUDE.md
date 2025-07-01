@@ -141,6 +141,7 @@ Migration files:
 - `2025_06_29_160323_add_expat_fields_to_users_table.php` - Initial expat fields
 - `2025_07_01_124618_make_user_fields_nullable.php` - Make personal fields optional
 - `2025_07_01_154430_add_youtube_username_to_users_table.php` - YouTube integration field
+- `2025_07_01_160225_add_unique_index_to_users_name_column.php` - Unique index on name for performance and data integrity
 
 ### Environment Configuration
 
@@ -208,3 +209,4 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Phone validation regex: `/^[\+]?[0-9\s\-\(\)]+$/` supports international formats
 - Map data loaded asynchronously to avoid blocking page render
 - Marker clustering could be implemented for better performance with large datasets
+- **Database Optimization**: Unique index on `users.name` ensures fast public profile lookups and enforces data integrity at the database level
