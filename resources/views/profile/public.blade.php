@@ -135,15 +135,130 @@
                         @if($user->youtube_username)
                             <div class="flex items-start space-x-3">
                                 <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                    </svg>
+                                    <i class="fab fa-youtube text-red-600"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-600">Chaîne YouTube</p>
+                                    <p class="text-sm font-medium text-gray-600">YouTube</p>
                                     <a href="https://www.youtube.com/{{ $user->youtube_username }}" target="_blank" rel="noopener noreferrer" 
                                        class="text-red-600 hover:text-red-700 font-medium flex items-center group">
                                         {{ $user->youtube_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($user->instagram_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-instagram text-pink-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Instagram</p>
+                                    <a href="https://instagram.com/{{ $user->instagram_username }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-pink-500 hover:text-pink-600 font-medium flex items-center group">
+                                        {{ $user->instagram_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($user->tiktok_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-tiktok text-black"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">TikTok</p>
+                                    @php
+                                        $tiktokUsername = str_starts_with($user->tiktok_username, '@') ? substr($user->tiktok_username, 1) : $user->tiktok_username;
+                                    @endphp
+                                    <a href="https://tiktok.com/@{{ $tiktokUsername }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-gray-800 hover:text-black font-medium flex items-center group">
+                                        {{ $user->tiktok_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($user->linkedin_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-linkedin text-blue-700"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">LinkedIn</p>
+                                    <a href="https://linkedin.com/in/{{ $user->linkedin_username }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-blue-700 hover:text-blue-800 font-medium flex items-center group">
+                                        {{ $user->linkedin_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($user->twitter_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-twitter text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Twitter / X</p>
+                                    @php
+                                        $twitterUsername = str_starts_with($user->twitter_username, '@') ? substr($user->twitter_username, 1) : $user->twitter_username;
+                                    @endphp
+                                    <a href="https://twitter.com/{{ $twitterUsername }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-blue-400 hover:text-blue-500 font-medium flex items-center group">
+                                        {{ $user->twitter_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($user->facebook_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-facebook text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Facebook</p>
+                                    <a href="https://facebook.com/{{ $user->facebook_username }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-blue-600 hover:text-blue-700 font-medium flex items-center group">
+                                        {{ $user->facebook_username }}
+                                        <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($user->telegram_username)
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fab fa-telegram text-blue-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Telegram</p>
+                                    @php
+                                        $telegramUsername = str_starts_with($user->telegram_username, '@') ? substr($user->telegram_username, 1) : $user->telegram_username;
+                                    @endphp
+                                    <a href="https://t.me/{{ $telegramUsername }}" target="_blank" rel="noopener noreferrer" 
+                                       class="text-blue-500 hover:text-blue-600 font-medium flex items-center group">
+                                        {{ $user->telegram_username }}
                                         <svg class="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                         </svg>
