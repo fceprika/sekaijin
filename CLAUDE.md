@@ -19,19 +19,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Database Schema Extensions**:
 The User model has been extended beyond standard Laravel auth to include expat-specific fields:
-- Personal info: `first_name`, `last_name`, `birth_date`, `phone`
-- Location data: `country_residence`, `city_residence`
+- Required fields: `name` (pseudo), `email`, `country_residence`
+- Optional personal info: `first_name`, `last_name`, `birth_date`, `phone` (nullable)
+- Location data: `country_residence` (required), `city_residence` (optional)
 - Community features: `bio`, `is_verified`, `last_login`
 
 **Authentication Flow**:
-- Custom AuthController handles registration/login with expat-specific validation
+- Custom AuthController handles simplified registration/login
 - French-language forms at `/inscription` and `/connexion` routes
-- Enhanced registration requiring country of residence and personal details
+- Simplified registration requiring only pseudo, email, country of residence, and password
+- Complete country list (195 countries) organized by continent
 
 **View Architecture**:
-- Base template: `resources/views/layout.blade.php` with responsive navigation
+- Base template: `resources/views/layout.blade.php` with responsive navigation and profile link
 - Main pages: home, about, services, contact (all French-localized)
 - Auth views: `resources/views/auth/` directory with custom styling
+- Profile management: `resources/views/profile/show.blade.php` for user profile editing
+- Reusable components: `resources/views/partials/countries.blade.php` for country selection
 - Consistent Tailwind CSS theming with blue/purple gradients
 
 ## Development Workflow
@@ -99,8 +103,10 @@ php artisan test --filter TestClassName
 - Navigation: Accueil, À propos, Services, Contact
 
 ### Expat-Focused Features
-- Country selection dropdown in registration (pre-populated with common expat destinations)
-- User profiles designed around expat needs (residence country/city tracking)
+- Complete country selection (195 countries) organized by continent in registration and profile
+- Comprehensive user profile management system at `/profil` for authenticated users
+- User profiles designed around expat needs (residence country/city tracking, bio, personal info)
+- Secure profile editing with password change functionality
 - Community stats display (25K+ members, 150 countries, etc.)
 
 ### Authentication Security
@@ -121,19 +127,36 @@ php artisan test --filter TestClassName
 The application uses a MySQL database named `sekaijin`. The User model includes these custom fields for the expat community:
 
 ```php
-// Extended user fields for expat-specific data
+// Required fields for registration and profile
+'name', 'email', 'country_residence', 'password'
+
+// Optional fields (nullable) for enhanced profile
 'first_name', 'last_name', 'birth_date', 'phone',
-'country_residence', 'city_residence', 'bio', 
-'is_verified', 'last_login'
+'city_residence', 'bio', 'is_verified', 'last_login'
 ```
 
-Migration file: `2025_06_29_160323_add_expat_fields_to_users_table.php`
+Migration files:
+- `2025_06_29_160323_add_expat_fields_to_users_table.php` - Initial expat fields
+- `2025_07_01_124618_make_user_fields_nullable.php` - Make personal fields optional
 
 ## Key Files for Modifications
 
-- **Routes**: `routes/web.php` - includes both page routes and custom auth routes
-- **Auth Logic**: `app/Http/Controllers/AuthController.php` - custom registration/login
+- **Routes**: `routes/web.php` - includes page routes, auth routes, and protected profile routes
+- **Auth Logic**: `app/Http/Controllers/AuthController.php` - simplified registration/login
+- **Profile Management**: `app/Http/Controllers/ProfileController.php` - user profile CRUD operations
 - **User Model**: `app/Models/User.php` - extended with expat fields and proper casting
-- **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state
+- **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state and profile link
+- **Registration Form**: `resources/views/auth/register.blade.php` - simplified with complete country list
+- **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing
+- **Countries Component**: `resources/views/partials/countries.blade.php` - reusable country selection
 - **Frontend Assets**: `resources/css/app.css`, `resources/js/app.js` 
 - **Vite Config**: `vite.config.js` - configured for Laravel integration with HMR
+
+## Recent Updates (July 2025)
+
+### Simplified Registration & Profile Management
+- Simplified registration form to essential fields only (pseudo, email, country, password)
+- Added comprehensive user profile management system
+- Complete world country list (195 countries) organized by continent
+- Secure password change functionality within profile
+- Made personal information fields optional for flexible user experience

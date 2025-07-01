@@ -35,3 +35,9 @@ Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'regist
 Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login']);
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+
+// Routes protégées pour les utilisateurs connectés
+Route::middleware('auth')->group(function () {
+    Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+});
