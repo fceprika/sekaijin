@@ -122,7 +122,9 @@ php artisan test --filter TestClassName
 - Vite handles asset bundling and hot module replacement
 - Custom CSS in `resources/css/app.css` loads Tailwind directives
 
-## Database Configuration
+## Configuration
+
+### Database Configuration
 
 The application uses a MySQL database named `sekaijin`. The User model includes these custom fields for the expat community:
 
@@ -139,6 +141,17 @@ Migration files:
 - `2025_06_29_160323_add_expat_fields_to_users_table.php` - Initial expat fields
 - `2025_07_01_124618_make_user_fields_nullable.php` - Make personal fields optional
 
+### Environment Configuration
+
+Add these variables to your `.env` file:
+
+```bash
+# Mapbox Configuration
+MAPBOX_ACCESS_TOKEN=your_mapbox_access_token_here
+```
+
+The Mapbox token is configured in `config/services.php` and used in the interactive map on the homepage.
+
 ## Key Files for Modifications
 
 - **Routes**: `routes/web.php` - includes page routes, auth routes, and protected profile routes
@@ -149,6 +162,8 @@ Migration files:
 - **Registration Form**: `resources/views/auth/register.blade.php` - simplified with complete country list
 - **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing
 - **Countries Component**: `resources/views/partials/countries.blade.php` - reusable country selection
+- **API Controllers**: `app/Http/Controllers/Api/ExpatController.php` - API endpoints for map data
+- **Map Integration**: `public/js/country-coordinates.js` - country coordinates mapping
 - **Frontend Assets**: `resources/css/app.css`, `resources/js/app.js` 
 - **Vite Config**: `vite.config.js` - configured for Laravel integration with HMR
 
@@ -163,8 +178,20 @@ Migration files:
 - Added phone number regex validation for international formats
 - Improved database migration safety with NULL value cleanup in rollbacks
 
+### Interactive Map Integration
+- Added Mapbox GL JS interactive map on homepage showing global expat distribution
+- API endpoint `/api/expats-by-country` returns JSON data of users grouped by country
+- Custom markers with size proportional to member count per country
+- Responsive design with different map heights for mobile/tablet/desktop
+- French localization for tooltips and map interface
+- Country coordinates mapping for 195+ countries worldwide
+- Real-time data loading via AJAX with error handling
+- Mapbox API key configured via `.env` file (`MAPBOX_ACCESS_TOKEN`)
+
 ### Performance Considerations
 - Country selection uses reusable `@include('partials.countries')` to reduce code duplication
 - Consider implementing JavaScript-based country selector for better UX at scale
 - Country list could be cached or loaded via AJAX for improved performance
 - Phone validation regex: `/^[\+]?[0-9\s\-\(\)]+$/` supports international formats
+- Map data loaded asynchronously to avoid blocking page render
+- Marker clustering could be implemented for better performance with large datasets

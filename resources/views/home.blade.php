@@ -3,6 +3,36 @@
 @section('title', 'Accueil - Sekaijin')
 
 @section('content')
+<!-- Interactive Map Section -->
+<div class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Notre Communauté dans le Monde</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Découvrez où se trouvent les membres de Sekaijin à travers le globe
+            </p>
+        </div>
+        
+        <!-- Map Container -->
+        <div class="bg-gray-100 rounded-2xl p-2 md:p-4 shadow-lg">
+            <div id="map" class="h-[250px] md:h-[400px] lg:h-[500px] w-full rounded-xl"></div>
+        </div>
+        
+        <!-- Map Legend -->
+        <div class="mt-6 text-center">
+            <div class="inline-flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 bg-gray-50 px-4 md:px-6 py-3 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-gray-600">Membres de la communauté</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs md:text-sm text-gray-500">Cliquez sur un point pour voir les détails</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Hero Section with Gradient -->
 <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden">
     <div class="absolute inset-0 bg-black bg-opacity-20"></div>
@@ -78,10 +108,9 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Stats Section -->
-<div class="py-16 bg-white">
+<div class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
@@ -104,11 +133,109 @@
     </div>
 </div>
 
+<!-- Country Coordinates Script -->
+<script src="/js/country-coordinates.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Hero button functionality
     $('#hero-btn').click(function() {
-        alert('Bienvenue dans la communauté Sekaijin !');
+        window.location.href = '/inscription';
+    });
+    
+    // Initialize Mapbox
+    mapboxgl.accessToken = '{{ config('services.mapbox.access_token') }}';
+    
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [2.2137, 46.2276], // Centré sur la France
+        zoom: 2,
+        projection: 'globe',
+        // Désactiver la collecte de données pour éviter les erreurs d'ad blocker
+        collectResourceTiming: false,
+        trackResize: true
+    });
+    
+    // Ajouter les contrôles de navigation
+    map.addControl(new mapboxgl.NavigationControl());
+    
+    // Charger les données des expatriés via AJAX
+    map.on('load', function() {
+        $.get('/api/expats-by-country')
+            .done(function(data) {
+                addExpatMarkersToMap(map, data);
+            })
+            .fail(function() {
+                console.error('Erreur lors du chargement des données des expatriés');
+            });
     });
 });
+
+function addExpatMarkersToMap(map, expatData) {
+    expatData.forEach(function(expat) {
+        const coordinates = getCountryCoordinates(expat.country);
+        
+        if (coordinates) {
+            // Calculer la taille du marqueur basée sur le nombre d'expatriés
+            const size = Math.min(Math.max(expat.count / 10 + 10, 15), 40);
+            
+            // Créer un élément HTML pour le marqueur
+            const markerElement = document.createElement('div');
+            markerElement.className = 'expat-marker';
+            markerElement.style.width = size + 'px';
+            markerElement.style.height = size + 'px';
+            markerElement.style.borderRadius = '50%';
+            markerElement.style.backgroundColor = '#3b82f6';
+            markerElement.style.border = '3px solid white';
+            markerElement.style.cursor = 'pointer';
+            markerElement.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+            markerElement.style.display = 'flex';
+            markerElement.style.alignItems = 'center';
+            markerElement.style.justifyContent = 'center';
+            markerElement.style.color = 'white';
+            markerElement.style.fontSize = '12px';
+            markerElement.style.fontWeight = 'bold';
+            markerElement.style.transition = 'transform 0.2s';
+            
+            // Afficher le nombre si assez grand
+            if (size > 25) {
+                markerElement.textContent = expat.count;
+            }
+            
+            // Effet hover
+            markerElement.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.2)';
+                this.style.zIndex = '1000';
+            });
+            
+            markerElement.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.zIndex = 'auto';
+            });
+            
+            // Créer le popup avec texte en français
+            const popup = new mapboxgl.Popup({
+                offset: 25,
+                closeButton: false
+            }).setHTML(`
+                <div class="text-center p-2">
+                    <h3 class="font-bold text-lg text-gray-800">${expat.country}</h3>
+                    <p class="text-blue-600 font-semibold">${expat.count} membre${expat.count > 1 ? 's' : ''}</p>
+                    <p class="text-xs text-gray-500 mt-1">de la communauté Sekaijin</p>
+                </div>
+            `);
+            
+            // Ajouter le marqueur à la carte
+            new mapboxgl.Marker(markerElement)
+                .setLngLat(coordinates)
+                .setPopup(popup)
+                .addTo(map);
+        }
+    });
+    
+    // Ajouter un message dans la console
+    console.log(`Carte chargée avec ${expatData.length} pays représentés`);
+}
 </script>
 @endsection

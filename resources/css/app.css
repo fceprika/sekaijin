@@ -1,3 +1,52 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Styles personnalisés pour la carte Mapbox */
+.mapboxgl-popup-content {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
+}
+
+.mapboxgl-popup-tip {
+    border-top-color: white !important;
+}
+
+/* Responsive adjustments for map */
+@media (max-width: 768px) {
+    #map {
+        height: 300px !important;
+    }
+    
+    .expat-marker {
+        transform: scale(0.8) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    #map {
+        height: 250px !important;
+    }
+    
+    .expat-marker {
+        transform: scale(0.7) !important;
+    }
+}
+
+/* Animation pour les marqueurs */
+.expat-marker {
+    animation: markerPulse 2s infinite;
+}
+
+@keyframes markerPulse {
+    0% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    70% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
