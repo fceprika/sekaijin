@@ -23,18 +23,12 @@
         <form method="POST" action="{{ route('register') }}" class="space-y-6">
             @csrf
             
-            <!-- Nom et Prénom -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Prénom *</label>
-                    <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                </div>
-                <div>
-                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
-                    <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                </div>
+            <!-- Pseudo -->
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Pseudo *</label>
+                <input type="text" id="name" name="name" value="{{ old('name') }}" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="Choisissez votre pseudo">
             </div>
 
             <!-- Email -->
@@ -44,47 +38,14 @@
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
             </div>
 
-            <!-- Date de naissance -->
+            <!-- Pays de résidence -->
             <div>
-                <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-2">Date de naissance *</label>
-                <input type="date" id="birth_date" name="birth_date" value="{{ old('birth_date') }}" required
+                <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
+                <select id="country_residence" name="country_residence" required
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-            </div>
-
-            <!-- Téléphone -->
-            <div>
-                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
-                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                    placeholder="+33 1 23 45 67 89">
-            </div>
-
-            <!-- Pays et Ville -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
-                    <select id="country_residence" name="country_residence" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                        <option value="">Sélectionnez un pays</option>
-                        <option value="Canada" {{ old('country_residence') == 'Canada' ? 'selected' : '' }}>Canada</option>
-                        <option value="États-Unis" {{ old('country_residence') == 'États-Unis' ? 'selected' : '' }}>États-Unis</option>
-                        <option value="Royaume-Uni" {{ old('country_residence') == 'Royaume-Uni' ? 'selected' : '' }}>Royaume-Uni</option>
-                        <option value="Allemagne" {{ old('country_residence') == 'Allemagne' ? 'selected' : '' }}>Allemagne</option>
-                        <option value="Espagne" {{ old('country_residence') == 'Espagne' ? 'selected' : '' }}>Espagne</option>
-                        <option value="Italie" {{ old('country_residence') == 'Italie' ? 'selected' : '' }}>Italie</option>
-                        <option value="Japon" {{ old('country_residence') == 'Japon' ? 'selected' : '' }}>Japon</option>
-                        <option value="Australie" {{ old('country_residence') == 'Australie' ? 'selected' : '' }}>Australie</option>
-                        <option value="Singapour" {{ old('country_residence') == 'Singapour' ? 'selected' : '' }}>Singapour</option>
-                        <option value="Suisse" {{ old('country_residence') == 'Suisse' ? 'selected' : '' }}>Suisse</option>
-                        <option value="Autre" {{ old('country_residence') == 'Autre' ? 'selected' : '' }}>Autre</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">Ville de résidence</label>
-                    <input type="text" id="city_residence" name="city_residence" value="{{ old('city_residence') }}"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                        placeholder="Paris, Londres, New York...">
-                </div>
+                    <option value="">Sélectionnez un pays</option>
+                    @include('partials.countries', ['selected' => old('country_residence')])
+                </select>
             </div>
 
             <!-- Mot de passe -->

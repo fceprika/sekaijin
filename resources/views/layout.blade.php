@@ -24,9 +24,12 @@
                     <a href="/contact" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Contact</a>
                     
                     @auth
-                        <div class="relative ml-4">
-                            <span class="text-blue-600 font-medium">{{ Auth::user()->first_name }}</span>
-                            <form method="POST" action="{{ route('logout') }}" class="inline ml-2">
+                        <div class="relative ml-4 flex items-center space-x-3">
+                            <span class="text-blue-600 font-medium">{{ Auth::user()->name }}</span>
+                            <a href="{{ route('profile.show') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
+                                Mon profil
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
                                 <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition duration-300">
                                     Déconnexion
