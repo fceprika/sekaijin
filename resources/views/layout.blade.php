@@ -27,14 +27,66 @@
                     <div>
                         <a href="/" class="flex items-center py-4 px-2">
                             <span class="font-bold text-blue-600 text-xl">🌍 Sekaijin</span>
+                            @if(isset($currentCountry))
+                                <span class="ml-2 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ $currentCountry->name_fr }}
+                                </span>
+                            @endif
                         </a>
                     </div>
                 </div>
                 <div class="hidden md:flex items-center space-x-3">
                     <a href="/" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Accueil</a>
-                    <a href="/about" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">À propos</a>
-                    <a href="/services" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Services</a>
-                    <a href="/contact" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Contact</a>
+                    
+                    <!-- Country Dropdown -->
+                    <div class="relative group">
+                        <button class="flex items-center py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">
+                            @if(isset($currentCountry))
+                                {{ $currentCountry->emoji }} {{ $currentCountry->name_fr }}
+                            @else
+                                🌍 Pays
+                            @endif
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            @php
+                                $allCountries = \App\Models\Country::all();
+                            @endphp
+                            @foreach($allCountries as $country)
+                                <a href="{{ route('country.index', $country->slug) }}" 
+                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : '' }}">
+                                    {{ $country->emoji }} {{ $country->name_fr }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    
+                    <!-- Country-specific navigation -->
+                    @if(isset($currentCountry))
+                        <a href="{{ route('country.actualites', $currentCountry->slug) }}" 
+                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.actualites') ? 'text-blue-600' : '' }}">
+                            Actualités
+                        </a>
+                        <a href="{{ route('country.blog', $currentCountry->slug) }}" 
+                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.blog') ? 'text-blue-600' : '' }}">
+                            Blog
+                        </a>
+                        <a href="{{ route('country.communaute', $currentCountry->slug) }}" 
+                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.communaute') ? 'text-blue-600' : '' }}">
+                            Communauté
+                        </a>
+                        <a href="{{ route('country.evenements', $currentCountry->slug) }}" 
+                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.evenements') ? 'text-blue-600' : '' }}">
+                            Événements
+                        </a>
+                    @else
+                        <a href="/about" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">À propos</a>
+                        <a href="/services" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Services</a>
+                        <a href="/contact" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Contact</a>
+                    @endif
                     
                     @auth
                         <div class="relative ml-4 flex items-center space-x-3">
