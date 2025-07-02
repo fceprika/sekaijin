@@ -23,6 +23,7 @@ The User model has been extended beyond standard Laravel auth to include expat-s
 - Optional personal info: `first_name`, `last_name`, `birth_date`, `phone` (nullable)
 - Location data: `country_residence` (required), `city_residence` (optional)
 - Community features: `bio`, `is_verified`, `last_login`
+- Role system: `role` field with 4 levels (free, premium, ambassador, admin)
 
 **Authentication Flow**:
 - Custom AuthController handles simplified registration/login
@@ -134,7 +135,7 @@ The application uses a MySQL database named `sekaijin`. The User model includes 
 
 // Optional fields (nullable) for enhanced profile
 'first_name', 'last_name', 'birth_date', 'phone',
-'city_residence', 'bio', 'youtube_username', 'is_verified', 'last_login'
+'city_residence', 'bio', 'youtube_username', 'is_verified', 'last_login', 'role'
 ```
 
 Migration files:
@@ -142,6 +143,7 @@ Migration files:
 - `2025_07_01_124618_make_user_fields_nullable.php` - Make personal fields optional
 - `2025_07_01_154430_add_youtube_username_to_users_table.php` - YouTube integration field
 - `2025_07_01_160225_add_unique_index_to_users_name_column.php` - Unique index on name for performance and data integrity
+- `2025_07_02_073153_add_role_to_users_table.php` - User role system implementation
 
 ### Environment Configuration
 
@@ -201,6 +203,14 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Cross-linking between private profile management and public profile
 - Proper 404 handling for non-existent profiles
 - French date formatting and localization throughout
+
+### User Role System (July 2025)
+- **Four-tier Role System**: `free` (default), `premium`, `ambassador`, `admin` with distinct privileges
+- **Role-based Access Control**: `RoleMiddleware` for protecting routes by role (`Route::middleware('role:admin')`)
+- **Blade Directives**: Custom directives for role checking (`@admin`, `@premium`, `@ambassador`, `@role('admin')`)
+- **User Model Methods**: Helper methods `isAdmin()`, `isPremium()`, `isAmbassador()`, `isFree()`, `isRole($role)`
+- **Visual Role Badges**: Color-coded badges on public profiles with role-specific icons and styling
+- **Role Display Names**: French localized role names ("Membre", "Membre Premium", "Ambassadeur Sekaijin", "Administrateur")
 
 ### UI/UX Improvements (July 2025)
 - **Clickable Username Navigation**: User's pseudo in navigation menu now links to their public profile with hover effects
