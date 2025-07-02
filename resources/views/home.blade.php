@@ -3,6 +3,33 @@
 @section('title', 'Accueil - Sekaijin')
 
 @section('content')
+<!-- Hero Section with Gradient -->
+<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            Bienvenue sur 
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">
+                Sekaijin
+            </span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
+            La communauté des expatriés français à travers le monde
+        </p>
+        <div class="space-x-4">
+            <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg">
+                Rejoindre la communauté
+            </button>
+            <a href="/about" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block">
+                En savoir plus
+            </a>
+        </div>
+    </div>
+    <!-- Floating shapes -->
+    <div class="absolute top-10 left-10 w-20 h-20 bg-yellow-400 rounded-full opacity-20 animate-pulse"></div>
+    <div class="absolute bottom-10 right-10 w-16 h-16 bg-pink-400 rounded-full opacity-20 animate-bounce"></div>
+</div>
+
 <!-- Interactive Map Section -->
 <div class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4">
@@ -33,31 +60,25 @@
     </div>
 </div>
 
-<!-- Hero Section with Gradient -->
-<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden">
-    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
-    <div class="relative max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Bienvenue sur 
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">
-                Sekaijin
-            </span>
-        </h1>
-        <p class="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
-            La communauté des expatriés français à travers le monde
-        </p>
-        <div class="space-x-4">
-            <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg">
-                Rejoindre la communauté
-            </button>
-            <a href="/about" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block">
-                En savoir plus
-            </a>
-        </div>
+<!-- Latest Content Section -->
+<div class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        @include('partials.country-content', [
+            'country' => $thailand,
+            'news' => $thailandNews,
+            'articles' => $thailandArticles,
+            'events' => $thailandEvents,
+            'isLast' => false
+        ])
+
+        @include('partials.country-content', [
+            'country' => $japan,
+            'news' => $japanNews,
+            'articles' => $japanArticles,
+            'events' => $japanEvents,
+            'isLast' => true
+        ])
     </div>
-    <!-- Floating shapes -->
-    <div class="absolute top-10 left-10 w-20 h-20 bg-yellow-400 rounded-full opacity-20 animate-pulse"></div>
-    <div class="absolute bottom-10 right-10 w-16 h-16 bg-pink-400 rounded-full opacity-20 animate-bounce"></div>
 </div>
 
 <!-- Features Section -->
