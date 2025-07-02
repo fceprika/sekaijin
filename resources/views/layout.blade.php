@@ -36,30 +36,13 @@
                     </div>
                 </div>
                 <div class="hidden md:flex items-center space-x-3">
-                    <a href="/" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Accueil</a>
-                    
-                    <!-- Country Dropdown -->
-                    <div class="relative group">
-                        <button class="flex items-center py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">
-                            @if(isset($currentCountry))
-                                {{ $currentCountry->emoji }} {{ $currentCountry->name_fr }}
-                            @else
-                                🌍 Pays
-                            @endif
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            @foreach($allCountries as $country)
-                                <a href="{{ route('country.index', $country->slug) }}" 
-                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : '' }}">
-                                    {{ $country->emoji }} {{ $country->name_fr }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
+                    <!-- Direct Country Links -->
+                    @foreach($allCountries as $country)
+                        <a href="{{ route('country.index', $country->slug) }}" 
+                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'text-blue-600' : '' }}">
+                            {{ $country->emoji }} {{ $country->name_fr }}
+                        </a>
+                    @endforeach
                     
                     <!-- Country-specific navigation -->
                     @if(isset($currentCountry))
@@ -81,7 +64,6 @@
                         </a>
                     @else
                         <a href="/about" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">À propos</a>
-                        <a href="/services" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Services</a>
                         <a href="/contact" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Contact</a>
                     @endif
                     

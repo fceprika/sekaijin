@@ -32,7 +32,9 @@ The User model has been extended beyond standard Laravel auth to include expat-s
 - Complete country list (195 countries) organized by continent
 
 **View Architecture**:
-- Base template: `resources/views/layout.blade.php` with responsive navigation and profile link
+- Base template: `resources/views/layout.blade.php` with responsive navigation, direct country links, and profile integration
+- Homepage: `resources/views/home.blade.php` with dynamic 2x2 grid layout displaying real content from Thailand and Japan
+- HomeController: `app/Http/Controllers/HomeController.php` provides real database data instead of dummy content
 - Main pages: home, about, services, contact (all French-localized)
 - Auth views: `resources/views/auth/` directory with custom styling
 - Profile management: `resources/views/profile/show.blade.php` for user profile editing
@@ -101,7 +103,7 @@ php artisan test --filter TestClassName
 - All user-facing content is in French
 - Route names use French terms (`/inscription`, `/connexion`, `/deconnexion`)
 - Error messages and validation text localized for French expat audience
-- Navigation: Accueil, À propos, Services, Contact
+- Navigation: Direct country links (Thailand, Japan), À propos, Contact, with dynamic country-specific menus when browsing country sections
 
 ### Expat-Focused Features
 - Complete country selection (195 countries) organized by continent in registration and profile
@@ -159,6 +161,7 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 ## Key Files for Modifications
 
 - **Routes**: `routes/web.php` - includes page routes, auth routes, protected profile routes, public profile routes, and country-based content routes
+- **Homepage Controller**: `app/Http/Controllers/HomeController.php` - provides real database content for homepage 2x2 grid layout (Thailand/Japan sections)
 - **Auth Logic**: `app/Http/Controllers/AuthController.php` - simplified registration/login with unique username validation
 - **Profile Management**: `app/Http/Controllers/ProfileController.php` - user profile CRUD operations with YouTube validation
 - **User Model**: `app/Models/User.php` - extended with expat fields, role system, and proper casting
@@ -170,7 +173,8 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Form Requests**: `app/Http/Requests/Store*Request.php` - comprehensive validation for content creation
 - **Authorization Policies**: `app/Policies/*Policy.php` - granular permission control for all content types
 - **View Composers**: `app/Http/View/Composers/CountryComposer.php` - performance optimization with caching
-- **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state, profile link, and country context
+- **Main Layout**: `resources/views/layout.blade.php` - responsive nav with direct country links, auth state, profile integration, and dynamic country context badges
+- **Homepage View**: `resources/views/home.blade.php` - 2x2 grid layout with hero section, interactive map, and real content from Thailand/Japan
 - **Registration Form**: `resources/views/auth/register.blade.php` - simplified with complete country list
 - **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing with public profile link
 - **Countries Component**: `resources/views/partials/countries.blade.php` - reusable country selection
@@ -197,12 +201,14 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 
 ### Interactive Map Integration
 - Added Mapbox GL JS interactive map on homepage showing global expat distribution
+- **Strategic Placement**: Map positioned between hero section and content grids for better user flow
 - API endpoint `/api/expats-by-country` returns JSON data of users grouped by country
 - Custom markers with size proportional to member count per country
-- Responsive design with different map heights for mobile/tablet/desktop
+- Responsive design with different map heights for mobile/tablet/desktop (250px/400px/500px)
 - French localization for tooltips and map interface
 - Country coordinates mapping for 195+ countries worldwide
-- Real-time data loading via AJAX with error handling
+- Real-time data loading via AJAX with error handling and fallback states
+- Enhanced visual design with rounded container, shadow effects, and legend
 - Mapbox API key configured via `.env` file (`MAPBOX_ACCESS_TOKEN`)
 
 ### Public Profile System with Social Integration
@@ -226,8 +232,19 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 ### UI/UX Improvements (July 2025)
 - **Clickable Username Navigation**: User's pseudo in navigation menu now links to their public profile with hover effects
 - **Hero Section Call-to-Actions**: Homepage hero buttons properly linked ("Rejoindre" → `/inscription`, "En savoir plus" → `/about`)
+- **Enhanced Homepage Interactivity**: All content blocks now clickable with proper hover states and visual feedback
+- **Visual Hierarchy**: Improved typography with larger fonts, better spacing, and clearer content organization
+- **Category Color Coding**: Dynamic badge colors for content categories (travel=blue, lifestyle=yellow, culture=purple, gastronomy=orange, etc.)
 - **Favicon Integration**: Site favicon properly organized in `/public/images/` directory for better asset management
 - **Clean Console Output**: Removed debug console messages for cleaner production experience
+
+### Recent Bug Fixes & Technical Improvements (July 2025)
+- **Route Generation Fix**: Resolved routing errors by using `.id` instead of `.slug` for content detail pages
+- **Database Query Optimization**: HomeController implements proper eager loading with `with('author')` and `with('organizer')`
+- **Null Safety**: Added comprehensive null checks and safe fallbacks for missing content or countries
+- **Content Filtering**: Proper country-specific content filtering at database level for accurate homepage display
+- **Event Date Handling**: Upcoming events properly filtered using `where('start_date', '>=', now())` for relevance
+- **Collection Safety**: Uses Laravel collections with `collect()` fallbacks when no database records exist
 
 ### Country-Based Site Architecture (July 2025)
 - **Dynamic Country Routing**: Site structured around countries with prefixed routes (`/thailande/*`, `/japon/*`)
@@ -285,10 +302,22 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Error Handling**: Comprehensive try-catch blocks with structured logging and user-friendly error messages
 - **Database Relationships**: Proper foreign key constraints with `country_id` replacing fragile string-based relationships
 
+### Homepage Redesign & Real Data Integration (July 2025)
+- **2x2 Grid Layout**: Homepage restructured with hero section followed by interactive map, then 2x2 content grids for Thailand and Japan
+- **HomeController Implementation**: `app/Http/Controllers/HomeController.php` replaces dummy content with real database queries
+- **Real Content Display**: Dynamic loading of latest news (2 items), blog articles (2 items), and upcoming events (1 item) per country
+- **Interactive Content**: All content blocks are clickable and properly routed to individual content pages
+- **Enhanced UX**: Added hover effects, larger fonts, color-coded categories, and proper visual hierarchy
+- **Navigation Streamlining**: Removed "Accueil" and "Services" buttons, replaced with direct country links for better site navigation
+- **Route Optimization**: Fixed routing errors by using `.id` instead of `.slug` for content page generation
+- **Content Categorization**: Dynamic category badges with proper color coding (travel=blue, lifestyle=yellow, culture=purple, etc.)
+- **Empty State Handling**: Graceful fallbacks when no content exists for a country section
+
 ### Performance Optimizations (July 2025)
 - **View Composers**: `CountryComposer` with 1-hour caching eliminates N+1 queries in navigation
-- **Eager Loading**: Optimized queries with `select()` clauses to fetch only necessary columns
-- **Query Optimization**: Proper use of Query Builder methods vs Collection methods
+- **Eager Loading**: Optimized queries with `select()` clauses to fetch only necessary columns, HomeController uses `with('author')` for efficient relationships
+- **Query Optimization**: Proper use of Query Builder methods vs Collection methods, country-specific content filtering at database level
 - **Content Pagination**: Laravel pagination for all content listings with efficient database queries
 - **Cached Data**: Country lists cached globally to avoid repeated database calls
+- **Real-time Data**: Homepage content loaded dynamically from database with proper null checks and safe fallbacks
 - **Database Optimization**: Unique index on `users.name` ensures fast public profile lookups and enforces data integrity at the database level
