@@ -52,9 +52,6 @@
                         </button>
                         
                         <div class="absolute left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                            @php
-                                $allCountries = \App\Models\Country::all();
-                            @endphp
                             @foreach($allCountries as $country)
                                 <a href="{{ route('country.index', $country->slug) }}" 
                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : '' }}">

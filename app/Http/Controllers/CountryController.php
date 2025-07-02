@@ -17,10 +17,11 @@ class CountryController extends Controller
     public function index(Request $request, $country)
     {
         $countryModel = $request->get('country_model');
-        $allCountries = Country::all();
+        // Remove allCountries from here as it's now handled by CountryComposer
         
-        // Get community members from this country
+        // Get community members from this country with optimized query
         $communityMembers = User::where('country_residence', $countryModel->name_fr)
+            ->select(['id', 'name', 'is_verified', 'role', 'city_residence'])
             ->take(6)
             ->get();
             
@@ -46,7 +47,7 @@ class CountryController extends Controller
             ->take(3)
             ->get();
         
-        return view('country.index', compact('countryModel', 'allCountries', 'communityMembers', 'featuredNews', 'featuredArticles', 'upcomingEvents'));
+        return view('country.index', compact('countryModel', 'communityMembers', 'featuredNews', 'featuredArticles', 'upcomingEvents'));
     }
 
     /**
@@ -106,8 +107,9 @@ class CountryController extends Controller
     {
         $countryModel = $request->get('country_model');
         
-        // Get community members from this country
+        // Get community members from this country with optimized pagination
         $communityMembers = User::where('country_residence', $countryModel->name_fr)
+            ->select(['id', 'name', 'is_verified', 'role', 'city_residence', 'bio', 'created_at'])
             ->paginate(12);
         
         return view('country.communaute', compact('countryModel', 'communityMembers'));
@@ -136,8 +138,33 @@ class CountryController extends Controller
             ->orderBy('start_date')
             ->take(3)
             ->get();
+
+        // Calculate statistics for sidebar
+        $statsThisMonth = Event::forCountry($countryModel->id)
+            ->published()
+            ->upcoming()
+            ->whereMonth('start_date', now()->month)
+            ->count();
+
+        $statsFree = Event::forCountry($countryModel->id)
+            ->published()
+            ->upcoming()
+            ->where('price', 0)
+            ->count();
+
+        $statsOnline = Event::forCountry($countryModel->id)
+            ->published()
+            ->upcoming()
+            ->where('is_online', true)
+            ->count();
+
+        $eventStats = [
+            'this_month' => $statsThisMonth,
+            'free' => $statsFree,
+            'online' => $statsOnline,
+        ];
         
-        return view('country.evenements', compact('countryModel', 'upcomingEvents', 'featuredEvents'));
+        return view('country.evenements', compact('countryModel', 'upcomingEvents', 'featuredEvents', 'eventStats'));
     }
 
     /**
@@ -145,25 +172,39 @@ class CountryController extends Controller
      */
     public function showArticle(Request $request, $country, Article $article)
     {
-        $countryModel = $request->get('country_model');
-        
-        // Verify article belongs to current country
-        if ($article->country_id !== $countryModel->id) {
-            abort(404);
+        try {
+            $countryModel = $request->get('country_model');
+            
+            // Verify article belongs to current country
+            if ($article->country_id !== $countryModel->id) {
+                abort(404, 'Article non trouvé dans ce pays.');
+            }
+
+            // Check authorization to view this article
+            $this->authorize('view', $article);
+            
+            // Increment views
+            $article->increment('views');
+            
+            // Get related articles with error handling
+            $relatedArticles = Article::forCountry($countryModel->id)
+                ->published()
+                ->where('id', '!=', $article->id)
+                ->latest('published_at')
+                ->take(3)
+                ->get();
+            
+            return view('country.article-show', compact('countryModel', 'article', 'relatedArticles'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Error displaying article: ' . $e->getMessage(), [
+                'article_id' => $article->id,
+                'country' => $country,
+                'user_id' => auth()->id()
+            ]);
+            
+            abort(500, 'Une erreur est survenue lors du chargement de l\'article.');
         }
-        
-        // Increment views
-        $article->increment('views');
-        
-        // Get related articles
-        $relatedArticles = Article::forCountry($countryModel->id)
-            ->published()
-            ->where('id', '!=', $article->id)
-            ->latest('published_at')
-            ->take(3)
-            ->get();
-        
-        return view('country.article-show', compact('countryModel', 'article', 'relatedArticles'));
     }
 
     /**
@@ -171,25 +212,39 @@ class CountryController extends Controller
      */
     public function showNews(Request $request, $country, News $news)
     {
-        $countryModel = $request->get('country_model');
-        
-        // Verify news belongs to current country
-        if ($news->country_id !== $countryModel->id) {
-            abort(404);
+        try {
+            $countryModel = $request->get('country_model');
+            
+            // Verify news belongs to current country
+            if ($news->country_id !== $countryModel->id) {
+                abort(404, 'Actualité non trouvée dans ce pays.');
+            }
+
+            // Check authorization to view this news
+            $this->authorize('view', $news);
+            
+            // Increment views
+            $news->increment('views');
+            
+            // Get related news with error handling
+            $relatedNews = News::forCountry($countryModel->id)
+                ->published()
+                ->where('id', '!=', $news->id)
+                ->latest('published_at')
+                ->take(3)
+                ->get();
+            
+            return view('country.news-show', compact('countryModel', 'news', 'relatedNews'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Error displaying news: ' . $e->getMessage(), [
+                'news_id' => $news->id,
+                'country' => $country,
+                'user_id' => auth()->id()
+            ]);
+            
+            abort(500, 'Une erreur est survenue lors du chargement de l\'actualité.');
         }
-        
-        // Increment views
-        $news->increment('views');
-        
-        // Get related news
-        $relatedNews = News::forCountry($countryModel->id)
-            ->published()
-            ->where('id', '!=', $news->id)
-            ->latest('published_at')
-            ->take(3)
-            ->get();
-        
-        return view('country.news-show', compact('countryModel', 'news', 'relatedNews'));
     }
 
     /**
@@ -197,22 +252,36 @@ class CountryController extends Controller
      */
     public function showEvent(Request $request, $country, Event $event)
     {
-        $countryModel = $request->get('country_model');
-        
-        // Verify event belongs to current country
-        if ($event->country_id !== $countryModel->id) {
-            abort(404);
+        try {
+            $countryModel = $request->get('country_model');
+            
+            // Verify event belongs to current country
+            if ($event->country_id !== $countryModel->id) {
+                abort(404, 'Événement non trouvé dans ce pays.');
+            }
+
+            // Check authorization to view this event
+            $this->authorize('view', $event);
+            
+            // Get related events with error handling
+            $relatedEvents = Event::forCountry($countryModel->id)
+                ->published()
+                ->upcoming()
+                ->where('id', '!=', $event->id)
+                ->orderBy('start_date')
+                ->take(3)
+                ->get();
+            
+            return view('country.event-show', compact('countryModel', 'event', 'relatedEvents'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Error displaying event: ' . $e->getMessage(), [
+                'event_id' => $event->id,
+                'country' => $country,
+                'user_id' => auth()->id()
+            ]);
+            
+            abort(500, 'Une erreur est survenue lors du chargement de l\'événement.');
         }
-        
-        // Get related events
-        $relatedEvents = Event::forCountry($countryModel->id)
-            ->published()
-            ->upcoming()
-            ->where('id', '!=', $event->id)
-            ->orderBy('start_date')
-            ->take(3)
-            ->get();
-        
-        return view('country.event-show', compact('countryModel', 'event', 'relatedEvents'));
     }
 }

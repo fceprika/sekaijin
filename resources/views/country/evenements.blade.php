@@ -271,15 +271,15 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600">Événements ce mois-ci</span>
-                            <span class="font-bold text-green-600">{{ $upcomingEvents->whereMonth('start_date', now()->month)->count() }}</span>
+                            <span class="font-bold text-green-600">{{ $eventStats['this_month'] }}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600">Événements gratuits</span>
-                            <span class="font-bold text-blue-600">{{ $upcomingEvents->where('price', 0)->count() }}</span>
+                            <span class="font-bold text-blue-600">{{ $eventStats['free'] }}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600">Événements en ligne</span>
-                            <span class="font-bold text-purple-600">{{ $upcomingEvents->where('is_online', true)->count() }}</span>
+                            <span class="font-bold text-purple-600">{{ $eventStats['online'] }}</span>
                         </div>
                     </div>
                 </div>

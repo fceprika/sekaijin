@@ -22,7 +22,8 @@
       "Bash(grep:*)",
       "Bash(mv:*)",
       "Bash(git rm:*)",
-      "Bash(gh pr create:*)"
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)"
     ],
     "deny": []
   }

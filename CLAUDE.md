@@ -167,6 +167,9 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Country Model**: `app/Models/Country.php` - country management with slug-based routing
 - **Role Middleware**: `app/Http/Middleware/RoleMiddleware.php` - role-based access control
 - **Country Middleware**: `app/Http/Middleware/EnsureValidCountry.php` - country context validation
+- **Form Requests**: `app/Http/Requests/Store*Request.php` - comprehensive validation for content creation
+- **Authorization Policies**: `app/Policies/*Policy.php` - granular permission control for all content types
+- **View Composers**: `app/Http/View/Composers/CountryComposer.php` - performance optimization with caching
 - **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state, profile link, and country context
 - **Registration Form**: `resources/views/auth/register.blade.php` - simplified with complete country list
 - **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing with public profile link
@@ -271,15 +274,21 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - `2025_07_02_090549_create_news_table.php` - News/actualités management
 - `2025_07_02_090641_create_articles_table.php` - Blog article system  
 - `2025_07_02_090725_create_events_table.php` - Event management system
+- `2025_07_02_094335_add_country_id_to_users_table.php` - Proper foreign key relationships
 - `ContentSeeder.php` - Sample content for Thailand and Japan with realistic French expat data
 
-### Performance Considerations
-- Country selection uses reusable `@include('partials.countries')` to reduce code duplication
-- Consider implementing JavaScript-based country selector for better UX at scale
-- Country list could be cached or loaded via AJAX for improved performance
-- Phone validation regex: `/^[\+]?[0-9\s\-\(\)]+$/` supports international formats
-- Map data loaded asynchronously to avoid blocking page render
-- Marker clustering could be implemented for better performance with large datasets
+### Security & Validation (July 2025)
+- **Form Request Classes**: Comprehensive validation for all content types (`StoreNewsRequest`, `StoreArticleRequest`, `StoreEventRequest`)
+- **Authorization Policies**: Role-based access control with detailed policies (`NewsPolicy`, `ArticlePolicy`, `EventPolicy`)
+- **Role-Based Permissions**: Granular permissions (admins/ambassadors for news, authors for their content)
+- **Input Validation**: Strict validation rules with French error messages for all user inputs
+- **Error Handling**: Comprehensive try-catch blocks with structured logging and user-friendly error messages
+- **Database Relationships**: Proper foreign key constraints with `country_id` replacing fragile string-based relationships
+
+### Performance Optimizations (July 2025)
+- **View Composers**: `CountryComposer` with 1-hour caching eliminates N+1 queries in navigation
+- **Eager Loading**: Optimized queries with `select()` clauses to fetch only necessary columns
+- **Query Optimization**: Proper use of Query Builder methods vs Collection methods
+- **Content Pagination**: Laravel pagination for all content listings with efficient database queries
+- **Cached Data**: Country lists cached globally to avoid repeated database calls
 - **Database Optimization**: Unique index on `users.name` ensures fast public profile lookups and enforces data integrity at the database level
-- **Content Pagination**: All content listings use Laravel pagination for optimal performance
-- **Eager Loading**: Content relationships (author, country) loaded efficiently to prevent N+1 queries

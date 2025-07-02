@@ -25,9 +25,18 @@ class Country extends Model
     }
 
     /**
-     * Get users living in this country
+     * Get users living in this country (using proper foreign key)
      */
     public function users()
+    {
+        return $this->hasMany(User::class, 'country_id');
+    }
+
+    /**
+     * Get users living in this country (legacy method for backward compatibility)
+     * @deprecated Use users() instead
+     */
+    public function usersLegacy()
     {
         return $this->hasMany(User::class, 'country_residence', 'name_fr');
     }

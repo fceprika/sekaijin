@@ -26,6 +26,7 @@ class User extends Authenticatable
         'birth_date',
         'phone',
         'country_residence',
+        'country_id',
         'city_residence',
         'bio',
         'youtube_username',
@@ -125,5 +126,13 @@ class User extends Authenticatable
             'admin' => 'Administrateur',
             default => 'Membre',
         };
+    }
+
+    /**
+     * Get the country relationship using proper foreign key
+     */
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
     }
 }
