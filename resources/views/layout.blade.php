@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Sekaijin - Communauté des expatriés français')</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    
     <!-- Mapbox CSS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
     
@@ -35,7 +38,7 @@
                     
                     @auth
                         <div class="relative ml-4 flex items-center space-x-3">
-                            <span class="text-blue-600 font-medium">{{ Auth::user()->name }}</span>
+                            <a href="{{ route('public.profile', Auth::user()->name) }}" class="text-blue-600 font-medium hover:text-blue-800 transition duration-300">{{ Auth::user()->name }}</a>
                             <a href="{{ route('profile.show') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
                                 Mon profil
                             </a>
