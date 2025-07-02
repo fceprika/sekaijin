@@ -202,6 +202,12 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Proper 404 handling for non-existent profiles
 - French date formatting and localization throughout
 
+### UI/UX Improvements (July 2025)
+- **Clickable Username Navigation**: User's pseudo in navigation menu now links to their public profile with hover effects
+- **Hero Section Call-to-Actions**: Homepage hero buttons properly linked ("Rejoindre" → `/inscription`, "En savoir plus" → `/about`)
+- **Favicon Integration**: Site favicon properly organized in `/public/images/` directory for better asset management
+- **Clean Console Output**: Removed debug console messages for cleaner production experience
+
 ### Performance Considerations
 - Country selection uses reusable `@include('partials.countries')` to reduce code duplication
 - Consider implementing JavaScript-based country selector for better UX at scale
