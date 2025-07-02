@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,5 +53,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('endambassador', function () {
             return "<?php endif; ?>";
         });
+
+        // Register view composers for performance optimization
+        View::composer(['layout', 'country.*'], \App\Http\View\Composers\CountryComposer::class);
     }
 }

@@ -158,18 +158,29 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 
 ## Key Files for Modifications
 
-- **Routes**: `routes/web.php` - includes page routes, auth routes, protected profile routes, and public profile routes
+- **Routes**: `routes/web.php` - includes page routes, auth routes, protected profile routes, public profile routes, and country-based content routes
 - **Auth Logic**: `app/Http/Controllers/AuthController.php` - simplified registration/login with unique username validation
 - **Profile Management**: `app/Http/Controllers/ProfileController.php` - user profile CRUD operations with YouTube validation
-- **User Model**: `app/Models/User.php` - extended with expat fields and proper casting
-- **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state and profile link
+- **User Model**: `app/Models/User.php` - extended with expat fields, role system, and proper casting
+- **Country Management**: `app/Http/Controllers/CountryController.php` - handles country-based content (actualités, blog, événements)
+- **Content Models**: `app/Models/News.php`, `app/Models/Article.php`, `app/Models/Event.php` - full content management with relationships
+- **Country Model**: `app/Models/Country.php` - country management with slug-based routing
+- **Role Middleware**: `app/Http/Middleware/RoleMiddleware.php` - role-based access control
+- **Country Middleware**: `app/Http/Middleware/EnsureValidCountry.php` - country context validation
+- **Form Requests**: `app/Http/Requests/Store*Request.php` - comprehensive validation for content creation
+- **Authorization Policies**: `app/Policies/*Policy.php` - granular permission control for all content types
+- **View Composers**: `app/Http/View/Composers/CountryComposer.php` - performance optimization with caching
+- **Main Layout**: `resources/views/layout.blade.php` - responsive nav with auth state, profile link, and country context
 - **Registration Form**: `resources/views/auth/register.blade.php` - simplified with complete country list
 - **Profile Management**: `resources/views/profile/show.blade.php` - comprehensive profile editing with public profile link
 - **Countries Component**: `resources/views/partials/countries.blade.php` - reusable country selection
-- **Public Profiles**: `app/Http/Controllers/PublicProfileController.php` - public profile display
-- **Public Profile View**: `resources/views/profile/public.blade.php` - public profile page with YouTube integration
+- **Public Profiles**: `app/Http/Controllers/PublicProfileController.php` - public profile display with role badges
+- **Public Profile View**: `resources/views/profile/public.blade.php` - public profile page with YouTube integration and role system
+- **Country Views**: `resources/views/country/` - complete country section views (index, actualités, blog, événements, individual content pages)
+- **Content Detail Views**: `resources/views/country/article-show.blade.php`, `news-show.blade.php`, `event-show.blade.php` - individual content pages
 - **API Controllers**: `app/Http/Controllers/Api/ExpatController.php` - API endpoints for map data
 - **Map Integration**: `public/js/country-coordinates.js` - country coordinates mapping
+- **Content Seeder**: `database/seeders/ContentSeeder.php` - sample content generation for development
 - **Frontend Assets**: `resources/css/app.css`, `resources/js/app.js` 
 - **Vite Config**: `vite.config.js` - configured for Laravel integration with HMR
 
@@ -218,11 +229,66 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Favicon Integration**: Site favicon properly organized in `/public/images/` directory for better asset management
 - **Clean Console Output**: Removed debug console messages for cleaner production experience
 
-### Performance Considerations
-- Country selection uses reusable `@include('partials.countries')` to reduce code duplication
-- Consider implementing JavaScript-based country selector for better UX at scale
-- Country list could be cached or loaded via AJAX for improved performance
-- Phone validation regex: `/^[\+]?[0-9\s\-\(\)]+$/` supports international formats
-- Map data loaded asynchronously to avoid blocking page render
-- Marker clustering could be implemented for better performance with large datasets
+### Country-Based Site Architecture (July 2025)
+- **Dynamic Country Routing**: Site structured around countries with prefixed routes (`/thailande/*`, `/japon/*`)
+- **Country Model**: Database-driven country management with `name_fr`, `slug`, `emoji`, `description` fields
+- **EnsureValidCountry Middleware**: Validates country slugs and shares country context with views automatically
+- **Adaptive Navigation**: Country dropdown in header with contextual country-specific navigation menus
+- **Country Badge Display**: Visual country indicator next to logo when browsing country-specific sections
+- **Scalable Architecture**: Easy addition of new countries through database seeding without code changes
+
+### Content Management System (July 2025)
+- **News System**: Database-driven actualités with categories (`administrative`, `vie-pratique`, `culture`, `economie`)
+- **Blog Articles**: Full article management with categories (`témoignage`, `guide-pratique`, `travail`, `lifestyle`, `cuisine`)
+- **Event Management**: Comprehensive event system with registration, pricing, online/offline support
+- **Content Relationships**: All content properly linked to countries and authors with role-based publishing permissions
+- **Featured Content**: Highlighting system for featured news, articles, and events on country homepages
+- **View Tracking**: Automatic view counting for articles and news with engagement metrics
+
+### Individual Content Pages (July 2025)
+- **Article Detail Pages**: Full article views with author info, reading time, likes, related articles
+- **News Detail Pages**: Complete news pages with publication details, categories, and related news
+- **Event Detail Pages**: Comprehensive event information with registration, pricing, participant tracking
+- **Cross-linking**: Seamless navigation between content types with breadcrumb navigation
+- **Social Features**: Like buttons, view counters, and sharing functionality across all content types
+- **Responsive Design**: Mobile-optimized layouts for all content detail pages
+
+### Database Schema (July 2025)
+**Content Tables**:
+```php
+// News table for actualités
+'title', 'excerpt', 'content', 'category', 'country_id', 'author_id', 
+'is_featured', 'is_published', 'published_at', 'views'
+
+// Articles table for blog
+'title', 'slug', 'excerpt', 'content', 'category', 'country_id', 'author_id',
+'is_featured', 'is_published', 'published_at', 'views', 'likes', 'reading_time'
+
+// Events table for événements  
+'title', 'slug', 'description', 'full_description', 'category', 'country_id', 'organizer_id',
+'start_date', 'end_date', 'location', 'address', 'is_online', 'online_link',
+'price', 'max_participants', 'current_participants', 'is_published', 'is_featured'
+```
+
+**Migration Files**:
+- `2025_07_02_090549_create_news_table.php` - News/actualités management
+- `2025_07_02_090641_create_articles_table.php` - Blog article system  
+- `2025_07_02_090725_create_events_table.php` - Event management system
+- `2025_07_02_094335_add_country_id_to_users_table.php` - Proper foreign key relationships
+- `ContentSeeder.php` - Sample content for Thailand and Japan with realistic French expat data
+
+### Security & Validation (July 2025)
+- **Form Request Classes**: Comprehensive validation for all content types (`StoreNewsRequest`, `StoreArticleRequest`, `StoreEventRequest`)
+- **Authorization Policies**: Role-based access control with detailed policies (`NewsPolicy`, `ArticlePolicy`, `EventPolicy`)
+- **Role-Based Permissions**: Granular permissions (admins/ambassadors for news, authors for their content)
+- **Input Validation**: Strict validation rules with French error messages for all user inputs
+- **Error Handling**: Comprehensive try-catch blocks with structured logging and user-friendly error messages
+- **Database Relationships**: Proper foreign key constraints with `country_id` replacing fragile string-based relationships
+
+### Performance Optimizations (July 2025)
+- **View Composers**: `CountryComposer` with 1-hour caching eliminates N+1 queries in navigation
+- **Eager Loading**: Optimized queries with `select()` clauses to fetch only necessary columns
+- **Query Optimization**: Proper use of Query Builder methods vs Collection methods
+- **Content Pagination**: Laravel pagination for all content listings with efficient database queries
+- **Cached Data**: Country lists cached globally to avoid repeated database calls
 - **Database Optimization**: Unique index on `users.name` ensures fast public profile lookups and enforces data integrity at the database level
