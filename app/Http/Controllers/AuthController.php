@@ -26,7 +26,13 @@ class AuthController extends Controller
             'name' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'country_residence' => 'required|string|max:255',
-            'destination_country' => 'nullable|string|max:255',
+            'destination_country' => [
+                'nullable', 
+                'string', 
+                'max:255',
+                'required_if:country_residence,France',
+                'different:country_residence'
+            ],
             'password' => 'required|string|min:8|confirmed',
             'terms' => 'required|accepted'
         ]);
