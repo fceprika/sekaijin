@@ -206,34 +206,11 @@ function addExpatMarkersToMap(map, expatData) {
             markerElement.className = 'expat-marker';
             markerElement.style.width = size + 'px';
             markerElement.style.height = size + 'px';
-            markerElement.style.borderRadius = '50%';
-            markerElement.style.backgroundColor = '#3b82f6';
-            markerElement.style.border = '3px solid white';
-            markerElement.style.cursor = 'pointer';
-            markerElement.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-            markerElement.style.display = 'flex';
-            markerElement.style.alignItems = 'center';
-            markerElement.style.justifyContent = 'center';
-            markerElement.style.color = 'white';
-            markerElement.style.fontSize = '12px';
-            markerElement.style.fontWeight = 'bold';
-            markerElement.style.transition = 'transform 0.2s';
             
             // Afficher le nombre si assez grand
             if (size > 25) {
                 markerElement.textContent = expat.count;
             }
-            
-            // Effet hover
-            markerElement.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.2)';
-                this.style.zIndex = '1000';
-            });
-            
-            markerElement.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-                this.style.zIndex = 'auto';
-            });
             
             // Créer le popup avec texte en français
             const popup = new mapboxgl.Popup({
