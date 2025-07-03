@@ -48,6 +48,17 @@
                 </select>
             </div>
 
+            <!-- Pays de destination (si résidence en France) -->
+            <div id="destination-country-container" style="display: none;">
+                <label for="destination_country" class="block text-sm font-medium text-gray-700 mb-2">Pays de destination souhaité</label>
+                <select id="destination_country" name="destination_country"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                    <option value="">Sélectionnez votre pays de destination</option>
+                    @include('partials.countries', ['selected' => old('destination_country'), 'exclude' => 'France'])
+                </select>
+                <p class="text-xs text-gray-500 mt-1">Où souhaitez-vous vous expatrier ?</p>
+            </div>
+
             <!-- Mot de passe -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -105,6 +116,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     const password = document.getElementById('password');
     const passwordConfirm = document.getElementById('password_confirmation');
+    const countryResidence = document.getElementById('country_residence');
+    const destinationContainer = document.getElementById('destination-country-container');
+    
+    // Afficher/masquer le champ destination selon le pays de résidence
+    countryResidence.addEventListener('change', function() {
+        if (this.value === 'France') {
+            destinationContainer.style.display = 'block';
+        } else {
+            destinationContainer.style.display = 'none';
+            document.getElementById('destination_country').value = '';
+        }
+    });
+    
+    // Vérifier au chargement si France est déjà sélectionnée (old input)
+    if (countryResidence.value === 'France') {
+        destinationContainer.style.display = 'block';
+    }
     
     form.addEventListener('submit', function(e) {
         if (password.value !== passwordConfirm.value) {
