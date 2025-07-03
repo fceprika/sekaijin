@@ -13,30 +13,31 @@
     border-top-color: white !important;
 }
 
-/* Responsive adjustments for map */
-@media (max-width: 768px) {
-    #map {
-        height: 300px !important;
-    }
-    
-    .expat-marker {
-        transform: scale(0.8) !important;
-    }
-}
-
-@media (max-width: 640px) {
-    #map {
-        height: 250px !important;
-    }
-    
-    .expat-marker {
-        transform: scale(0.7) !important;
-    }
-}
-
-/* Animation pour les marqueurs */
+/* Styles optimisés pour les marqueurs Mapbox */
 .expat-marker {
+    position: relative;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    border: 3px solid white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+    will-change: transform;
+    /* Animation de pulse par défaut */
     animation: markerPulse 2s infinite;
+}
+
+.expat-marker:hover {
+    transform: scale(1.2);
+    z-index: 1000;
+    animation: none; /* Arrêter l'animation au hover */
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
 }
 
 @keyframes markerPulse {
@@ -48,5 +49,18 @@
     }
     100% {
         box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+/* Responsive adjustments for map */
+@media (max-width: 768px) {
+    #map {
+        height: 300px !important;
+    }
+}
+
+@media (max-width: 640px) {
+    #map {
+        height: 250px !important;
     }
 }

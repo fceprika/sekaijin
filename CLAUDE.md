@@ -137,7 +137,7 @@ The application uses a MySQL database named `sekaijin`. The User model includes 
 
 // Optional fields (nullable) for enhanced profile
 'first_name', 'last_name', 'birth_date', 'phone',
-'city_residence', 'bio', 'youtube_username', 'is_verified', 'last_login', 'role'
+'city_residence', 'destination_country', 'bio', 'youtube_username', 'is_verified', 'last_login', 'role'
 ```
 
 Migration files:
@@ -146,6 +146,7 @@ Migration files:
 - `2025_07_01_154430_add_youtube_username_to_users_table.php` - YouTube integration field
 - `2025_07_01_160225_add_unique_index_to_users_name_column.php` - Unique index on name for performance and data integrity
 - `2025_07_02_073153_add_role_to_users_table.php` - User role system implementation
+- `2025_07_03_165927_add_destination_country_to_users_table.php` - Destination country field for French residents
 
 ### Environment Configuration
 
@@ -194,6 +195,9 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Simplified registration form to essential fields only (pseudo, email, country, password)
 - Added comprehensive user profile management system
 - Complete world country list (195 countries) organized by continent using reusable partial
+- **Destination Country for French Residents**: Conditional field that appears when France is selected as residence country
+- **Smart Country Exclusion**: France automatically excluded from destination options to prevent confusion
+- **Conditional Validation**: `required_if:country_residence,France` ensures proper data collection for French users
 - Secure password change functionality with enhanced validation (current_password rule)
 - Made personal information fields optional for flexible user experience
 - Added phone number regex validation for international formats
@@ -204,12 +208,14 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Strategic Placement**: Map positioned between hero section and content grids for better user flow
 - API endpoint `/api/expats-by-country` returns JSON data of users grouped by country
 - Custom markers with size proportional to member count per country
+- **Optimized Marker Behavior**: CSS-based hover effects prevent positioning bugs, stable transforms with `will-change: transform`
 - Responsive design with different map heights for mobile/tablet/desktop (250px/400px/500px)
 - French localization for tooltips and map interface
 - Country coordinates mapping for 195+ countries worldwide
 - Real-time data loading via AJAX with error handling and fallback states
 - Enhanced visual design with rounded container, shadow effects, and legend
 - Mapbox API key configured via `.env` file (`MAPBOX_ACCESS_TOKEN`)
+- **Performance Optimizations**: Replaced JavaScript hover events with pure CSS for smooth animations
 
 ### Public Profile System with Social Integration
 - Public profile pages accessible via `/membre/{pseudo}` URLs
