@@ -26,6 +26,7 @@ class User extends Authenticatable
         'birth_date',
         'phone',
         'country_residence',
+        'destination_country',
         'country_id',
         'city_residence',
         'bio',

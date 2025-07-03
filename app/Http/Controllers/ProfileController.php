@@ -27,6 +27,13 @@ class ProfileController extends Controller
             'birth_date' => 'nullable|date|before:today',
             'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
             'country_residence' => 'required|string|max:255',
+            'destination_country' => [
+                'nullable', 
+                'string', 
+                'max:255',
+                'required_if:country_residence,France',
+                'different:country_residence'
+            ],
             'city_residence' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'youtube_username' => 'nullable|string|max:255|regex:/^@[a-zA-Z0-9_.-]+$/',
@@ -62,6 +69,7 @@ class ProfileController extends Controller
             'birth_date' => $request->birth_date,
             'phone' => $request->phone,
             'country_residence' => $request->country_residence,
+            'destination_country' => $request->destination_country,
             'city_residence' => $request->city_residence,
             'bio' => $request->bio,
             'youtube_username' => $request->youtube_username,
