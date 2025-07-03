@@ -24,7 +24,7 @@
                 @if($country && $news->count() > 0)
                     @foreach($news as $index => $newsItem)
                         <a href="{{ route('country.news.show', [$countrySlug, $newsItem->id]) }}" class="block">
-                            <article class="{{ $index === 0 ? 'border border-orange-200 rounded-lg p-4 hover:border-orange-400 hover:shadow-md' : 'p-4 border-b border-gray-100 hover:bg-gray-50 hover:border-gray-200 rounded-lg' }} transition-all duration-200 cursor-pointer">
+                            <article class="{{ $index === 0 ? 'border border-orange-200 rounded-lg p-4 hover:border-orange-400 hover:shadow-md' : 'p-4 border-b border-gray-100 hover:bg-gray-50 rounded-lg' }} transition-all duration-200 cursor-pointer">
                                 @if($index === 0)
                                     <div class="flex items-center space-x-2 mb-3">
                                         <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">{{ $newsItem->priority === 'high' ? 'Important' : 'Actualité' }}</span>
@@ -68,8 +68,8 @@
                             ];
                             $colors = $categoryColors[$article->category] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'hover' => 'hover:bg-gray-50 hover:border hover:border-gray-200'];
                         @endphp
-                        <a href="{{ route('country.article.show', [$countrySlug, $article->id]) }}" class="block">
-                            <article class="{{ $index === 0 ? 'bg-gray-50 rounded-lg ' : '' }}p-4 {{ $colors['hover'] }} rounded-lg transition-all duration-200 cursor-pointer">
+                        <a href="{{ route('country.article.show', [$countrySlug, $article->slug]) }}" class="block">
+                            <article class="{{ $index === 0 ? 'bg-gray-50 rounded-lg border border-transparent ' : 'border border-transparent ' }}p-4 {{ $colors['hover'] }} rounded-lg transition-all duration-200 cursor-pointer">
                                 <div class="flex items-center space-x-2 mb-3">
                                     <span class="{{ $colors['bg'] }} {{ $colors['text'] }} px-3 py-1 rounded-full text-sm font-medium">{{ ucfirst(str_replace('-', ' ', $article->category)) }}</span>
                                     <span class="text-sm text-gray-500">{{ $article->created_at->diffForHumans() }}</span>
