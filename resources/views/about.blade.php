@@ -185,9 +185,9 @@
         <div class="text-center">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Rejoignez notre communauté</h2>
             <p class="text-gray-600 mb-8">Sekaijin, c'est la famille que l'on retrouve, même loin de chez soi.</p>
-            <button class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 text-lg font-medium">
+            <a href="{{ route('register') }}" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 text-lg font-medium">
                 S'inscrire maintenant
-            </button>
+            </a>
         </div>
     </div>
 </div>
