@@ -40,6 +40,10 @@ class User extends Authenticatable
         'password',
         'is_verified',
         'last_login',
+        'is_visible_on_map',
+        'latitude',
+        'longitude',
+        'city_detected',
     ];
 
     /**
@@ -63,6 +67,9 @@ class User extends Authenticatable
         'last_login' => 'datetime',
         'is_verified' => 'boolean',
         'password' => 'hashed',
+        'is_visible_on_map' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     /**
@@ -135,5 +142,59 @@ class User extends Authenticatable
     public function country()
     {
         return $this->belongsTo(Country::class);
+    }
+
+    /**
+     * Check if user has enabled location sharing
+     */
+    public function hasLocationSharing(): bool
+    {
+        return $this->is_visible_on_map && $this->latitude && $this->longitude;
+    }
+
+    /**
+     * Get display location (city, country)
+     */
+    public function getDisplayLocation(): string
+    {
+        if ($this->city_detected && $this->country_residence) {
+            return "{$this->city_detected}, {$this->country_residence}";
+        }
+        
+        if ($this->city_residence && $this->country_residence) {
+            return "{$this->city_residence}, {$this->country_residence}";
+        }
+        
+        return $this->country_residence ?? 'Non renseigné';
+    }
+
+    /**
+     * Update user location with privacy protection (randomize within ~10km radius)
+     */
+    public function updateLocation(float $latitude, float $longitude, ?string $city = null): void
+    {
+        $randomizedCoords = $this->randomizeCoordinates($latitude, $longitude);
+        
+        $this->update([
+            'latitude' => $randomizedCoords['latitude'],
+            'longitude' => $randomizedCoords['longitude'],
+            'city_detected' => $city,
+        ]);
+    }
+
+    /**
+     * Randomize coordinates within approximately 10km radius for privacy
+     */
+    private function randomizeCoordinates(float $latitude, float $longitude): array
+    {
+        $radius = 0.09; // Approximately 10km in decimal degrees
+        
+        $randomLat = $latitude + (mt_rand(-100, 100) / 100) * $radius;
+        $randomLng = $longitude + (mt_rand(-100, 100) / 100) * $radius;
+        
+        return [
+            'latitude' => round($randomLat, 6),
+            'longitude' => round($randomLng, 6),
+        ];
     }
 }

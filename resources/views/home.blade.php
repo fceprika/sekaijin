@@ -50,7 +50,11 @@
             <div class="inline-flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 bg-gray-50 px-4 md:px-6 py-3 rounded-lg">
                 <div class="flex items-center space-x-2">
                     <div class="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span class="text-sm text-gray-600">Membres de la communauté</span>
+                    <span class="text-sm text-gray-600">Communautés par pays</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="text-sm text-gray-600">Membres individuels</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="text-xs md:text-sm text-gray-500">Cliquez sur un point pour voir les détails</span>
@@ -183,17 +187,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Charger les données des expatriés via AJAX
     map.on('load', function() {
+        // Charger les données par pays (marqueurs plus gros)
         $.get('/api/expats-by-country')
             .done(function(data) {
-                addExpatMarkersToMap(map, data);
+                addCountryMarkersToMap(map, data);
             })
             .fail(function() {
-                console.error('Erreur lors du chargement des données des expatriés');
+                console.error('Erreur lors du chargement des données par pays');
+            });
+            
+        // Charger les membres individuels avec localisation
+        $.get('/api/members-with-location')
+            .done(function(data) {
+                addIndividualMembersToMap(map, data);
+            })
+            .fail(function() {
+                console.error('Erreur lors du chargement des membres individuels');
             });
     });
 });
 
-function addExpatMarkersToMap(map, expatData) {
+function addCountryMarkersToMap(map, expatData) {
     expatData.forEach(function(expat) {
         const coordinates = getCountryCoordinates(expat.country);
         
@@ -231,7 +245,53 @@ function addExpatMarkersToMap(map, expatData) {
                 .addTo(map);
         }
     });
-    
+}
+
+function addIndividualMembersToMap(map, members) {
+    members.forEach(function(member) {
+        // Créer un élément HTML pour le marqueur individuel (plus petit, vert)
+        const markerElement = document.createElement('div');
+        markerElement.className = 'individual-member-marker';
+        markerElement.style.width = '12px';
+        markerElement.style.height = '12px';
+        markerElement.style.backgroundColor = '#10B981'; // Green-500
+        markerElement.style.borderRadius = '50%';
+        markerElement.style.border = '2px solid white';
+        markerElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        markerElement.style.cursor = 'pointer';
+        
+        // Créer le popup avec les informations du membre
+        const popup = new mapboxgl.Popup({
+            offset: 15,
+            closeButton: false
+        }).setHTML(`
+            <div class="text-center p-3 min-w-[200px]">
+                <div class="flex items-center justify-center mb-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        ${member.name.charAt(0).toUpperCase()}
+                    </div>
+                </div>
+                <h3 class="font-bold text-lg text-gray-800 mb-1">${member.name}</h3>
+                <p class="text-sm text-gray-600 mb-1">${member.location}</p>
+                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mb-2">
+                    ${member.role}
+                </span>
+                <div class="mt-2">
+                    <a href="${member.profile_url}" target="_blank" 
+                       class="inline-block bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition">
+                        Voir le profil
+                    </a>
+                </div>
+                ${member.updated_at ? `<p class="text-xs text-gray-400 mt-2">Position mise à jour: ${new Date(member.updated_at).toLocaleDateString('fr-FR')}</p>` : ''}
+            </div>
+        `);
+        
+        // Ajouter le marqueur à la carte
+        new mapboxgl.Marker(markerElement)
+            .setLngLat([member.longitude, member.latitude])
+            .setPopup(popup)
+            .addTo(map);
+    });
 }
 </script>
 @endsection

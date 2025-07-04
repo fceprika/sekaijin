@@ -34,7 +34,10 @@ class AuthController extends Controller
                 'different:country_residence'
             ],
             'password' => 'required|string|min:8|confirmed',
-            'terms' => 'required|accepted'
+            'terms' => 'required|accepted',
+            'share_location' => 'nullable|boolean',
+            'initial_latitude' => 'nullable|numeric|between:-90,90',
+            'initial_longitude' => 'nullable|numeric|between:-180,180'
         ]);
 
         if ($validator->fails()) {
@@ -47,9 +50,34 @@ class AuthController extends Controller
             'country_residence' => $request->country_residence,
             'destination_country' => $request->destination_country,
             'password' => Hash::make($request->password),
+            'is_visible_on_map' => $request->boolean('share_location', false),
         ]);
 
         Auth::login($user);
+
+        // Si des coordonnées initiales sont fournies, les traiter
+        if ($request->filled('initial_latitude') && $request->filled('initial_longitude') && $user->is_visible_on_map) {
+            try {
+                // Utiliser une API de géocodage inversé simple pour obtenir la ville
+                $latitude = $request->input('initial_latitude');
+                $longitude = $request->input('initial_longitude');
+                
+                $city = $this->getCityFromCoordinates($latitude, $longitude);
+                
+                // Mettre à jour la localisation avec protection de la vie privée
+                $user->updateLocation($latitude, $longitude, $city);
+                
+                \Log::info('User registered with location', [
+                    'user_id' => $user->id,
+                    'city' => $city
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Failed to set initial location for user', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         return redirect('/')->with('success', 'Bienvenue dans la communauté Sekaijin !');
     }
@@ -82,5 +110,53 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')->with('success', 'Vous avez été déconnecté avec succès.');
+    }
+
+    /**
+     * Get city name from coordinates using reverse geocoding
+     */
+    private function getCityFromCoordinates(float $latitude, float $longitude): string
+    {
+        try {
+            // Use a free geocoding service (Nominatim OpenStreetMap)
+            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=10&addressdetails=1";
+            
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 5,
+                    'user_agent' => 'Sekaijin/1.0 (contact@sekaijin.com)'
+                ]
+            ]);
+            
+            $response = file_get_contents($url, false, $context);
+            
+            if ($response === false) {
+                throw new \Exception('Failed to fetch geocoding data');
+            }
+
+            $data = json_decode($response, true);
+            
+            if (!$data || !isset($data['address'])) {
+                throw new \Exception('Invalid geocoding response');
+            }
+            
+            // Extract city name from various possible fields
+            $address = $data['address'];
+            $city = $address['city'] ?? 
+                   $address['town'] ?? 
+                   $address['village'] ?? 
+                   $address['county'] ?? 
+                   $address['state'] ?? 
+                   'Ville inconnue';
+
+            return $city;
+        } catch (\Exception $e) {
+            \Log::warning('Failed to get city from coordinates', [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'error' => $e->getMessage()
+            ]);
+            return 'Ville inconnue';
+        }
     }
 }

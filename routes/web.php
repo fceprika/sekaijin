@@ -36,6 +36,9 @@ Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout
 
 // API Routes
 Route::get('/api/expats-by-country', [App\Http\Controllers\Api\ExpatController::class, 'expatsByCountry']);
+Route::get('/api/members-with-location', [App\Http\Controllers\Api\ExpatController::class, 'membersWithLocation']);
+Route::middleware('auth')->post('/api/update-location', [App\Http\Controllers\Api\ExpatController::class, 'updateLocation']);
+Route::middleware('auth')->post('/api/remove-location', [App\Http\Controllers\Api\ExpatController::class, 'removeLocation']);
 
 // Routes protégées pour les utilisateurs connectés (AVANT les routes pays)
 Route::middleware('auth')->group(function () {

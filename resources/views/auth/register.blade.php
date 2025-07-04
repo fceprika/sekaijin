@@ -75,6 +75,31 @@
                 </div>
             </div>
 
+            <!-- Partage de localisation -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 class="text-lg font-semibold text-blue-800 mb-3">🗺️ Partage de localisation (optionnel)</h3>
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="share_location" name="share_location" type="checkbox" value="1"
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                    </div>
+                    <div class="ml-3">
+                        <label for="share_location" class="text-sm font-medium text-blue-800">
+                            Apparaître sur la carte des membres
+                        </label>
+                        <p class="text-xs text-blue-600 mt-1">
+                            Permettez aux autres membres de vous localiser de manière approximative sur la carte interactive. 
+                            Votre position exacte ne sera jamais partagée (rayon d'environ 10 km pour protéger votre vie privée).
+                        </p>
+                        <div id="location-setup-info" class="mt-2 text-xs text-gray-600" style="display: none;">
+                            <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded">
+                                ✓ Votre navigateur vous demandera l'autorisation après l'inscription
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Conditions -->
             <div class="flex items-start">
                 <div class="flex items-center h-5">
@@ -110,6 +135,7 @@
     </div>
 </div>
 
+<script src="/js/geolocation.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Validation côté client
@@ -118,6 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordConfirm = document.getElementById('password_confirmation');
     const countryResidence = document.getElementById('country_residence');
     const destinationContainer = document.getElementById('destination-country-container');
+    const shareLocationCheckbox = document.getElementById('share_location');
+    const locationSetupInfo = document.getElementById('location-setup-info');
     
     // Afficher/masquer le champ destination selon le pays de résidence
     countryResidence.addEventListener('change', function() {
@@ -134,13 +162,107 @@ document.addEventListener('DOMContentLoaded', function() {
         destinationContainer.style.display = 'block';
     }
     
-    form.addEventListener('submit', function(e) {
-        if (password.value !== passwordConfirm.value) {
-            e.preventDefault();
-            alert('Les mots de passe ne correspondent pas');
-            passwordConfirm.focus();
+    // Gérer l'affichage des informations de localisation
+    shareLocationCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            locationSetupInfo.style.display = 'block';
+        } else {
+            locationSetupInfo.style.display = 'none';
         }
     });
+    
+    // Gérer la soumission du formulaire avec localisation
+    form.addEventListener('submit', function(e) {
+        if (shareLocationCheckbox.checked) {
+            // Empêcher la soumission par défaut pour traiter la localisation d'abord
+            e.preventDefault();
+            
+            // Vérifier la validité du formulaire avant de procéder
+            if (password.value !== passwordConfirm.value) {
+                alert('Les mots de passe ne correspondent pas');
+                passwordConfirm.focus();
+                return;
+            }
+            
+            // Sauvegarder les données du formulaire
+            const formData = new FormData(form);
+            
+            // Si géolocalisation supportée, l'obtenir maintenant
+            if ('geolocation' in navigator) {
+                // Désactiver le bouton de soumission
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Inscription en cours...';
+                
+                // Message de progression
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-center';
+                progressDiv.innerHTML = '<p class="text-blue-700">📍 Inscription en cours... Votre navigateur peut vous demander l\'autorisation de géolocalisation.</p>';
+                form.appendChild(progressDiv);
+                
+                // Obtenir la position
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Ajouter les coordonnées aux données du formulaire
+                        formData.append('initial_latitude', position.coords.latitude);
+                        formData.append('initial_longitude', position.coords.longitude);
+                        
+                        progressDiv.innerHTML = '<p class="text-green-700">✅ Position obtenue! Finalisation de l\'inscription...</p>';
+                        
+                        // Soumettre le formulaire avec les données de localisation
+                        submitFormWithData(formData);
+                    },
+                    function(error) {
+                        progressDiv.innerHTML = '<p class="text-orange-600">⚠️ Impossible d\'obtenir votre position. Inscription sans géolocalisation...</p>';
+                        
+                        // Soumettre quand même le formulaire sans coordonnées
+                        setTimeout(() => {
+                            submitFormWithData(formData);
+                        }, 1500);
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 300000
+                    }
+                );
+            } else {
+                // Géolocalisation non supportée, continuer normalement
+                form.submit();
+            }
+        }
+    });
+    
+    // Fonction pour soumettre le formulaire avec les données
+    function submitFormWithData(formData) {
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            }
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.text();
+            }
+        })
+        .then(html => {
+            if (html) {
+                document.open();
+                document.write(html);
+                document.close();
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de l\'inscription:', error);
+            // En cas d'erreur, soumettre le formulaire normalement
+            form.submit();
+        });
+    }
 });
 </script>
 @endsection

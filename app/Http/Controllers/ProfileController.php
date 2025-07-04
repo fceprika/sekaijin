@@ -45,6 +45,7 @@ class ProfileController extends Controller
             'telegram_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_]+$/',
             'current_password' => 'nullable|required_with:new_password|current_password',
             'new_password' => 'nullable|string|min:8|confirmed|different:current_password',
+            'share_location' => 'nullable|boolean',
         ], [
             'phone.regex' => 'Le numéro de téléphone doit contenir uniquement des chiffres, espaces, tirets et parenthèses.',
             'youtube_username.regex' => 'Le nom d\'utilisateur YouTube doit commencer par @ (ex: @monusername).',
@@ -79,6 +80,7 @@ class ProfileController extends Controller
             'twitter_username' => $request->twitter_username,
             'facebook_username' => $request->facebook_username,
             'telegram_username' => $request->telegram_username,
+            'is_visible_on_map' => $request->boolean('share_location', false),
         ];
 
         // Ajouter le nouveau mot de passe s'il est fourni
