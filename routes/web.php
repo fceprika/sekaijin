@@ -34,8 +34,16 @@ Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login']);
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
-// API Routes
-Route::get('/api/expats-by-country', [App\Http\Controllers\Api\ExpatController::class, 'expatsByCountry']);
+// API Routes with rate limiting
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/api/expats-by-country', [App\Http\Controllers\Api\ExpatController::class, 'expatsByCountry']);
+    Route::get('/api/members-with-location', [App\Http\Controllers\Api\ExpatController::class, 'membersWithLocation']);
+});
+
+Route::middleware(['auth', 'throttle:10,1'])->group(function () {
+    Route::post('/api/update-location', [App\Http\Controllers\Api\ExpatController::class, 'updateLocation']);
+    Route::post('/api/remove-location', [App\Http\Controllers\Api\ExpatController::class, 'removeLocation']);
+});
 
 // Routes protégées pour les utilisateurs connectés (AVANT les routes pays)
 Route::middleware('auth')->group(function () {
