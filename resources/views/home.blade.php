@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v12',
         center: [100.5018, 13.7563], // Centré sur la Thaïlande (Bangkok)
-        zoom: 2,
+        zoom: 3,
         projection: 'globe',
         // Désactiver la collecte de données pour éviter les erreurs d'ad blocker
         collectResourceTiming: false,
@@ -174,16 +174,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function addIndividualMembersToMap(map, members) {
     members.forEach(function(member) {
-        // Créer un élément HTML pour le marqueur individuel (plus petit, vert)
+        // Créer un élément HTML pour le marqueur avec icône bonhomme
         const markerElement = document.createElement('div');
         markerElement.className = 'individual-member-marker';
-        markerElement.style.width = '12px';
-        markerElement.style.height = '12px';
-        markerElement.style.backgroundColor = '#10B981'; // Green-500
+        markerElement.style.width = '28px';
+        markerElement.style.height = '28px';
+        markerElement.style.backgroundColor = '#FFFFFF'; // Blanc
         markerElement.style.borderRadius = '50%';
-        markerElement.style.border = '2px solid white';
-        markerElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        markerElement.style.border = '2px solid #10B981';
+        markerElement.style.boxShadow = '0 3px 6px rgba(0,0,0,0.4)';
         markerElement.style.cursor = 'pointer';
+        markerElement.style.display = 'flex';
+        markerElement.style.alignItems = 'center';
+        markerElement.style.justifyContent = 'center';
+        markerElement.style.fontSize = '16px';
+        markerElement.style.willChange = 'transform';
+        
+        // Ajouter l'icône bonhomme
+        markerElement.innerHTML = '👤';
         
         // Créer le popup avec les informations du membre
         const popup = new mapboxgl.Popup({
