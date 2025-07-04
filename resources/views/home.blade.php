@@ -49,15 +49,11 @@
         <div class="mt-6 text-center">
             <div class="inline-flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 bg-gray-50 px-4 md:px-6 py-3 rounded-lg">
                 <div class="flex items-center space-x-2">
-                    <div class="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span class="text-sm text-gray-600">Communautés par pays</span>
-                </div>
-                <div class="flex items-center space-x-2">
                     <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span class="text-sm text-gray-600">Membres individuels</span>
+                    <span class="text-sm text-gray-600">Membres de la communauté</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-xs md:text-sm text-gray-500">Cliquez sur un point pour voir les détails</span>
+                    <span class="text-xs md:text-sm text-gray-500">Cliquez sur un membre pour voir son profil</span>
                 </div>
             </div>
         </div>
@@ -173,8 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/light-v11',
-        center: [2.2137, 46.2276], // Centré sur la France
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [100.5018, 13.7563], // Centré sur la Thaïlande (Bangkok)
         zoom: 2,
         projection: 'globe',
         // Désactiver la collecte de données pour éviter les erreurs d'ad blocker
@@ -185,67 +181,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ajouter les contrôles de navigation
     map.addControl(new mapboxgl.NavigationControl());
     
-    // Charger les données des expatriés via AJAX
+    // Charger les membres individuels avec localisation uniquement
     map.on('load', function() {
-        // Charger les données par pays (marqueurs plus gros)
-        $.get('/api/expats-by-country')
-            .done(function(data) {
-                addCountryMarkersToMap(map, data);
-            })
-            .fail(function() {
-                console.error('Erreur lors du chargement des données par pays');
-            });
-            
-        // Charger les membres individuels avec localisation
         $.get('/api/members-with-location')
             .done(function(data) {
                 addIndividualMembersToMap(map, data);
             })
             .fail(function() {
-                console.error('Erreur lors du chargement des membres individuels');
+                console.error('Erreur lors du chargement des membres');
             });
     });
 });
-
-function addCountryMarkersToMap(map, expatData) {
-    expatData.forEach(function(expat) {
-        const coordinates = getCountryCoordinates(expat.country);
-        
-        if (coordinates) {
-            // Calculer la taille du marqueur basée sur le nombre d'expatriés
-            const size = Math.min(Math.max(expat.count / 10 + 10, 15), 40);
-            
-            // Créer un élément HTML pour le marqueur
-            const markerElement = document.createElement('div');
-            markerElement.className = 'expat-marker';
-            markerElement.style.width = size + 'px';
-            markerElement.style.height = size + 'px';
-            
-            // Afficher le nombre si assez grand
-            if (size > 25) {
-                markerElement.textContent = expat.count;
-            }
-            
-            // Créer le popup avec texte en français
-            const popup = new mapboxgl.Popup({
-                offset: 25,
-                closeButton: false
-            }).setHTML(`
-                <div class="text-center p-2">
-                    <h3 class="font-bold text-lg text-gray-800">${expat.country}</h3>
-                    <p class="text-blue-600 font-semibold">${expat.count} membre${expat.count > 1 ? 's' : ''}</p>
-                    <p class="text-xs text-gray-500 mt-1">de la communauté Sekaijin</p>
-                </div>
-            `);
-            
-            // Ajouter le marqueur à la carte
-            new mapboxgl.Marker(markerElement)
-                .setLngLat(coordinates)
-                .setPopup(popup)
-                .addTo(map);
-        }
-    });
-}
 
 function addIndividualMembersToMap(map, members) {
     members.forEach(function(member) {
