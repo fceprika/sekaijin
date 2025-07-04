@@ -14,7 +14,10 @@
             </span>
         </h1>
         <p class="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
-            La communauté des expatriés français à travers le monde
+            Rejoignez des milliers d'expatriés français dans plus de 150 pays ! 
+            <span class="block mt-2 text-lg md:text-xl text-yellow-300 font-semibold">
+                👇 Découvrez les membres de votre région sur la carte interactive ci-dessous
+            </span>
         </p>
         <div class="space-x-4">
             <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg">
@@ -31,33 +34,8 @@
 </div>
 
 <!-- Interactive Map Section -->
-<div class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">Notre Communauté dans le Monde</h2>
-            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                Découvrez où se trouvent les membres de Sekaijin à travers le globe
-            </p>
-        </div>
-        
-        <!-- Map Container -->
-        <div class="bg-gray-100 rounded-2xl p-2 md:p-4 shadow-lg">
-            <div id="map" class="h-[250px] md:h-[400px] lg:h-[500px] w-full rounded-xl"></div>
-        </div>
-        
-        <!-- Map Legend -->
-        <div class="mt-6 text-center">
-            <div class="inline-flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 bg-gray-50 px-4 md:px-6 py-3 rounded-lg">
-                <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span class="text-sm text-gray-600">Membres de la communauté</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs md:text-sm text-gray-500">Cliquez sur un membre pour voir son profil</span>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="bg-white">
+    <div id="map" class="h-[400px] md:h-[500px] lg:h-[600px] w-full"></div>
 </div>
 
 <!-- Latest Content Section -->
