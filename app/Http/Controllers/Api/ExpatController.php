@@ -30,8 +30,12 @@ class ExpatController extends Controller
     /**
      * Get members with location sharing enabled for individual display on map
      */
-    public function membersWithLocation(): JsonResponse
+    public function membersWithLocation(Request $request): JsonResponse
     {
+        // Add pagination to improve performance
+        $limit = min($request->input('limit', 100), 200); // Max 200 members per request
+        $offset = $request->input('offset', 0);
+        
         $members = User::where('is_visible_on_map', true)
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
@@ -44,6 +48,8 @@ class ExpatController extends Controller
                 'role',
                 'updated_at'
             ])
+            ->offset($offset)
+            ->limit($limit)
             ->get()
             ->map(function ($user) {
                 return [
@@ -57,7 +63,14 @@ class ExpatController extends Controller
                 ];
             });
 
-        return response()->json($members);
+        return response()->json([
+            'members' => $members,
+            'pagination' => [
+                'limit' => $limit,
+                'offset' => $offset,
+                'count' => $members->count()
+            ]
+        ]);
     }
 
     /**
@@ -97,8 +110,7 @@ class ExpatController extends Controller
 
             Log::info('User location updated', [
                 'user_id' => $user->id,
-                'city' => $request->input('city'),
-                'ip' => $request->ip()
+                'city' => $request->input('city')
             ]);
 
             return response()->json([
@@ -141,8 +153,7 @@ class ExpatController extends Controller
             ]);
 
             Log::info('User location removed', [
-                'user_id' => $user->id,
-                'ip' => $request->ip()
+                'user_id' => $user->id
             ]);
 
             return response()->json([

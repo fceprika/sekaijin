@@ -37,7 +37,8 @@ class AuthController extends Controller
             'terms' => 'required|accepted',
             'share_location' => 'nullable|boolean',
             'initial_latitude' => 'nullable|numeric|between:-90,90',
-            'initial_longitude' => 'nullable|numeric|between:-180,180'
+            'initial_longitude' => 'nullable|numeric|between:-180,180',
+            'initial_city' => 'nullable|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -113,11 +114,21 @@ class AuthController extends Controller
     }
 
     /**
-     * Get city name from coordinates using reverse geocoding
+     * Get city name from coordinates using reverse geocoding with caching
      */
     private function getCityFromCoordinates(float $latitude, float $longitude): string
     {
         try {
+            // Create cache key based on rounded coordinates (for privacy and performance)
+            $roundedLat = round($latitude, 2);
+            $roundedLng = round($longitude, 2);
+            $cacheKey = "geocoding_{$roundedLat}_{$roundedLng}";
+            
+            // Check cache first (5 minute cache)
+            if (\Cache::has($cacheKey)) {
+                return \Cache::get($cacheKey);
+            }
+            
             // Use a free geocoding service (Nominatim OpenStreetMap)
             $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=10&addressdetails=1";
             
@@ -148,6 +159,9 @@ class AuthController extends Controller
                    $address['county'] ?? 
                    $address['state'] ?? 
                    'Ville inconnue';
+
+            // Cache the result for 5 minutes
+            \Cache::put($cacheKey, $city, 300);
 
             return $city;
         } catch (\Exception $e) {

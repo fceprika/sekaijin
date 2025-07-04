@@ -201,9 +201,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressDiv.innerHTML = '<p class="text-blue-700">📍 Inscription en cours... Votre navigateur peut vous demander l\'autorisation de géolocalisation.</p>';
                 form.appendChild(progressDiv);
                 
-                // Obtenir la position
+                // Obtenir la position avec gestion d'erreurs améliorée
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
+                        // Valider les coordonnées
+                        if (position.coords.latitude < -90 || position.coords.latitude > 90 ||
+                            position.coords.longitude < -180 || position.coords.longitude > 180) {
+                            progressDiv.innerHTML = '<p class="text-orange-600">⚠️ Coordonnées invalides détectées. Inscription sans géolocalisation...</p>';
+                            setTimeout(() => {
+                                submitFormWithData(formData);
+                            }, 1500);
+                            return;
+                        }
+                        
                         // Ajouter les coordonnées aux données du formulaire
                         formData.append('initial_latitude', position.coords.latitude);
                         formData.append('initial_longitude', position.coords.longitude);
@@ -214,7 +224,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         submitFormWithData(formData);
                     },
                     function(error) {
-                        progressDiv.innerHTML = '<p class="text-orange-600">⚠️ Impossible d\'obtenir votre position. Inscription sans géolocalisation...</p>';
+                        let errorMessage = 'Impossible d\'obtenir votre position.';
+                        
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Autorisation refusée pour la géolocalisation.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Position indisponible.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'Délai d\'attente dépassé.';
+                                break;
+                        }
+                        
+                        progressDiv.innerHTML = `<p class="text-orange-600">⚠️ ${errorMessage} Inscription sans géolocalisation...</p>`;
                         
                         // Soumettre quand même le formulaire sans coordonnées
                         setTimeout(() => {

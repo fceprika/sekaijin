@@ -184,8 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Charger les membres individuels avec localisation uniquement
     map.on('load', function() {
         $.get('/api/members-with-location')
-            .done(function(data) {
-                addIndividualMembersToMap(map, data);
+            .done(function(response) {
+                const members = response.members || response; // Handle both old and new response formats
+                addIndividualMembersToMap(map, members);
             })
             .fail(function() {
                 console.error('Erreur lors du chargement des membres');
