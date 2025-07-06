@@ -223,10 +223,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Auto-remplir la ville
+            // Auto-remplir la ville (privilégier les noms en caractères latins)
             if (locationData.city || locationData.locality) {
                 const cityInput = document.getElementById('city_residence');
-                cityInput.value = locationData.city || locationData.locality;
+                let cityName = locationData.city || locationData.locality;
+                
+                // Si le nom contient des caractères non-latins, essayer d'utiliser un nom alternatif
+                if (!/^[\w\s\-\.,'àáâäèéêëìíîïòóôöùúûüçñ]+$/i.test(cityName)) {
+                    // Essayer d'utiliser le nom du district ou région si disponible
+                    cityName = locationData.locality || locationData.principalSubdivision || cityName;
+                }
+                
+                cityInput.value = cityName;
             }
             
             console.log('Localisation auto-remplie:', locationData);

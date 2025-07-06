@@ -153,22 +153,41 @@ class User extends Authenticatable
     }
 
     /**
-     * Get display location (city, country) - always in French
+     * Get display location (city, country) - always in French with Latin characters
      */
     public function getDisplayLocation(): string
     {
         // Utiliser le nom français du pays via la relation
         $countryName = $this->country ? $this->country->name_fr : $this->country_residence;
         
-        if ($this->city_detected && $countryName) {
-            return "{$this->city_detected}, {$countryName}";
+        // Privilégier city_residence (saisi manuellement) sur city_detected (auto-détecté)
+        // Et vérifier que le nom contient des caractères latins
+        $cityName = null;
+        
+        if ($this->city_residence && $this->isLatinText($this->city_residence)) {
+            $cityName = $this->city_residence;
+        } elseif ($this->city_detected && $this->isLatinText($this->city_detected)) {
+            $cityName = $this->city_detected;
+        } elseif ($this->city_residence) {
+            $cityName = $this->city_residence; // Fallback même si non-latin
+        } elseif ($this->city_detected) {
+            $cityName = $this->city_detected; // Fallback même si non-latin
         }
         
-        if ($this->city_residence && $countryName) {
-            return "{$this->city_residence}, {$countryName}";
+        if ($cityName && $countryName) {
+            return "{$cityName}, {$countryName}";
         }
         
         return $countryName ?? 'Non renseigné';
+    }
+    
+    /**
+     * Check if text contains only Latin characters (including French accents)
+     */
+    private function isLatinText(string $text): bool
+    {
+        // Use Unicode property to match Latin characters and common punctuation
+        return preg_match('/^[\p{Latin}\s\-\.,\']+$/u', $text);
     }
 
     /**
@@ -178,10 +197,16 @@ class User extends Authenticatable
     {
         $randomizedCoords = $this->randomizeCoordinates($latitude, $longitude);
         
+        // Ne stocker la ville que si elle contient des caractères latins
+        $cityToStore = null;
+        if ($city && $this->isLatinText($city)) {
+            $cityToStore = $city;
+        }
+        
         $this->update([
             'latitude' => $randomizedCoords['latitude'],
             'longitude' => $randomizedCoords['longitude'],
-            'city_detected' => $city,
+            'city_detected' => $cityToStore,
         ]);
     }
 

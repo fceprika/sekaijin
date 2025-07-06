@@ -77,9 +77,9 @@ class GeolocationService {
      */
     async getCityFromCoordinates(latitude, longitude) {
         try {
-            // Use a free geocoding service (Nominatim OpenStreetMap)
+            // Use a free geocoding service (Nominatim OpenStreetMap) with English preference
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1&accept-language=en,fr`
             );
 
             if (!response.ok) {
@@ -88,14 +88,20 @@ class GeolocationService {
 
             const data = await response.json();
             
-            // Extract city name from various possible fields
+            // Extract city name from various possible fields, preferring Latin characters
             const address = data.address || {};
-            const city = address.city || 
-                        address.town || 
-                        address.village || 
-                        address.county || 
-                        address.state || 
-                        'Ville inconnue';
+            let city = address.city || 
+                      address.town || 
+                      address.village || 
+                      address.county || 
+                      address.state || 
+                      'Ville inconnue';
+
+            // If city name contains non-Latin characters, try to use alternative
+            if (!/^[\w\s\-\.,'àáâäèéêëìíîïòóôöùúûüçñ]+$/i.test(city)) {
+                // Try to use alternative names or fallback to region/state
+                city = address.state || address.county || city;
+            }
 
             return city;
         } catch (error) {
