@@ -73,7 +73,7 @@
 
             <!-- Article Content -->
             <div class="px-8 py-8">
-                <div class="prose prose-lg max-w-none">
+                <div class="prose prose-lg max-w-none tinymce-content">
                     {!! $article->content !!}
                 </div>
             </div>
