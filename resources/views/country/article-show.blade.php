@@ -7,12 +7,14 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumb -->
         <nav class="mb-8 text-sm">
-            <ol class="flex items-center space-x-2 text-gray-500">
-                <li><a href="{{ route('country.index', $currentCountry->slug) }}" class="hover:text-blue-600">{{ $currentCountry->name_fr }}</a></li>
-                <li class="before:content-['/'] before:mx-2">
-                    <a href="{{ route('country.blog', $currentCountry->slug) }}" class="hover:text-blue-600">Blog</a>
+            <ol class="flex items-center flex-wrap gap-x-2 gap-y-1 text-gray-500">
+                <li><a href="{{ route('country.index', $currentCountry->slug) }}" class="hover:text-blue-600 whitespace-nowrap">{{ $currentCountry->name_fr }}</a></li>
+                <li class="before:content-['/'] before:mx-2 flex items-center">
+                    <a href="{{ route('country.blog', $currentCountry->slug) }}" class="hover:text-blue-600 whitespace-nowrap">Blog</a>
                 </li>
-                <li class="before:content-['/'] before:mx-2 text-gray-900 font-medium">{{ $article->title }}</li>
+                <li class="before:content-['/'] before:mx-2 text-gray-900 font-medium flex items-center">
+                    <span class="truncate max-w-[200px] sm:max-w-none">{{ $article->title }}</span>
+                </li>
             </ol>
         </nav>
 
@@ -80,7 +82,7 @@
 
             <!-- Article Footer -->
             <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
                         <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
                             <i class="far fa-heart"></i>
@@ -92,8 +94,9 @@
                         </button>
                     </div>
                     
-                    <a href="{{ route('country.blog', $currentCountry->slug) }}" class="text-blue-600 hover:text-blue-700 font-medium">
-                        ← Retour au blog
+                    <a href="{{ route('country.blog', $currentCountry->slug) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Retour au blog
                     </a>
                 </div>
             </div>
