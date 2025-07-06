@@ -50,7 +50,7 @@ class ProfileController extends Controller
                 'min:12',
                 'confirmed',
                 'different:current_password',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/',
             ],
             'share_location' => 'nullable|boolean',
         ], [
@@ -63,7 +63,7 @@ class ProfileController extends Controller
             'facebook_username.regex' => 'Le nom d\'utilisateur Facebook peut contenir des lettres, chiffres, points, underscores et tirets.',
             'telegram_username.regex' => 'Le nom d\'utilisateur Telegram peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
             'new_password.min' => 'Le nouveau mot de passe doit contenir au moins 12 caractères.',
-            'new_password.regex' => 'Le nouveau mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&).',
+            'new_password.regex' => 'Le nouveau mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
         ]);
 
         if ($validator->fails()) {

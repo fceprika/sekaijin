@@ -39,7 +39,7 @@ class AuthController extends Controller
                 'string',
                 'min:12',
                 'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/',
             ],
             'terms' => 'required|accepted',
             'share_location' => 'nullable|boolean',
@@ -48,7 +48,7 @@ class AuthController extends Controller
             'initial_city' => 'nullable|string|max:255'
         ], [
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
-            'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&).',
+            'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
         ]);
 
         if ($validator->fails()) {
