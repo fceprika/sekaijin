@@ -153,19 +153,22 @@ class User extends Authenticatable
     }
 
     /**
-     * Get display location (city, country)
+     * Get display location (city, country) - always in French
      */
     public function getDisplayLocation(): string
     {
-        if ($this->city_detected && $this->country_residence) {
-            return "{$this->city_detected}, {$this->country_residence}";
+        // Utiliser le nom français du pays via la relation
+        $countryName = $this->country ? $this->country->name_fr : $this->country_residence;
+        
+        if ($this->city_detected && $countryName) {
+            return "{$this->city_detected}, {$countryName}";
         }
         
-        if ($this->city_residence && $this->country_residence) {
-            return "{$this->city_residence}, {$this->country_residence}";
+        if ($this->city_residence && $countryName) {
+            return "{$this->city_residence}, {$countryName}";
         }
         
-        return $this->country_residence ?? 'Non renseigné';
+        return $countryName ?? 'Non renseigné';
     }
 
     /**

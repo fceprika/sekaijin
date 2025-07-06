@@ -39,12 +39,15 @@ class ExpatController extends Controller
         $members = User::where('is_visible_on_map', true)
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
+            ->with('country:id,name_fr') // Charger la relation country avec le nom français
             ->select([
                 'name',
                 'latitude',
                 'longitude',
                 'city_detected',
+                'city_residence',
                 'country_residence',
+                'country_id',
                 'role',
                 'updated_at'
             ])
