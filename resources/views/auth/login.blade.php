@@ -112,7 +112,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-focus sur email si vide
     const emailInput = document.getElementById('email');

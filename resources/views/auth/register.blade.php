@@ -149,7 +149,7 @@
 </div>
 
 <script src="/js/geolocation.js"></script>
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     // Validation côté client
     const form = document.querySelector('form');

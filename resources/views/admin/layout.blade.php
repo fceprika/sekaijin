@@ -101,7 +101,7 @@
         @yield('content')
     </main>
 
-    <script>
+    <script nonce="{{ $csp_nonce ?? '' }}">
         // Initialize TinyMCE
         document.addEventListener('DOMContentLoaded', function() {
             tinymce.init({

@@ -50,7 +50,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     $('#services-btn').click(function() {
         alert('Contact us for a custom quote!');

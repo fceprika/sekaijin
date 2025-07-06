@@ -278,7 +278,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
     document.addEventListener('DOMContentLoaded', function() {
         // Show/hide publish date based on checkbox
         const isPublishedCheckbox = document.getElementById('is_published');

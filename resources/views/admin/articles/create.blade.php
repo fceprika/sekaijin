@@ -202,7 +202,7 @@
     </form>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-generate slug from title
         const titleInput = document.getElementById('title');

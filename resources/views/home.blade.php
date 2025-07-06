@@ -127,7 +127,7 @@
 <!-- Country Coordinates Script -->
 <script src="/js/country-coordinates.js"></script>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     // Hero button functionality
     $('#hero-btn').click(function() {

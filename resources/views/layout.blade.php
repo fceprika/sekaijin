@@ -226,7 +226,7 @@
         </div>
     </nav>
 
-    <script>
+    <script nonce="{{ $csp_nonce ?? '' }}">
         // Mobile menu functionality
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuButton = document.getElementById('mobile-menu-button');
