@@ -74,7 +74,7 @@
             <!-- Article Content -->
             <div class="px-8 py-8">
                 <div class="prose prose-lg max-w-none">
-                    {!! nl2br(e($article->content)) !!}
+                    {!! $article->content !!}
                 </div>
             </div>
 
