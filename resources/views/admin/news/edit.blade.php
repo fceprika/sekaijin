@@ -251,21 +251,31 @@
                         <i class="fas fa-times mr-2"></i>
                         Annuler
                     </a>
-                    <form method="POST" action="{{ route('admin.news.destroy', $news) }}" 
-                          class="inline" 
-                          onsubmit="return confirmDelete('Êtes-vous sûr de vouloir supprimer définitivement cette actualité ?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" 
-                                class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200">
-                            <i class="fas fa-trash mr-2"></i>
-                            Supprimer
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
     </form>
+
+    <!-- Formulaire de suppression séparé -->
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800">Zone de danger</h2>
+                <p class="text-gray-600 mt-2">Cette action est irréversible.</p>
+            </div>
+            <form method="POST" action="{{ route('admin.news.destroy', $news->id) }}" 
+                  class="inline" 
+                  onsubmit="return confirmDelete('Êtes-vous sûr de vouloir supprimer définitivement cette actualité ?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200">
+                    <i class="fas fa-trash mr-2"></i>
+                    Supprimer l'actualité
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>

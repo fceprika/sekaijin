@@ -60,18 +60,18 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/articles', [App\Http\Controllers\AdminController::class, 'articles'])->name('articles');
     Route::get('/articles/create', [App\Http\Controllers\AdminController::class, 'createArticle'])->name('articles.create');
     Route::post('/articles', [App\Http\Controllers\AdminController::class, 'storeArticle'])->name('articles.store');
-    Route::get('/articles/{article}/edit', [App\Http\Controllers\AdminController::class, 'editArticle'])->name('articles.edit');
-    Route::put('/articles/{article}', [App\Http\Controllers\AdminController::class, 'updateArticle'])->name('articles.update');
-    Route::delete('/articles/{article}', [App\Http\Controllers\AdminController::class, 'destroyArticle'])->name('articles.destroy');
+    Route::get('/articles/{article:id}/edit', [App\Http\Controllers\AdminController::class, 'editArticle'])->name('articles.edit');
+    Route::put('/articles/{article:id}', [App\Http\Controllers\AdminController::class, 'updateArticle'])->name('articles.update');
+    Route::delete('/articles/{article:id}', [App\Http\Controllers\AdminController::class, 'destroyArticle'])->name('articles.destroy');
     Route::post('/articles/bulk', [App\Http\Controllers\AdminController::class, 'bulkArticleAction'])->name('articles.bulk');
     
     // Gestion des actualités
     Route::get('/news', [App\Http\Controllers\AdminController::class, 'news'])->name('news');
     Route::get('/news/create', [App\Http\Controllers\AdminController::class, 'createNews'])->name('news.create');
     Route::post('/news', [App\Http\Controllers\AdminController::class, 'storeNews'])->name('news.store');
-    Route::get('/news/{news}/edit', [App\Http\Controllers\AdminController::class, 'editNews'])->name('news.edit');
-    Route::put('/news/{news}', [App\Http\Controllers\AdminController::class, 'updateNews'])->name('news.update');
-    Route::delete('/news/{news}', [App\Http\Controllers\AdminController::class, 'destroyNews'])->name('news.destroy');
+    Route::get('/news/{news:id}/edit', [App\Http\Controllers\AdminController::class, 'editNews'])->name('news.edit');
+    Route::put('/news/{news:id}', [App\Http\Controllers\AdminController::class, 'updateNews'])->name('news.update');
+    Route::delete('/news/{news:id}', [App\Http\Controllers\AdminController::class, 'destroyNews'])->name('news.destroy');
     Route::post('/news/bulk', [App\Http\Controllers\AdminController::class, 'bulkNewsAction'])->name('news.bulk');
 });
 

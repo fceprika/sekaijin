@@ -108,6 +108,10 @@ class AdminController extends Controller
             $data['reading_time'] = max(1, ceil($wordCount / 200)); // 200 words per minute
         }
         
+        // Set default values for checkboxes
+        $data['is_featured'] = $data['is_featured'] ?? false;
+        $data['is_published'] = $data['is_published'] ?? false;
+        
         // Set published_at if publishing
         if ($data['is_published'] && empty($data['published_at'])) {
             $data['published_at'] = now();
@@ -146,6 +150,10 @@ class AdminController extends Controller
             $wordCount = str_word_count(strip_tags($data['content']));
             $data['reading_time'] = max(1, ceil($wordCount / 200));
         }
+        
+        // Set default values for checkboxes
+        $data['is_featured'] = $data['is_featured'] ?? false;
+        $data['is_published'] = $data['is_published'] ?? false;
         
         // Set published_at if publishing for the first time
         if ($data['is_published'] && !$article->published_at) {
@@ -219,6 +227,10 @@ class AdminController extends Controller
         // Set author
         $data['author_id'] = auth()->id();
         
+        // Set default values for checkboxes
+        $data['is_featured'] = $data['is_featured'] ?? false;
+        $data['is_published'] = $data['is_published'] ?? false;
+        
         // Set published_at if publishing
         if ($data['is_published'] && empty($data['published_at'])) {
             $data['published_at'] = now();
@@ -246,6 +258,10 @@ class AdminController extends Controller
         $this->authorize('update', $news);
         
         $data = $request->validated();
+        
+        // Set default values for checkboxes
+        $data['is_featured'] = $data['is_featured'] ?? false;
+        $data['is_published'] = $data['is_published'] ?? false;
         
         // Set published_at if publishing for the first time
         if ($data['is_published'] && !$news->published_at) {
