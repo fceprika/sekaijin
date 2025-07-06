@@ -368,10 +368,22 @@
                         
                         <div>
                             <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Biographie</label>
-                            <textarea id="bio" name="bio" rows="4" 
+                            <textarea id="bio" name="bio" rows="6" 
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 resize-y"
-                                placeholder="Parlez-nous de vous, de votre parcours d'expatrié, de vos passions...">{{ old('bio', $user->bio) }}</textarea>
-                            <p class="text-xs text-gray-500 mt-1">Maximum 1000 caractères</p>
+                                placeholder="Parlez-nous de vous, de votre parcours d'expatrié, de vos passions...
+
+🎯 Fondateur de Sekaijin.fr
+
+🌏 Globe-trotteur dans l'âme, Français aux racines multiples, je vis à l'étranger pour découvrir, apprendre et créer.
+
+Je m'appelle Wecko, passionné de cultures, de liberté et d'expériences humaines. Après avoir vécu en France, j'ai choisi de poser mes valises en Asie pour explorer d'autres manières de vivre, travailler, aimer et penser.
+
+💻 Développeur freelance depuis plus de 10 ans, je conçois des projets web avec passion. Mais au-delà du code, je cherche surtout à tisser des liens entre les Français expatriés, partager nos galères, nos fous rires et nos bons plans.
+
+🎥 Je crée aussi du contenu sur YouTube pour raconter mon parcours, mes réflexions et inspirer celles et ceux qui rêvent d'une vie différente.
+
+✨ Si tu vis dans le coin ou que tu prévois de venir, n'hésite pas à me contacter ! On est tous un peu seuls au début. Et ici, c'est justement pour se retrouver.">{{ old('bio', $user->bio) }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">Maximum 1000 caractères. Utilisez des sauts de ligne pour organiser votre texte.</p>
                         </div>
                     </div>
 

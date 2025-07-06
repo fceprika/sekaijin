@@ -95,7 +95,7 @@
                             À propos
                         </h2>
                         <div class="prose prose-gray max-w-none">
-                            <p class="text-gray-700 leading-relaxed text-lg">{{ $user->bio }}</p>
+                            <div class="text-gray-700 leading-relaxed text-lg whitespace-pre-line">{{ $user->bio }}</div>
                         </div>
                     </div>
                 @else
