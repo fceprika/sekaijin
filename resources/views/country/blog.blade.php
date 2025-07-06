@@ -69,7 +69,7 @@
                                         {{ strtoupper(substr($featuredArticle->author->name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('public.profile', $featuredArticle->author->name) }}" class="text-sm font-medium text-gray-800 hover:text-purple-600">
+                                        <a href="{{ route('public.profile', strtolower($featuredArticle->author->name)) }}" class="text-sm font-medium text-gray-800 hover:text-purple-600">
                                             {{ $featuredArticle->author->name }}
                                             @if($featuredArticle->author->is_verified)
                                                 <i class="fas fa-check-circle text-blue-500 ml-1"></i>
@@ -145,7 +145,7 @@
                                                 <div class="w-6 h-6 bg-{{ $categoryColor }}-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
                                                     {{ strtoupper(substr($article->author->name, 0, 1)) }}
                                                 </div>
-                                                <a href="{{ route('public.profile', $article->author->name) }}" class="text-xs text-gray-700 hover:text-blue-600">
+                                                <a href="{{ route('public.profile', strtolower($article->author->name)) }}" class="text-xs text-gray-700 hover:text-blue-600">
                                                     {{ $article->author->name }}
                                                 </a>
                                             </div>

@@ -48,7 +48,7 @@
                             </span>
                         </div>
                         <div>
-                            <a href="{{ route('public.profile', $news->author->name) }}" class="text-lg font-medium text-gray-900 hover:text-blue-600">
+                            <a href="{{ route('public.profile', strtolower($news->author->name)) }}" class="text-lg font-medium text-gray-900 hover:text-blue-600">
                                 {{ $news->author->name }}
                                 @if($news->author->is_verified)
                                     <i class="fas fa-check-circle text-blue-500 ml-1"></i>
