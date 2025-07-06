@@ -153,78 +153,217 @@ document.addEventListener('DOMContentLoaded', function() {
         projection: 'globe',
         // Désactiver la collecte de données pour éviter les erreurs d'ad blocker
         collectResourceTiming: false,
-        trackResize: true
+        trackResize: true,
+        // Configuration du zoom 2x plus rapide
+        scrollZoom: {
+            around: 'center'
+        },
+        doubleClickZoom: true,
+        touchZoomRotate: {
+            around: 'center'
+        }
     });
     
     // Ajouter les contrôles de navigation
     map.addControl(new mapboxgl.NavigationControl());
     
+    // Configurer le zoom 2x plus rapide
+    map.scrollZoom.setWheelZoomRate(1/200); // Plus petit = zoom plus rapide (défaut: 1/450)
+    
+    // Variables globales pour la gestion des marqueurs
+    window.allMembers = [];
+    window.currentMarkers = [];
+    
     // Charger les membres individuels avec localisation uniquement
     map.on('load', function() {
         $.get('/api/members-with-location')
             .done(function(response) {
-                const members = response.members || response; // Handle both old and new response formats
-                addIndividualMembersToMap(map, members);
+                window.allMembers = response.members || response; // Handle both old and new response formats
+                updateMarkersForZoom(map);
             })
             .fail(function() {
                 console.error('Erreur lors du chargement des membres');
             });
     });
+    
+    // Mettre à jour les marqueurs quand le zoom change
+    map.on('zoomend', function() {
+        updateMarkersForZoom(map);
+    });
 });
 
-function addIndividualMembersToMap(map, members) {
-    members.forEach(function(member) {
-        // Créer un élément HTML pour le marqueur avec icône bonhomme
-        const markerElement = document.createElement('div');
-        markerElement.className = 'individual-member-marker';
-        markerElement.style.width = '28px';
-        markerElement.style.height = '28px';
-        markerElement.style.backgroundColor = '#FFFFFF'; // Blanc
-        markerElement.style.borderRadius = '50%';
-        markerElement.style.border = '2px solid #10B981';
-        markerElement.style.boxShadow = '0 3px 6px rgba(0,0,0,0.4)';
-        markerElement.style.cursor = 'pointer';
-        markerElement.style.display = 'flex';
-        markerElement.style.alignItems = 'center';
-        markerElement.style.justifyContent = 'center';
-        markerElement.style.fontSize = '16px';
-        markerElement.style.willChange = 'transform';
-        
-        // Ajouter l'icône bonhomme
-        markerElement.innerHTML = '👤';
-        
-        // Créer le popup avec les informations du membre
-        const popup = new mapboxgl.Popup({
-            offset: 15,
-            closeButton: false
-        }).setHTML(`
-            <div class="text-center p-3 min-w-[200px]">
-                <div class="flex items-center justify-center mb-2">
-                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        ${member.name.charAt(0).toUpperCase()}
-                    </div>
-                </div>
-                <h3 class="font-bold text-lg text-gray-800 mb-1">${member.name}</h3>
-                <p class="text-sm text-gray-600 mb-1">${member.location}</p>
-                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mb-2">
-                    ${member.role}
-                </span>
-                <div class="mt-2">
-                    <a href="${member.profile_url}" target="_blank" 
-                       class="inline-block bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition">
-                        Voir le profil
-                    </a>
-                </div>
-                ${member.updated_at ? `<p class="text-xs text-gray-400 mt-2">Position mise à jour: ${new Date(member.updated_at).toLocaleDateString('fr-FR')}</p>` : ''}
-            </div>
-        `);
-        
-        // Ajouter le marqueur à la carte
-        new mapboxgl.Marker(markerElement)
-            .setLngLat([member.longitude, member.latitude])
-            .setPopup(popup)
-            .addTo(map);
+function updateMarkersForZoom(map) {
+    // Supprimer tous les marqueurs existants
+    window.currentMarkers.forEach(marker => marker.remove());
+    window.currentMarkers = [];
+    
+    const zoom = map.getZoom();
+    
+    // Calculer la tolérance de clustering basée sur le zoom
+    let tolerance;
+    if (zoom < 6) {
+        tolerance = 2.0; // Clustering très large pour vue mondiale
+    } else if (zoom < 8) {
+        tolerance = 1.0; // Clustering large pour vue continentale
+    } else if (zoom < 10) {
+        tolerance = 0.3; // Clustering moyen pour vue pays
+    } else if (zoom < 12) {
+        tolerance = 0.05; // Clustering serré pour vue régionale
+    } else if (zoom < 14) {
+        tolerance = 0.01; // Clustering très serré pour vue ville
+    } else {
+        tolerance = 0.001; // Pas de clustering pour vue détaillée
+    }
+    
+    // Grouper les membres par proximité selon le niveau de zoom
+    const clusters = clusterNearbyMembers(window.allMembers, tolerance);
+    
+    clusters.forEach(function(cluster) {
+        if (cluster.length === 1) {
+            // Marqueur simple pour un membre isolé
+            const marker = addSingleMemberMarker(map, cluster[0]);
+            window.currentMarkers.push(marker);
+        } else {
+            // Marqueur cluster pour plusieurs membres proches
+            const marker = addClusterMarker(map, cluster);
+            window.currentMarkers.push(marker);
+        }
     });
+}
+
+function clusterNearbyMembers(members, tolerance) {
+    const clusters = [];
+    const processed = new Set();
+    
+    members.forEach((member, index) => {
+        if (processed.has(index)) return;
+        
+        const cluster = [member];
+        processed.add(index);
+        
+        // Chercher les membres proches
+        members.forEach((otherMember, otherIndex) => {
+            if (processed.has(otherIndex)) return;
+            
+            const distance = Math.sqrt(
+                Math.pow(member.latitude - otherMember.latitude, 2) +
+                Math.pow(member.longitude - otherMember.longitude, 2)
+            );
+            
+            if (distance < tolerance) {
+                cluster.push(otherMember);
+                processed.add(otherIndex);
+            }
+        });
+        
+        clusters.push(cluster);
+    });
+    
+    return clusters;
+}
+
+function addSingleMemberMarker(map, member) {
+    // Créer un élément HTML pour le marqueur avec icône bonhomme
+    const markerElement = document.createElement('div');
+    markerElement.className = 'individual-member-marker';
+    markerElement.style.width = '28px';
+    markerElement.style.height = '28px';
+    markerElement.style.backgroundColor = '#FFFFFF';
+    markerElement.style.borderRadius = '50%';
+    markerElement.style.border = '2px solid #10B981';
+    markerElement.style.boxShadow = '0 3px 6px rgba(0,0,0,0.4)';
+    markerElement.style.cursor = 'pointer';
+    markerElement.style.display = 'flex';
+    markerElement.style.alignItems = 'center';
+    markerElement.style.justifyContent = 'center';
+    markerElement.style.fontSize = '16px';
+    markerElement.style.willChange = 'transform';
+    
+    // Ajouter l'icône bonhomme
+    markerElement.innerHTML = '👤';
+    
+    // Créer le popup avec les informations du membre
+    const popup = new mapboxgl.Popup({
+        offset: 15,
+        closeButton: false
+    }).setHTML(`
+        <div class="text-center p-3 min-w-[200px]">
+            <div class="flex items-center justify-center mb-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ${member.name.charAt(0).toUpperCase()}
+                </div>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">${member.name}</h3>
+            <p class="text-sm text-gray-600 mb-1">${member.location}</p>
+            <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mb-2">
+                ${member.role}
+            </span>
+            <div class="mt-2">
+                <a href="${member.profile_url}" target="_blank" 
+                   class="inline-block bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition">
+                    Voir le profil
+                </a>
+            </div>
+            ${member.updated_at ? `<p class="text-xs text-gray-400 mt-2">Position mise à jour: ${new Date(member.updated_at).toLocaleDateString('fr-FR')}</p>` : ''}
+        </div>
+    `);
+    
+    // Ajouter le marqueur à la carte et le retourner
+    const marker = new mapboxgl.Marker(markerElement)
+        .setLngLat([member.longitude, member.latitude])
+        .setPopup(popup)
+        .addTo(map);
+        
+    return marker;
+}
+
+function addClusterMarker(map, cluster) {
+    // Calculer le centre du cluster
+    const centerLat = cluster.reduce((sum, member) => sum + member.latitude, 0) / cluster.length;
+    const centerLng = cluster.reduce((sum, member) => sum + member.longitude, 0) / cluster.length;
+    
+    // Créer un marqueur cluster
+    const clusterElement = document.createElement('div');
+    clusterElement.className = 'cluster-marker';
+    clusterElement.style.width = '40px';
+    clusterElement.style.height = '40px';
+    clusterElement.style.backgroundColor = '#10B981';
+    clusterElement.style.borderRadius = '50%';
+    clusterElement.style.border = '3px solid #FFFFFF';
+    clusterElement.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
+    clusterElement.style.cursor = 'pointer';
+    clusterElement.style.display = 'flex';
+    clusterElement.style.alignItems = 'center';
+    clusterElement.style.justifyContent = 'center';
+    clusterElement.style.fontSize = '14px';
+    clusterElement.style.fontWeight = 'bold';
+    clusterElement.style.color = '#FFFFFF';
+    clusterElement.style.willChange = 'transform';
+    
+    // Afficher le nombre de membres
+    clusterElement.innerHTML = cluster.length;
+    
+    // Ajouter le marqueur cluster à la carte
+    const marker = new mapboxgl.Marker(clusterElement)
+        .setLngLat([centerLng, centerLat])
+        .addTo(map);
+    
+    // Ajouter un gestionnaire de clic pour zoomer sur le cluster
+    clusterElement.addEventListener('click', function() {
+        // Calculer les limites du cluster
+        const bounds = new mapboxgl.LngLatBounds();
+        cluster.forEach(member => {
+            bounds.extend([member.longitude, member.latitude]);
+        });
+        
+        // Zoomer sur la zone du cluster avec un padding
+        map.fitBounds(bounds, {
+            padding: 100,
+            maxZoom: 15
+        });
+    });
+    
+    return marker;
 }
 </script>
 @endsection
