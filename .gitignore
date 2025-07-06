@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+deploy_key
+deploy_key.pub
+setup-deploy-keys.sh
