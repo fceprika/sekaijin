@@ -81,7 +81,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     $('#contact-form').on('submit', function(e) {
         e.preventDefault();

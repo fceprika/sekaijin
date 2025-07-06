@@ -422,7 +422,7 @@
 </div>
 
 <script src="/js/geolocation.js"></script>
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     const countryResidence = document.getElementById('country_residence');
     const destinationContainer = document.getElementById('destination-country-container');
