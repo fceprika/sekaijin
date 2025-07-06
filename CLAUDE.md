@@ -43,6 +43,23 @@ The User model has been extended beyond standard Laravel auth to include expat-s
 
 ## Development Workflow
 
+### Git Workflow Rules
+**IMPORTANT: Claude Code must follow these Git rules at all times:**
+
+- **NEVER push directly to main branch** - Always create feature branches
+- **Branch naming convention**: `feature/description-of-feature` or `fix/bug-description`
+- **Always create Pull Requests** for code review before merging to main
+- **Only push to main** after explicit user approval and instruction
+- **Commit messages**: Use conventional commits format with appropriate emojis
+- **Work in isolation**: Each feature/fix should be in its own branch
+
+**Workflow steps:**
+1. Create feature branch: `git checkout -b feature/feature-name`
+2. Make changes and commit with descriptive messages
+3. Push to feature branch: `git push origin feature/feature-name`
+4. Create PR for review (use `gh pr create` command)
+5. Wait for user approval before merging to main
+
 ### Local Development Setup
 ```bash
 # Start both servers in separate terminals:
