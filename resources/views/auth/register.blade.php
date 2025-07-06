@@ -38,44 +38,6 @@
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
             </div>
 
-            <!-- Pays de résidence -->
-            <div>
-                <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence</label>
-                <select id="country_residence" name="country_residence"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                    <option value="">Sélectionnez un pays (optionnel)</option>
-                    @include('partials.countries', ['selected' => old('country_residence')])
-                </select>
-                <p class="text-xs text-gray-500 mt-1">Vous pouvez renseigner cette information plus tard dans votre profil</p>
-            </div>
-
-            <!-- Pays de destination (si résidence en France) -->
-            <div id="destination-country-container" style="display: none;">
-                <label for="destination_country" class="block text-sm font-medium text-gray-700 mb-2">Pays de destination souhaité</label>
-                <select id="destination_country" name="destination_country"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                    <option value="">Sélectionnez votre pays de destination</option>
-                    @include('partials.countries', ['selected' => old('destination_country'), 'exclude' => 'France'])
-                </select>
-                <p class="text-xs text-gray-500 mt-1">Où souhaitez-vous vous expatrier ?</p>
-            </div>
-
-            <!-- Mot de passe -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
-                    <input type="password" id="password" name="password" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                        minlength="8">
-                    <p class="text-xs text-gray-500 mt-1">Minimum 8 caractères</p>
-                </div>
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                </div>
-            </div>
-
             <!-- Partage de localisation -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <h3 class="text-lg font-semibold text-blue-800 mb-3">🗺️ Partage de localisation (optionnel)</h3>
@@ -98,6 +60,56 @@
                             </span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Localisation (auto-remplie ou manuelle) -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800">📍 Votre localisation</h3>
+                
+                <!-- Pays de résidence -->
+                <div>
+                    <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence</label>
+                    <select id="country_residence" name="country_residence"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                        <option value="">Sélectionnez un pays (optionnel)</option>
+                        @include('partials.countries', ['selected' => old('country_residence')])
+                    </select>
+                </div>
+
+                <!-- Ville de résidence -->
+                <div>
+                    <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">Ville de résidence</label>
+                    <input type="text" id="city_residence" name="city_residence" value="{{ old('city_residence') }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        placeholder="Votre ville (optionnel)">
+                </div>
+
+                <!-- Pays de destination (si résidence en France) -->
+                <div id="destination-country-container" style="display: none;">
+                    <label for="destination_country" class="block text-sm font-medium text-gray-700 mb-2">Pays de destination souhaité</label>
+                    <select id="destination_country" name="destination_country"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                        <option value="">Sélectionnez votre pays de destination</option>
+                        @include('partials.countries', ['selected' => old('destination_country'), 'exclude' => 'France'])
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Où souhaitez-vous vous expatrier ?</p>
+                </div>
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
+                    <input type="password" id="password" name="password" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                        minlength="8">
+                    <p class="text-xs text-gray-500 mt-1">Minimum 8 caractères</p>
+                </div>
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                 </div>
             </div>
 
@@ -163,14 +175,66 @@ document.addEventListener('DOMContentLoaded', function() {
         destinationContainer.style.display = 'block';
     }
     
-    // Gérer l'affichage des informations de localisation
+    // Gérer l'affichage des informations de localisation et auto-remplissage
     shareLocationCheckbox.addEventListener('change', function() {
         if (this.checked) {
             locationSetupInfo.style.display = 'block';
+            // Tenter d'obtenir la géolocalisation pour auto-remplir les champs
+            autoFillLocationFields();
         } else {
             locationSetupInfo.style.display = 'none';
+            // Optionnel : vider les champs auto-remplis
         }
     });
+    
+    // Fonction pour auto-remplir les champs de localisation
+    async function autoFillLocationFields() {
+        if (!navigator.geolocation) {
+            console.log('Géolocalisation non supportée');
+            return;
+        }
+        
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                });
+            });
+            
+            const { latitude, longitude } = position.coords;
+            
+            // Utiliser l'API de géocodage inversé pour obtenir pays et ville
+            const locationData = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`)
+                .then(response => response.json());
+            
+            // Auto-remplir le pays
+            if (locationData.countryName) {
+                const countrySelect = document.getElementById('country_residence');
+                const countryOption = Array.from(countrySelect.options).find(option => 
+                    option.text.toLowerCase().includes(locationData.countryName.toLowerCase()) ||
+                    locationData.countryName.toLowerCase().includes(option.text.toLowerCase())
+                );
+                if (countryOption) {
+                    countrySelect.value = countryOption.value;
+                    // Déclencher l'événement change pour la logique France/destination
+                    countrySelect.dispatchEvent(new Event('change'));
+                }
+            }
+            
+            // Auto-remplir la ville
+            if (locationData.city || locationData.locality) {
+                const cityInput = document.getElementById('city_residence');
+                cityInput.value = locationData.city || locationData.locality;
+            }
+            
+            console.log('Localisation auto-remplie:', locationData);
+            
+        } catch (error) {
+            console.log('Impossible d\'obtenir la localisation:', error.message);
+        }
+    }
     
     // Gérer la soumission du formulaire avec localisation
     form.addEventListener('submit', function(e) {

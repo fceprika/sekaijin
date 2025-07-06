@@ -26,6 +26,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'country_residence' => 'nullable|string|max:255',
+            'city_residence' => 'nullable|string|max:255',
             'destination_country' => [
                 'nullable', 
                 'string', 
@@ -49,6 +50,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'country_residence' => $request->country_residence,
+            'city_residence' => $request->city_residence,
             'destination_country' => $request->destination_country,
             'password' => Hash::make($request->password),
             'is_visible_on_map' => $request->boolean('share_location', false),
