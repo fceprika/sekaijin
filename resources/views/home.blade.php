@@ -48,14 +48,6 @@
             'events' => $thailandEvents,
             'isLast' => false
         ])
-
-        @include('partials.country-content', [
-            'country' => $japan,
-            'news' => $japanNews,
-            'articles' => $japanArticles,
-            'events' => $japanEvents,
-            'isLast' => true
-        ])
     </div>
 </div>
 
@@ -356,10 +348,12 @@ function addClusterMarker(map, cluster) {
             bounds.extend([member.longitude, member.latitude]);
         });
         
-        // Zoomer sur la zone du cluster avec un padding
+        // Zoomer sur la zone du cluster avec un padding et vitesse constante
         map.fitBounds(bounds, {
             padding: 100,
-            maxZoom: 15
+            maxZoom: 15,
+            duration: 800, // Animation plus courte (800ms au lieu de ~1500ms par défaut)
+            easing: function(t) { return t; } // Animation linéaire au lieu de l'easing par défaut
         });
     });
     

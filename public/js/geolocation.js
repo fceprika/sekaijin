@@ -143,12 +143,15 @@ class GeolocationService {
             });
 
             if (!response.ok) {
-                throw new Error('Erreur lors de l\'enregistrement de la localisation');
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || `Erreur HTTP ${response.status}: ${response.statusText}`;
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
             return data;
         } catch (error) {
+            console.error('Erreur lors de l\'enregistrement de la localisation:', error);
             throw new Error('Impossible d\'enregistrer votre localisation: ' + error.message);
         }
     }

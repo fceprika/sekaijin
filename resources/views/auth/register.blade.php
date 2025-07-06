@@ -40,12 +40,13 @@
 
             <!-- Pays de résidence -->
             <div>
-                <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
-                <select id="country_residence" name="country_residence" required
+                <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence</label>
+                <select id="country_residence" name="country_residence"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                    <option value="">Sélectionnez un pays</option>
+                    <option value="">Sélectionnez un pays (optionnel)</option>
                     @include('partials.countries', ['selected' => old('country_residence')])
                 </select>
+                <p class="text-xs text-gray-500 mt-1">Vous pouvez renseigner cette information plus tard dans votre profil</p>
             </div>
 
             <!-- Pays de destination (si résidence en France) -->
