@@ -92,7 +92,7 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-500">Organisé par</p>
-                                <a href="{{ route('public.profile', strtolower($event->organizer->name)) }}" class="font-medium text-gray-900 hover:text-blue-600">
+                                <a href="{{ $event->organizer->getPublicProfileUrl() }}" class="font-medium text-gray-900 hover:text-blue-600">
                                     {{ $event->organizer->name }}
                                     @if($event->organizer->is_verified)
                                         <i class="fas fa-check-circle text-blue-500 ml-1"></i>

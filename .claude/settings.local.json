@@ -31,7 +31,8 @@
       "Bash(cat:*)",
       "Bash(git merge:*)",
       "Bash(git stash:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }

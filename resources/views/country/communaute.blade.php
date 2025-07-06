@@ -127,7 +127,7 @@
                                     
                                     <!-- Action Buttons -->
                                     <div class="flex space-x-2">
-                                        <a href="{{ route('public.profile', strtolower($member->name)) }}" 
+                                        <a href="{{ $member->getPublicProfileUrl() }}" 
                                            class="flex-1 bg-blue-600 text-white text-center py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200">
                                             Voir profil
                                         </a>

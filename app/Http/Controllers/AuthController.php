@@ -23,7 +23,15 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:users',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:users',
+                'regex:/^[a-zA-Z0-9_.-]+$/',
+                'not_regex:/^[._-]/',
+                'not_regex:/[._-]$/',
+            ],
             'email' => 'required|string|email|max:255|unique:users',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             'country_residence' => 'nullable|string|max:255',
@@ -48,6 +56,8 @@ class AuthController extends Controller
             'initial_longitude' => 'nullable|numeric|between:-180,180',
             'initial_city' => 'nullable|string|max:255'
         ], [
+            'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
+            'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
             'avatar.image' => 'Le fichier doit être une image.',
