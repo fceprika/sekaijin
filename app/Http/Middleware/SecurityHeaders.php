@@ -15,6 +15,13 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Content Security Policy - Different for dev and production
+        $nonce = base64_encode(random_bytes(16));
+        
+        // Store nonce for use in views BEFORE processing the request
+        app()->instance('csp_nonce', $nonce);
+        view()->share('csp_nonce', $nonce);
+        
         $response = $next($request);
 
         // Security headers to prevent various attacks
@@ -23,9 +30,6 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
-        
-        // Content Security Policy - Different for dev and production
-        $nonce = base64_encode(random_bytes(16));
         
         if (app()->environment('local', 'development')) {
             // Development CSP - More permissive for Vite
@@ -55,8 +59,6 @@ class SecurityHeaders
         
         $response->headers->set('Content-Security-Policy', $csp);
         
-        // Store nonce for use in views
-        view()->share('csp_nonce', $nonce);
 
         return $response;
     }
