@@ -7,6 +7,7 @@ use App\Models\News;
 use App\Models\Country;
 use App\Models\User;
 use App\Http\Requests\StoreArticleRequest;
+use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Requests\StoreNewsRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -129,7 +130,7 @@ class AdminController extends Controller
         return view('admin.articles.edit', compact('article', 'countries', 'categories'));
     }
 
-    public function updateArticle(StoreArticleRequest $request, Article $article)
+    public function updateArticle(UpdateArticleRequest $request, Article $article)
     {
         $this->authorize('update', $article);
         

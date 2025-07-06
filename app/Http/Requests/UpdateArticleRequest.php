@@ -5,14 +5,14 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreArticleRequest extends FormRequest
+class UpdateArticleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        // Any authenticated user can create articles
+        // Authorization is handled by the controller's authorize method
         return auth()->check();
     }
 
@@ -26,7 +26,7 @@ class StoreArticleRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'slug' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 'regex:/^[a-z0-9-]+$/',
@@ -52,7 +52,6 @@ class StoreArticleRequest extends FormRequest
         return [
             'title.required' => 'Le titre est obligatoire.',
             'title.max' => 'Le titre ne peut pas dépasser 255 caractères.',
-            'slug.required' => 'Le slug est obligatoire.',
             'slug.unique' => 'Ce slug est déjà utilisé.',
             'slug.regex' => 'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
             'excerpt.required' => 'Le résumé est obligatoire.',

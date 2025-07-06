@@ -46,7 +46,7 @@
     </div>
 
     <!-- Formulaire -->
-    <form method="POST" action="{{ route('admin.articles.update', $article) }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.articles.update', $article->id) }}" class="space-y-6">
         @csrf
         @method('PUT')
         
