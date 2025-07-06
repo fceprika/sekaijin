@@ -72,6 +72,12 @@
                     
                     @auth
                         <div class="relative ml-4 flex items-center space-x-3">
+                            @if(Auth::user()->isAdmin())
+                                <a href="{{ route('admin.dashboard') }}" class="text-red-600 font-medium hover:text-red-800 transition duration-300">
+                                    <i class="fas fa-shield-alt mr-1"></i>
+                                    Administration
+                                </a>
+                            @endif
                             <a href="{{ route('public.profile', Auth::user()->name) }}" class="text-blue-600 font-medium hover:text-blue-800 transition duration-300">{{ Auth::user()->name }}</a>
                             <a href="{{ route('profile.show') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
                                 Mon profil
@@ -128,11 +134,22 @@
                                     {{ substr(Auth::user()->name, 0, 1) }}
                                 </div>
                                 <div>
-                                    <p class="font-medium text-gray-800">{{ Auth::user()->name }}</p>
+                                    <p class="font-medium text-gray-800">
+                                        {{ Auth::user()->name }}
+                                        @if(Auth::user()->isAdmin())
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 ml-2">
+                                                <i class="fas fa-shield-alt mr-1"></i>
+                                                Admin
+                                            </span>
+                                        @endif
+                                    </p>
                                     <p class="text-sm text-gray-600">{{ Auth::user()->getDisplayLocation() }}</p>
                                 </div>
                             </div>
                             <div class="mt-3 flex space-x-2">
+                                @if(Auth::user()->isAdmin())
+                                    <a href="{{ route('admin.dashboard') }}" class="text-red-600 text-sm hover:text-red-800">Administration</a>
+                                @endif
                                 <a href="{{ route('public.profile', Auth::user()->name) }}" class="text-blue-600 text-sm hover:text-blue-800">Voir profil</a>
                                 <a href="{{ route('profile.show') }}" class="text-blue-600 text-sm hover:text-blue-800">Modifier</a>
                             </div>

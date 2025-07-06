@@ -1,0 +1,245 @@
+@extends('admin.layout')
+
+@section('title', 'Gestion des Articles')
+
+@section('content')
+<div class="space-y-6">
+    <!-- Header avec actions -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Gestion des Articles</h1>
+                <p class="text-gray-600 mt-2">{{ $articles->total() }} article(s) au total</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a href="{{ route('admin.articles.create') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Nouvel article
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <form method="GET" action="{{ route('admin.articles') }}" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Recherche -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
+                    <input type="text" id="search" name="search" value="{{ request('search') }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Titre ou contenu...">
+                </div>
+
+                <!-- Statut -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                    <select id="status" name="status" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Tous les statuts</option>
+                        <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Publiés</option>
+                        <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Brouillons</option>
+                    </select>
+                </div>
+
+                <!-- Pays -->
+                <div>
+                    <label for="country" class="block text-sm font-medium text-gray-700 mb-2">Pays</label>
+                    <select id="country" name="country" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Tous les pays</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country->id }}" {{ request('country') == $country->id ? 'selected' : '' }}>
+                                {{ $country->emoji }} {{ $country->name_fr }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Catégorie -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                    <select id="category" name="category" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Toutes les catégories</option>
+                        <option value="témoignage" {{ request('category') === 'témoignage' ? 'selected' : '' }}>Témoignage</option>
+                        <option value="guide-pratique" {{ request('category') === 'guide-pratique' ? 'selected' : '' }}>Guide pratique</option>
+                        <option value="travail" {{ request('category') === 'travail' ? 'selected' : '' }}>Travail</option>
+                        <option value="lifestyle" {{ request('category') === 'lifestyle' ? 'selected' : '' }}>Lifestyle</option>
+                        <option value="cuisine" {{ request('category') === 'cuisine' ? 'selected' : '' }}>Cuisine</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button type="submit" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-search mr-2"></i>
+                    Filtrer
+                </button>
+                <a href="{{ route('admin.articles') }}" 
+                   class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Actions en masse -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <form id="bulk-form" method="POST" action="{{ route('admin.articles.bulk') }}" onsubmit="return handleBulkAction('bulk-form')">
+            @csrf
+            <div class="flex items-center space-x-4">
+                <select name="action" 
+                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Sélectionner une action...</option>
+                    <option value="publish">Publier</option>
+                    <option value="unpublish">Dépublier</option>
+                    <option value="delete">Supprimer</option>
+                </select>
+                <button type="submit" 
+                        class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition duration-200">
+                    <i class="fas fa-check mr-2"></i>
+                    Appliquer
+                </button>
+                <span class="text-sm text-gray-500">aux éléments sélectionnés</span>
+            </div>
+
+            <!-- Liste des articles -->
+            <div class="mt-6 overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left">
+                                <input type="checkbox" onchange="toggleSelectAll(this, 'article-checkbox')" 
+                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Article</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auteur</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pays</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($articles as $article)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4">
+                                    <input type="checkbox" name="articles[]" value="{{ $article->id }}" 
+                                           class="article-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-900">{{ $article->title }}</h3>
+                                        <p class="text-sm text-gray-500">{{ Str::limit($article->excerpt, 60) }}</p>
+                                        @if($article->is_featured)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
+                                                <i class="fas fa-star mr-1"></i>
+                                                Featured
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-sm text-gray-900">
+                                    {{ $article->author->name }}
+                                </td>
+                                <td class="px-4 py-4 text-sm text-gray-900">
+                                    {{ $article->country->emoji }} {{ $article->country->name_fr }}
+                                </td>
+                                <td class="px-4 py-4">
+                                    @php
+                                        $categoryColors = [
+                                            'témoignage' => 'bg-blue-100 text-blue-800',
+                                            'guide-pratique' => 'bg-green-100 text-green-800',
+                                            'travail' => 'bg-purple-100 text-purple-800',
+                                            'lifestyle' => 'bg-pink-100 text-pink-800',
+                                            'cuisine' => 'bg-orange-100 text-orange-800',
+                                        ];
+                                        $colorClass = $categoryColors[$article->category] ?? 'bg-gray-100 text-gray-800';
+                                    @endphp
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $colorClass }}">
+                                        {{ ucfirst($article->category) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4">
+                                    @if($article->is_published)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Publié
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-edit mr-1"></i>
+                                            Brouillon
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-4 text-sm text-gray-500">
+                                    {{ $article->created_at->format('d/m/Y') }}
+                                    <br>
+                                    <span class="text-xs">{{ $article->created_at->diffForHumans() }}</span>
+                                </td>
+                                <td class="px-4 py-4 text-sm font-medium">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('admin.articles.edit', $article) }}" 
+                                           class="text-blue-600 hover:text-blue-900 transition duration-200" 
+                                           title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if($article->is_published)
+                                            <a href="{{ route('country.article.show', [$article->country->slug, $article->id]) }}" 
+                                               target="_blank"
+                                               class="text-green-600 hover:text-green-900 transition duration-200" 
+                                               title="Voir">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                        @endif
+                                        <form method="POST" action="{{ route('admin.articles.destroy', $article) }}" 
+                                              class="inline" 
+                                              onsubmit="return confirmDelete('Êtes-vous sûr de vouloir supprimer cet article ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="text-red-600 hover:text-red-900 transition duration-200" 
+                                                    title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                                    <div>
+                                        <i class="fas fa-newspaper text-4xl text-gray-300 mb-4"></i>
+                                        <p class="text-lg font-medium">Aucun article trouvé</p>
+                                        <p class="text-sm">Commencez par créer votre premier article.</p>
+                                        <a href="{{ route('admin.articles.create') }}" 
+                                           class="inline-flex items-center mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                                            <i class="fas fa-plus mr-2"></i>
+                                            Créer un article
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+
+    <!-- Pagination -->
+    @if($articles->hasPages())
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            {{ $articles->links() }}
+        </div>
+    @endif
+</div>
+@endsection

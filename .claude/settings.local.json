@@ -27,7 +27,8 @@
       "Bash(gh pr edit:*)",
       "Bash(find:*)",
       "Bash(rm:*)",
-      "Bash(gh pr diff:*)"
+      "Bash(gh pr diff:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
