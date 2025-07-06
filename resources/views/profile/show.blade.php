@@ -394,8 +394,9 @@
                             
                             <div>
                                 <label for="new_password" class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe</label>
-                                <input type="password" id="new_password" name="new_password"
+                                <input type="password" id="new_password" name="new_password" minlength="12"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                <p class="text-xs text-gray-500 mt-1">Minimum 12 caractères avec majuscule, minuscule et chiffre</p>
                             </div>
                             
                             <div>

@@ -103,8 +103,8 @@
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe *</label>
                     <input type="password" id="password" name="password" required
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                        minlength="8">
-                    <p class="text-xs text-gray-500 mt-1">Minimum 8 caractères</p>
+                        minlength="12">
+                    <p class="text-xs text-gray-500 mt-1">Minimum 12 caractères avec majuscule, minuscule et chiffre</p>
                 </div>
                 <div>
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirmer le mot de passe *</label>
@@ -333,33 +333,47 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Fonction pour soumettre le formulaire avec les données
     function submitFormWithData(formData) {
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        // Ajouter les données de géolocalisation aux champs cachés du formulaire
+        for (let [key, value] of formData.entries()) {
+            if (['initial_latitude', 'initial_longitude', 'initial_city'].includes(key)) {
+                let hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = key;
+                hiddenInput.value = value;
+                form.appendChild(hiddenInput);
             }
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                return response.text();
-            }
-        })
-        .then(html => {
-            if (html) {
-                document.open();
-                document.write(html);
-                document.close();
-            }
-        })
-        .catch(error => {
-            console.error('Erreur lors de l\'inscription:', error);
-            // En cas d'erreur, soumettre le formulaire normalement
-            form.submit();
-        });
+        }
+        
+        // Soumettre le formulaire normalement pour permettre la redirection Laravel
+        form.submit();
     }
+
+    // Validation du mot de passe en temps réel
+    const passwordInput = document.getElementById('password');
+    const passwordConfirmInput = document.getElementById('password_confirmation');
+    
+    function validatePassword() {
+        const password = passwordInput.value;
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/;
+        
+        if (password.length < 12) {
+            passwordInput.setCustomValidity('Le mot de passe doit contenir au moins 12 caractères.');
+        } else if (!regex.test(password)) {
+            passwordInput.setCustomValidity('Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.');
+        } else {
+            passwordInput.setCustomValidity('');
+        }
+        
+        // Vérifier la confirmation
+        if (passwordConfirmInput.value && passwordConfirmInput.value !== password) {
+            passwordConfirmInput.setCustomValidity('Les mots de passe ne correspondent pas.');
+        } else {
+            passwordConfirmInput.setCustomValidity('');
+        }
+    }
+    
+    passwordInput.addEventListener('input', validatePassword);
+    passwordConfirmInput.addEventListener('input', validatePassword);
 });
 </script>
 @endsection

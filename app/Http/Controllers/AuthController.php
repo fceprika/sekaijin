@@ -34,12 +34,21 @@ class AuthController extends Controller
                 'required_if:country_residence,France',
                 'different:country_residence'
             ],
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:12',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/',
+            ],
             'terms' => 'required|accepted',
             'share_location' => 'nullable|boolean',
             'initial_latitude' => 'nullable|numeric|between:-90,90',
             'initial_longitude' => 'nullable|numeric|between:-180,180',
             'initial_city' => 'nullable|string|max:255'
+        ], [
+            'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
+            'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
         ]);
 
         if ($validator->fails()) {
