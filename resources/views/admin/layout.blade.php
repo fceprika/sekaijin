@@ -147,9 +147,11 @@
                     alignjustify: { selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', classes: 'text-justify' }
                 },
                 
-                // Content filtering
-                valid_elements: '*[*]',
-                extended_valid_elements: 'script[language|type|src]',
+                // Content filtering - Secure configuration
+                valid_elements: 'p,br,strong/b,em/i,u,s,ul,ol,li,a[href|target|title],img[src|alt|width|height|class],h1,h2,h3,h4,h5,h6,blockquote,code,pre[class],table,thead,tbody,tr,td[colspan|rowspan],th[colspan|rowspan],div[class],span[class]',
+                invalid_elements: 'script,object,embed,iframe,form,input,button,meta,link,style,base,applet,audio,video,canvas,svg',
+                forced_root_block: 'p',
+                convert_urls: false,
                 
                 setup: function (editor) {
                     editor.on('change', function () {

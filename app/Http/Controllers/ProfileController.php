@@ -44,7 +44,14 @@ class ProfileController extends Controller
             'facebook_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9._-]+$/',
             'telegram_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_]+$/',
             'current_password' => 'nullable|required_with:new_password|current_password',
-            'new_password' => 'nullable|string|min:8|confirmed|different:current_password',
+            'new_password' => [
+                'nullable',
+                'string',
+                'min:12',
+                'confirmed',
+                'different:current_password',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/',
+            ],
             'share_location' => 'nullable|boolean',
         ], [
             'phone.regex' => 'Le numéro de téléphone doit contenir uniquement des chiffres, espaces, tirets et parenthèses.',
@@ -55,6 +62,8 @@ class ProfileController extends Controller
             'twitter_username.regex' => 'Le nom d\'utilisateur Twitter peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
             'facebook_username.regex' => 'Le nom d\'utilisateur Facebook peut contenir des lettres, chiffres, points, underscores et tirets.',
             'telegram_username.regex' => 'Le nom d\'utilisateur Telegram peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
+            'new_password.min' => 'Le nouveau mot de passe doit contenir au moins 12 caractères.',
+            'new_password.regex' => 'Le nouveau mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&).',
         ]);
 
         if ($validator->fails()) {
