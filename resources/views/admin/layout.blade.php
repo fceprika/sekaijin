@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- TinyMCE -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/{{ config('services.tinymce.api_key') }}/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -106,13 +106,58 @@
         document.addEventListener('DOMContentLoaded', function() {
             tinymce.init({
                 selector: '.wysiwyg',
-                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-                height: 400,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount', 'emoticons',
+                    'autoresize', 'codesample', 'quickbars'
+                ],
+                toolbar: 'undo redo | formatselect | bold italic underline strikethrough | ' +
+                         'alignleft aligncenter alignright alignjustify | ' +
+                         'bullist numlist outdent indent | ' +
+                         'removeformat | link image media table | ' +
+                         'codesample emoticons | fullscreen preview help',
+                menubar: 'file edit view insert format tools table help',
+                height: 500,
+                max_height: 800,
                 language: 'fr_FR',
-                content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.6; }',
+                branding: false,
+                resize: true,
+                autoresize_bottom_margin: 16,
+                content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.6; margin: 1rem; }',
+                
+                // Enhanced image handling
+                images_upload_url: false,
+                automatic_uploads: false,
+                file_picker_types: 'image',
+                
+                // Link options
+                link_assume_external_targets: true,
+                link_context_toolbar: true,
+                
+                // Table options
+                table_use_colgroups: true,
+                table_responsive_width: true,
+                
+                // Advanced formatting
+                formats: {
+                    alignleft: { selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', classes: 'text-left' },
+                    aligncenter: { selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', classes: 'text-center' },
+                    alignright: { selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', classes: 'text-right' },
+                    alignjustify: { selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img', classes: 'text-justify' }
+                },
+                
+                // Content filtering
+                valid_elements: '*[*]',
+                extended_valid_elements: 'script[language|type|src]',
+                
                 setup: function (editor) {
                     editor.on('change', function () {
+                        editor.save();
+                    });
+                    
+                    // Auto-save when editor loses focus
+                    editor.on('blur', function () {
                         editor.save();
                     });
                 }

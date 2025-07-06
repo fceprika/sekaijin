@@ -35,4 +35,8 @@ return [
         'access_token' => env('MAPBOX_ACCESS_TOKEN'),
     ],
 
+    'tinymce' => [
+        'api_key' => env('TINYMCE_API_KEY'),
+    ],
+
 ];
