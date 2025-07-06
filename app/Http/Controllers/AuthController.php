@@ -25,6 +25,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             'country_residence' => 'nullable|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'destination_country' => [
@@ -49,15 +50,25 @@ class AuthController extends Controller
         ], [
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
+            'avatar.image' => 'Le fichier doit être une image.',
+            'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
+            'avatar.max' => 'L\'avatar ne doit pas dépasser 2MB.',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
+        // Gérer l'upload de l'avatar
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $this->uploadAvatar($request->file('avatar'));
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'avatar' => $avatarPath,
             'country_residence' => $request->country_residence,
             'city_residence' => $request->city_residence,
             'destination_country' => $request->destination_country,
@@ -183,5 +194,25 @@ class AuthController extends Controller
             ]);
             return 'Ville inconnue';
         }
+    }
+
+    /**
+     * Upload and optimize avatar image
+     */
+    private function uploadAvatar($file): string
+    {
+        // Generate unique filename
+        $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        
+        // Ensure avatars directory exists
+        $avatarPath = public_path('storage/avatars');
+        if (!file_exists($avatarPath)) {
+            mkdir($avatarPath, 0755, true);
+        }
+        
+        // Move the file
+        $file->move($avatarPath, $filename);
+        
+        return $filename;
     }
 }

@@ -22,6 +22,8 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'remove_avatar' => 'nullable|boolean',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'birth_date' => 'nullable|date|before:today',
@@ -54,6 +56,9 @@ class ProfileController extends Controller
             ],
             'share_location' => 'nullable|boolean',
         ], [
+            'avatar.image' => 'Le fichier doit être une image.',
+            'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
+            'avatar.max' => 'L\'avatar ne doit pas dépasser 2MB.',
             'phone.regex' => 'Le numéro de téléphone doit contenir uniquement des chiffres, espaces, tirets et parenthèses.',
             'youtube_username.regex' => 'Le nom d\'utilisateur YouTube doit commencer par @ (ex: @monusername).',
             'instagram_username.regex' => 'Le nom d\'utilisateur Instagram peut contenir seulement des lettres, chiffres, points et underscores.',
@@ -70,10 +75,31 @@ class ProfileController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Gérer l'avatar
+        $avatarPath = $user->avatar; // Conserver l'avatar actuel par défaut
+        
+        // Si l'utilisateur veut supprimer l'avatar
+        if ($request->boolean('remove_avatar')) {
+            if ($user->avatar && file_exists(public_path('storage/avatars/' . $user->avatar))) {
+                unlink(public_path('storage/avatars/' . $user->avatar));
+            }
+            $avatarPath = null;
+        }
+        
+        // Si un nouvel avatar est uploadé
+        if ($request->hasFile('avatar')) {
+            // Supprimer l'ancien avatar s'il existe
+            if ($user->avatar && file_exists(public_path('storage/avatars/' . $user->avatar))) {
+                unlink(public_path('storage/avatars/' . $user->avatar));
+            }
+            $avatarPath = $this->uploadAvatar($request->file('avatar'));
+        }
+
         // Mettre à jour les informations de l'utilisateur
         $updateData = [
             'name' => $request->name,
             'email' => $request->email,
+            'avatar' => $avatarPath,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'birth_date' => $request->birth_date,
@@ -100,5 +126,25 @@ class ProfileController extends Controller
         $user->update($updateData);
 
         return back()->with('success', 'Votre profil a été mis à jour avec succès !');
+    }
+
+    /**
+     * Upload and optimize avatar image
+     */
+    private function uploadAvatar($file): string
+    {
+        // Generate unique filename
+        $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        
+        // Ensure avatars directory exists
+        $avatarPath = public_path('storage/avatars');
+        if (!file_exists($avatarPath)) {
+            mkdir($avatarPath, 0755, true);
+        }
+        
+        // Move the file
+        $file->move($avatarPath, $filename);
+        
+        return $filename;
     }
 }

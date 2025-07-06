@@ -49,7 +49,7 @@
 
             <!-- Formulaire de profil -->
             <div class="p-8">
-                <form method="POST" action="{{ route('profile.update') }}" class="space-y-8">
+                <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-8">
                     @csrf
 
                     <!-- Informations de base -->
@@ -61,6 +61,29 @@
                             Informations de base
                         </h2>
                         
+                        <!-- Avatar Section -->
+                        <div class="mb-6">
+                            <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
+                            <div class="flex items-center space-x-6">
+                                <div class="flex-shrink-0">
+                                    <img id="avatar-preview" class="h-20 w-20 rounded-full object-cover border-2 border-gray-300" 
+                                         src="{{ $user->getAvatarUrl() }}" 
+                                         alt="Avatar de {{ $user->name }}">
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" id="avatar" name="avatar" accept="image/*"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG ou WebP. Maximum 2MB. Laissez vide pour conserver l'avatar actuel.</p>
+                                    @if($user->avatar)
+                                        <label class="flex items-center mt-2">
+                                            <input type="checkbox" name="remove_avatar" value="1" class="mr-2">
+                                            <span class="text-sm text-red-600">Supprimer l'avatar actuel</span>
+                                        </label>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Pseudo *</label>
@@ -542,6 +565,66 @@ document.addEventListener('DOMContentLoaded', function() {
             this.textContent = '🗑️ Supprimer ma position';
         }
     });
+    
+    // Gestion de l'aperçu de l'avatar dans le profil
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const removeAvatarCheckbox = document.querySelector('input[name="remove_avatar"]');
+    const originalAvatarSrc = avatarPreview.src;
+    
+    // Prévisualiser l'image uploadée
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Vérifier la taille du fichier (2MB max)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 2MB autorisé.');
+                    this.value = '';
+                    return;
+                }
+                
+                // Vérifier le type de fichier
+                if (!file.type.match('image.*')) {
+                    alert('Veuillez sélectionner un fichier image.');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                // Décocher la suppression si un nouveau fichier est sélectionné
+                if (removeAvatarCheckbox) {
+                    removeAvatarCheckbox.checked = false;
+                }
+            } else {
+                // Revenir à l'avatar original
+                avatarPreview.src = originalAvatarSrc;
+            }
+        });
+    }
+    
+    // Gérer la case à cocher "Supprimer l'avatar"
+    if (removeAvatarCheckbox) {
+        removeAvatarCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Afficher un aperçu de l'avatar par défaut
+                const userName = document.getElementById('name').value || 'Avatar';
+                avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3B82F6&color=fff&size=80`;
+                // Vider l'input file
+                if (avatarInput) {
+                    avatarInput.value = '';
+                }
+            } else {
+                // Revenir à l'avatar original
+                avatarPreview.src = originalAvatarSrc;
+            }
+        });
+    }
 });
 </script>
 

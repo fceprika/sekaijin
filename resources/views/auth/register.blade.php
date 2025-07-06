@@ -20,7 +20,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-6">
+        <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
             
             <!-- Pseudo -->
@@ -36,6 +36,23 @@
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Adresse email *</label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}" required
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+            </div>
+
+            <!-- Avatar -->
+            <div>
+                <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">Photo de profil (optionnel)</label>
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <img id="avatar-preview" class="h-16 w-16 rounded-full object-cover border-2 border-gray-300" 
+                             src="https://ui-avatars.com/api/?name={{ old('name', 'Avatar') }}&background=3B82F6&color=fff&size=64" 
+                             alt="Aperçu avatar">
+                    </div>
+                    <div class="flex-1">
+                        <input type="file" id="avatar" name="avatar" accept="image/*"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                        <p class="text-xs text-gray-500 mt-1">JPG, PNG ou WebP. Maximum 2MB.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Partage de localisation -->
@@ -374,6 +391,49 @@ document.addEventListener('DOMContentLoaded', function() {
     
     passwordInput.addEventListener('input', validatePassword);
     passwordConfirmInput.addEventListener('input', validatePassword);
+    
+    // Gestion de l'aperçu de l'avatar
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const nameInput = document.getElementById('name');
+    
+    // Mettre à jour l'aperçu par défaut quand le pseudo change
+    nameInput.addEventListener('input', function() {
+        if (!avatarInput.files || avatarInput.files.length === 0) {
+            const name = this.value || 'Avatar';
+            avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3B82F6&color=fff&size=64`;
+        }
+    });
+    
+    // Prévisualiser l'image uploadée
+    avatarInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Vérifier la taille du fichier (2MB max)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Le fichier est trop volumineux. Maximum 2MB autorisé.');
+                this.value = '';
+                return;
+            }
+            
+            // Vérifier le type de fichier
+            if (!file.type.match('image.*')) {
+                alert('Veuillez sélectionner un fichier image.');
+                this.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                avatarPreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Revenir à l'avatar par défaut
+            const name = nameInput.value || 'Avatar';
+            avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3B82F6&color=fff&size=64`;
+        }
+    });
 });
 </script>
 @endsection

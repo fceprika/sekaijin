@@ -22,6 +22,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
+        'avatar',
         'role',
         'birth_date',
         'phone',
@@ -224,5 +225,18 @@ class User extends Authenticatable
             'latitude' => round($randomLat, 6),
             'longitude' => round($randomLng, 6),
         ];
+    }
+
+    /**
+     * Get avatar URL or default avatar
+     */
+    public function getAvatarUrl(): string
+    {
+        if ($this->avatar && file_exists(public_path('storage/avatars/' . $this->avatar))) {
+            return asset('storage/avatars/' . $this->avatar);
+        }
+        
+        // Default avatar - using a placeholder service
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=3B82F6&color=fff&size=200';
     }
 }

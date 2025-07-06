@@ -130,8 +130,10 @@
                     @auth
                         <div class="p-4 border-b border-gray-200 bg-blue-50">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-600">
+                                    <img src="{{ Auth::user()->getAvatarUrl() }}" 
+                                         alt="Avatar de {{ Auth::user()->name }}"
+                                         class="w-full h-full object-cover">
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-800">

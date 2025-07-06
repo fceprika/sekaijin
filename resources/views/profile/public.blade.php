@@ -10,10 +10,19 @@
             <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-white relative">
                 <div class="absolute inset-0 bg-black bg-opacity-10"></div>
                 <div class="relative">
-                    <!-- Info principale -->
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-3 mb-2">
-                            <h1 class="text-3xl font-bold">{{ $user->name }}</h1>
+                    <!-- Avatar et Info principale -->
+                    <div class="flex items-center space-x-6 mb-6">
+                        <!-- Avatar -->
+                        <div class="flex-shrink-0">
+                            <img class="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover" 
+                                 src="{{ $user->getAvatarUrl() }}" 
+                                 alt="Avatar de {{ $user->name }}">
+                        </div>
+                        
+                        <!-- Info utilisateur -->
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <h1 class="text-3xl font-bold">{{ $user->name }}</h1>
                             
                             <!-- Role Badge -->
                             @php
@@ -53,9 +62,9 @@
                                     Membre vérifié
                                 </span>
                             @endif
-                        </div>
-                        
-                        <!-- Localisation -->
+                            </div>
+                            
+                            <!-- Localisation -->
                         @if($user->country_residence || $user->city_residence)
                             <div class="flex items-center text-blue-100 text-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,12 +79,13 @@
                             </div>
                         @endif
                         
-                        <!-- Date d'inscription -->
-                        <div class="flex items-center text-blue-100 text-sm mt-2">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Membre depuis {{ $user->created_at->diffForHumans() }}
+                            <!-- Date d'inscription -->
+                            <div class="flex items-center text-blue-100 text-sm mt-2">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Membre depuis {{ $user->created_at->diffForHumans() }}
+                            </div>
                         </div>
                     </div>
                 </div>

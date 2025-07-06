@@ -30,7 +30,8 @@
       "Bash(gh pr diff:*)",
       "Bash(cat:*)",
       "Bash(git merge:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git branch:*)"
     ],
     "deny": []
   }
