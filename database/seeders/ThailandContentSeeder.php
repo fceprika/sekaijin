@@ -19,7 +19,6 @@ class ThailandContentSeeder extends Seeder
         // Créer la Thaïlande
         $thailand = Country::create([
             'name_fr' => 'Thaïlande',
-            'name_en' => 'Thailand',
             'slug' => 'thailande',
             'emoji' => '🇹🇭',
             'description' => 'La Thaïlande, terre de sourires et de temples dorés, accueille une communauté française dynamique. Découvrez Bangkok, Chiang Mai, Phuket et les îles paradisiaques à travers les yeux des expatriés français.',
