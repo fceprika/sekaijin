@@ -327,3 +327,13 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Cached Data**: Country lists cached globally to avoid repeated database calls
 - **Real-time Data**: Homepage content loaded dynamically from database with proper null checks and safe fallbacks
 - **Database Optimization**: Unique index on `users.name` ensures fast public profile lookups and enforces data integrity at the database level
+
+### Mobile UX & Profile Enhancements (July 2025)
+- **Mobile Navigation Menu**: Implemented BDfugue-style slide-out sidebar menu for mobile devices
+- **Hamburger Menu System**: Right-side sliding navigation (320px width) with smooth animations and overlay backdrop
+- **Mobile Profile Integration**: User avatar and location display in mobile menu for authenticated users
+- **Organized Mobile Navigation**: Clear section headers for countries and content types with emojis and active state indicators
+- **Mobile UX Features**: Body scroll lock, auto-close on link clicks, proper visual hierarchy for mobile screens
+- **Bio Formatting Improvements**: Enhanced profile bio display with `whitespace-pre-line` CSS for proper line break preservation
+- **Profile Textarea Enhancement**: Increased bio textarea height (6 rows) with example placeholder showing proper formatting
+- **Cross-Platform Bio Consistency**: Unified bio formatting between private profile editing and public profile display
