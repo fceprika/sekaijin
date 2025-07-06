@@ -78,7 +78,7 @@
                                     Administration
                                 </a>
                             @endif
-                            <a href="{{ route('public.profile', strtolower(Auth::user()->name)) }}" class="text-blue-600 font-medium hover:text-blue-800 transition duration-300">{{ Auth::user()->name }}</a>
+                            <a href="{{ Auth::user()->getPublicProfileUrl() }}" class="text-blue-600 font-medium hover:text-blue-800 transition duration-300">{{ Auth::user()->name }}</a>
                             <a href="{{ route('profile.show') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
                                 Mon profil
                             </a>
@@ -152,7 +152,7 @@
                                 @if(Auth::user()->isAdmin())
                                     <a href="{{ route('admin.dashboard') }}" class="text-red-600 text-sm hover:text-red-800">Administration</a>
                                 @endif
-                                <a href="{{ route('public.profile', strtolower(Auth::user()->name)) }}" class="text-blue-600 text-sm hover:text-blue-800">Voir profil</a>
+                                <a href="{{ Auth::user()->getPublicProfileUrl() }}" class="text-blue-600 text-sm hover:text-blue-800">Voir profil</a>
                                 <a href="{{ route('profile.show') }}" class="text-blue-600 text-sm hover:text-blue-800">Modifier</a>
                             </div>
                         </div>

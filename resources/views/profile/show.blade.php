@@ -14,7 +14,7 @@
                         <p class="text-blue-100 mt-2 text-sm sm:text-base">Gérez vos informations personnelles</p>
                     </div>
                     <div class="flex justify-center sm:justify-end">
-                        <a href="{{ route('public.profile', strtolower($user->name)) }}" target="_blank" 
+                        <a href="{{ $user->getPublicProfileUrl() }}" target="_blank" 
                            class="inline-flex items-center px-4 py-3 bg-white bg-opacity-25 hover:bg-opacity-35 text-white rounded-lg font-semibold transition duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
