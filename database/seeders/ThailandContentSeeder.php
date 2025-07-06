@@ -22,13 +22,6 @@ class ThailandContentSeeder extends Seeder
             'slug' => 'thailande',
             'emoji' => '🇹🇭',
             'description' => 'La Thaïlande, terre de sourires et de temples dorés, accueille une communauté française dynamique. Découvrez Bangkok, Chiang Mai, Phuket et les îles paradisiaques à travers les yeux des expatriés français.',
-            'latitude' => 15.8700,
-            'longitude' => 100.9925,
-            'population' => 69950000,
-            'currency' => 'Baht thaïlandais (THB)',
-            'timezone' => 'UTC+7',
-            'language' => 'Thaï',
-            'is_active' => true,
         ]);
 
         // Créer un utilisateur admin pour être l'auteur du contenu
