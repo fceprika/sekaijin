@@ -11,6 +11,7 @@ class News extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'excerpt',
         'content',
         'category',
@@ -67,5 +68,44 @@ class News extends Model
     public function scopeForCountry($query, $countryId)
     {
         return $query->where('country_id', $countryId);
+    }
+
+    /**
+     * Generate a unique slug from title
+     */
+    public static function generateSlug($title, $id = null)
+    {
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+        
+        while (self::where('slug', $slug)->when($id, function($query, $id) {
+            return $query->where('id', '!=', $id);
+        })->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        return $slug;
+    }
+
+    /**
+     * Boot the model events
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($news) {
+            if (empty($news->slug)) {
+                $news->slug = self::generateSlug($news->title);
+            }
+        });
+        
+        static::updating(function ($news) {
+            if ($news->isDirty('title') && empty($news->slug)) {
+                $news->slug = self::generateSlug($news->title, $news->id);
+            }
+        });
     }
 }

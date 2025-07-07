@@ -34,7 +34,7 @@ class HomeController extends Controller
                     ->with(['author' => function($query) {
                         $query->select('id', 'name', 'avatar', 'is_verified');
                     }])
-                    ->select('id', 'title', 'excerpt', 'content', 'category', 'author_id', 'created_at')
+                    ->select('id', 'title', 'slug', 'excerpt', 'content', 'category', 'author_id', 'created_at')
                     ->orderBy('created_at', 'desc')
                     ->take(3)
                     ->get();

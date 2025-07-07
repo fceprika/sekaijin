@@ -123,7 +123,7 @@
                         </div>
                         
                         <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                            <a href="{{ route('country.news.show', [$currentCountry->slug, $relatedNewsItem->id]) }}" class="hover:text-blue-600">
+                            <a href="{{ route('country.news.show', [$currentCountry->slug, $relatedNewsItem->slug]) }}" class="hover:text-blue-600">
                                 {{ $relatedNewsItem->title }}
                             </a>
                         </h3>

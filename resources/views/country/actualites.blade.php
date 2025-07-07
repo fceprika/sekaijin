@@ -47,7 +47,7 @@
                                 <span>{{ $featuredNewsItem->published_at->diffForHumans() }}</span>
                             </div>
                             <h2 class="text-2xl font-bold text-gray-800 mb-3">
-                                <a href="{{ route('country.news.show', [$countryModel->slug, $featuredNewsItem->id]) }}" class="hover:text-blue-600">
+                                <a href="{{ route('country.news.show', [$countryModel->slug, $featuredNewsItem->slug]) }}" class="hover:text-blue-600">
                                     {{ $featuredNewsItem->title }}
                                 </a>
                             </h2>
@@ -66,7 +66,7 @@
                                         @endif
                                     </a>
                                 </div>
-                                <a href="{{ route('country.news.show', [$countryModel->slug, $featuredNewsItem->id]) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lire la suite →</a>
+                                <a href="{{ route('country.news.show', [$countryModel->slug, $featuredNewsItem->slug]) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lire la suite →</a>
                             </div>
                         </div>
                     </article>
@@ -99,7 +99,7 @@
                                         @endif
                                     </div>
                                     <h3 class="text-xl font-bold text-gray-800 mb-3">
-                                        <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->id]) }}" class="hover:text-blue-600">
+                                        <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->slug]) }}" class="hover:text-blue-600">
                                             {{ $newsItem->title }}
                                         </a>
                                     </h3>
@@ -129,7 +129,7 @@
                                         </div>
                                         <div class="flex items-center space-x-4">
                                             <span class="text-xs text-gray-500">{{ $newsItem->views }} vues</span>
-                                            <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->id]) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lire la suite →</a>
+                                            <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->slug]) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lire la suite →</a>
                                         </div>
                                     </div>
                                 </article>
@@ -203,7 +203,7 @@
                             @foreach($featuredNews->skip(1)->take(3) as $sidebarNews)
                                 <div class="border-b border-gray-100 pb-3 last:border-b-0">
                                     <h4 class="text-sm font-medium text-gray-800 mb-1">
-                                        <a href="{{ route('country.news.show', [$countryModel->slug, $sidebarNews->id]) }}" class="hover:text-blue-600">
+                                        <a href="{{ route('country.news.show', [$countryModel->slug, $sidebarNews->slug]) }}" class="hover:text-blue-600">
                                             {{ $sidebarNews->title }}
                                         </a>
                                     </h4>
