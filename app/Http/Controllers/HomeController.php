@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\News;
 use App\Models\Article;
 use App\Models\Event;
+use App\Models\User;
 
 class HomeController extends Controller
 {
