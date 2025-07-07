@@ -14,14 +14,15 @@
                     </h1>
                     <p class="text-gray-600 mt-1">Rencontres et activités de la communauté française</p>
                 </div>
-                @auth
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition duration-200">
-                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                @can('create', App\Models\Event::class)
+                    <a href="{{ route('events.create', ['country' => $countryModel->slug]) }}" 
+                       class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition duration-200 inline-flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         Créer un événement
-                    </button>
-                @endauth
+                    </a>
+                @endcan
             </div>
         </div>
     </div>
