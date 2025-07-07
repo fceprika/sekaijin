@@ -34,7 +34,7 @@
                                     <span class="text-sm text-gray-500">{{ $newsItem->created_at->diffForHumans() }}</span>
                                 @endif
                                 <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $newsItem->title }}</h3>
-                                <p class="text-gray-600 text-sm mb-3">{{ strip_tags(Str::limit($newsItem->content, 150)) }}</p>
+                                <p class="text-gray-600 text-sm mb-3">{!! strip_tags(Str::limit($newsItem->content, 150)) !!}</p>
                                 <div class="flex items-center space-x-2">
                                     @if($newsItem->author && $newsItem->author->avatar)
                                         <img src="{{ asset('storage/avatars/' . $newsItem->author->avatar) }}" 
@@ -86,7 +86,7 @@
                                     <span class="text-sm text-gray-500">{{ $article->created_at->diffForHumans() }}</span>
                                 </div>
                                 <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $article->title }}</h3>
-                                <p class="text-gray-600 text-sm mb-3">{{ strip_tags(Str::limit($article->excerpt ?? $article->content, 150)) }}</p>
+                                <p class="text-gray-600 text-sm mb-3">{!! strip_tags(Str::limit($article->excerpt ?? $article->content, 150)) !!}</p>
                                 <div class="flex items-center space-x-2">
                                     @if($article->author && $article->author->avatar)
                                         <img src="{{ asset('storage/avatars/' . $article->author->avatar) }}" 
@@ -172,7 +172,7 @@
                             <span>📍 @if($event->is_online) En ligne @else {{ $event->location }} @endif</span>
                         </div>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">{{ strip_tags(Str::limit($event->description, 120)) }}</p>
+                    <p class="text-gray-600 text-sm mb-4">{!! strip_tags(Str::limit($event->description, 120)) !!}</p>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Par {{ $event->organizer ? $event->organizer->name : 'Organisateur' }}</span>
                         <a href="{{ route('country.event.show', [$countrySlug, $event->id]) }}" class="bg-{{ $countrySlug === 'japon' ? 'red' : 'green' }}-600 text-white px-3 py-2 rounded font-medium hover:bg-{{ $countrySlug === 'japon' ? 'red' : 'green' }}-700 transition duration-200">

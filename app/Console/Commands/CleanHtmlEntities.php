@@ -37,14 +37,18 @@ class CleanHtmlEntities extends Command
                 $originalExcerpt = $news->excerpt;
                 $originalContent = $news->content;
                 
-                $news->title = html_entity_decode($news->title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                $news->excerpt = html_entity_decode($news->excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                $news->content = html_entity_decode($news->content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                // Multiple decode passes and manual replacements for stubborn entities
+                $news->title = $this->cleanHtmlEntities($news->title);
+                $news->excerpt = $this->cleanHtmlEntities($news->excerpt);
+                $news->content = $this->cleanHtmlEntities($news->content);
                 
                 if ($originalTitle !== $news->title || $originalExcerpt !== $news->excerpt || $originalContent !== $news->content) {
                     $news->save();
                     $newsCount++;
                     $this->line("Cleaned news: {$news->title}");
+                    if ($originalContent !== $news->content) {
+                        $this->line("  Content changed: " . substr($originalContent, 0, 100) . "...");
+                    }
                 }
             }
         });
@@ -57,14 +61,18 @@ class CleanHtmlEntities extends Command
                 $originalExcerpt = $article->excerpt;
                 $originalContent = $article->content;
                 
-                $article->title = html_entity_decode($article->title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                $article->excerpt = html_entity_decode($article->excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                $article->content = html_entity_decode($article->content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                // Multiple decode passes and manual replacements for stubborn entities
+                $article->title = $this->cleanHtmlEntities($article->title);
+                $article->excerpt = $this->cleanHtmlEntities($article->excerpt);
+                $article->content = $this->cleanHtmlEntities($article->content);
                 
                 if ($originalTitle !== $article->title || $originalExcerpt !== $article->excerpt || $originalContent !== $article->content) {
                     $article->save();
                     $articleCount++;
                     $this->line("Cleaned article: {$article->title}");
+                    if ($originalContent !== $article->content) {
+                        $this->line("  Content changed: " . substr($originalContent, 0, 100) . "...");
+                    }
                 }
             }
         });
@@ -73,5 +81,46 @@ class CleanHtmlEntities extends Command
         $this->info('HTML entities cleanup completed!');
         
         return 0;
+    }
+    
+    /**
+     * Clean HTML entities with multiple approaches
+     */
+    private function cleanHtmlEntities($text)
+    {
+        if (empty($text)) {
+            return $text;
+        }
+        
+        // First pass: Standard HTML entity decoding
+        $cleaned = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Second pass: Manual replacement of common stubborn entities
+        $replacements = [
+            '&rsquo;' => "'",
+            '&lsquo;' => "'", 
+            '&ldquo;' => '"',
+            '&rdquo;' => '"',
+            '&nbsp;' => ' ',
+            '&amp;' => '&',
+            '&lt;' => '<',
+            '&gt;' => '>',
+            '&quot;' => '"',
+            '&#39;' => "'",
+            '&#8217;' => "'",
+            '&#8216;' => "'",
+            '&#8220;' => '"',
+            '&#8221;' => '"',
+            '&#160;' => ' ',
+        ];
+        
+        foreach ($replacements as $entity => $replacement) {
+            $cleaned = str_replace($entity, $replacement, $cleaned);
+        }
+        
+        // Third pass: Another round of HTML entity decoding
+        $cleaned = html_entity_decode($cleaned, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        return $cleaned;
     }
 }

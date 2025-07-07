@@ -61,17 +61,13 @@ The User model has been extended beyond standard Laravel auth to include expat-s
 5. Wait for user approval before merging to main
 
 ### Local Development Setup
-```bash
-# Start both servers in separate terminals:
+**IMPORTANT: DO NOT start the Laravel server - it is already running**
 
-# Terminal 1 - Laravel backend
-php artisan serve
-# Runs on http://127.0.0.1:8000
+The development environment is already configured and running:
+- Laravel backend is running on http://127.0.0.1:8000 
+- Vite frontend assets can be started with `npm run dev` if needed
 
-# Terminal 2 - Vite frontend assets  
-npm run dev
-# Runs on http://localhost:5173 (auto-assigns port if 5173 busy)
-```
+**Claude Code should NEVER run `php artisan serve` or attempt to start the Laravel server**
 
 ### Database Operations
 ```bash
