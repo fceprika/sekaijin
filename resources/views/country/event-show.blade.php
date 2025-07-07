@@ -128,7 +128,7 @@
                     <div class="flex items-center space-x-4">
                         @auth
                             @if(auth()->user()->id === $event->organizer_id || auth()->user()->isAdmin())
-                                <a href="{{ route('events.edit', $event->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                <a href="{{ route('events.edit', $event->slug) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                                     <i class="fas fa-edit mr-1"></i>
                                     Modifier
                                 </a>
