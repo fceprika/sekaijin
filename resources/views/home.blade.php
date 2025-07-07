@@ -20,9 +20,15 @@
             </span>
         </p>
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-            <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto">
-                👥 Rejoindre la communauté
-            </button>
+            @guest
+                <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto">
+                    👥 Rejoindre la communauté
+                </button>
+            @else
+                <a href="/profil" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto text-center">
+                    👤 Mon Profil
+                </a>
+            @endguest
             <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center">
                 Découvrir la Thaïlande
             </a>
