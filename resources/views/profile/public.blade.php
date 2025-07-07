@@ -122,76 +122,171 @@
                 
                 <!-- Events Section -->
                 @if($upcomingEvents->count() > 0 || $pastEvents->count() > 0)
-                    <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Événements organisés
-                        </h2>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mt-8">
+                        <!-- Header with Stats -->
+                        <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <div>
+                                        <h2 class="text-2xl font-bold">Événements organisés</h2>
+                                        <p class="text-purple-100 text-sm">Organisateur de la communauté</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold">{{ $upcomingEvents->count() + $pastEvents->count() }}</div>
+                                    <div class="text-purple-100 text-sm">Total créés</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-8">
                         
                         <!-- Upcoming Events -->
                         @if($upcomingEvents->count() > 0)
-                            <div class="mb-8">
-                                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium mr-2">
-                                        À venir
-                                    </span>
-                                    {{ $upcomingEvents->count() }} événement{{ $upcomingEvents->count() > 1 ? 's' : '' }}
-                                </h3>
-                                <div class="grid gap-4">
-                                    @foreach($upcomingEvents as $event)
-                                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                            <div class="flex justify-between items-start mb-3">
-                                                <div class="flex-1">
-                                                    <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
-                                                       class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
-                                                        {{ $event->title }}
-                                                    </a>
-                                                    <div class="flex items-center text-sm text-gray-500 mt-1">
-                                                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium mr-2">
-                                                            {{ ucfirst($event->category) }}
-                                                        </span>
-                                                        <span class="mr-3">📍 {{ $event->country->emoji }} {{ $event->country->name_fr }}</span>
-                                                        @if($event->is_featured)
-                                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">
-                                                                ⭐ À la une
+                            <div class="mb-10">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                                        <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-sm font-medium mr-3 flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                            </svg>
+                                            À venir
+                                        </span>
+                                        {{ $upcomingEvents->count() }} événement{{ $upcomingEvents->count() > 1 ? 's' : '' }}
+                                    </h3>
+                                    @if($upcomingEvents->count() > 0)
+                                        <span class="text-sm text-gray-500">
+                                            Prochain dans {{ $upcomingEvents->first()->start_date->diffForHumans() }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="grid gap-6">
+                                    @foreach($upcomingEvents as $index => $event)
+                                        @php
+                                            $daysUntil = now()->diffInDays($event->start_date, false);
+                                            $isUrgent = $daysUntil <= 7 && $daysUntil >= 0;
+                                            $isPast = $daysUntil < 0;
+                                        @endphp
+                                        <div class="relative group">
+                                            <!-- Urgent indicator -->
+                                            @if($isUrgent)
+                                                <div class="absolute -top-2 -right-2 z-10">
+                                                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium animate-pulse">
+                                                        🔥 Bientôt !
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            
+                                            <div class="bg-gradient-to-r {{ $index === 0 ? 'from-blue-50 to-purple-50 border-blue-200' : 'from-gray-50 to-blue-50 border-gray-200' }} rounded-xl p-6 border-2 hover:shadow-xl transition-all duration-300 group-hover:scale-[1.02]">
+                                                <div class="flex justify-between items-start mb-4">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center gap-3 mb-2">
+                                                            <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
+                                                               class="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors group-hover:text-blue-700">
+                                                                {{ $event->title }}
+                                                            </a>
+                                                            @if($event->is_featured)
+                                                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                                    ⭐ Vedette
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                                                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                                                                {{ ucfirst($event->category) }}
                                                             </span>
+                                                            <span class="flex items-center">
+                                                                <span class="mr-1">{{ $event->country->emoji }}</span>
+                                                                {{ $event->country->name_fr }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Date prominent -->
+                                                    <div class="text-right ml-6">
+                                                        <div class="bg-white rounded-lg p-3 shadow-sm border">
+                                                            <div class="text-2xl font-bold text-gray-800">{{ $event->start_date->format('d') }}</div>
+                                                            <div class="text-xs uppercase text-gray-500 font-medium">{{ $event->start_date->format('M') }}</div>
+                                                            <div class="text-sm text-gray-600 mt-1">{{ $event->start_date->format('H:i') }}</div>
+                                                        </div>
+                                                        @if($isUrgent)
+                                                            <div class="text-xs text-red-600 font-medium mt-2">
+                                                                @if($daysUntil === 0)
+                                                                    Aujourd'hui !
+                                                                @elseif($daysUntil === 1)
+                                                                    Demain
+                                                                @else
+                                                                    Dans {{ $daysUntil }} jours
+                                                                @endif
+                                                            </div>
+                                                        @else
+                                                            <div class="text-xs text-gray-500 mt-2">
+                                                                {{ $event->start_date->diffForHumans() }}
+                                                            </div>
                                                         @endif
                                                     </div>
                                                 </div>
-                                                <div class="text-right text-sm text-gray-600 ml-4">
-                                                    <div class="font-medium">{{ $event->start_date->format('d/m/Y') }}</div>
-                                                    <div>{{ $event->start_date->format('H:i') }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center text-sm text-gray-600">
-                                                    @if($event->is_online)
-                                                        <span class="flex items-center mr-4">
-                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
-                                                            </svg>
-                                                            En ligne
+                                                
+                                                <!-- Event details -->
+                                                <div class="flex items-center justify-between mb-4">
+                                                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                                                        @if($event->is_online)
+                                                            <span class="flex items-center bg-green-100 text-green-700 px-2 py-1 rounded">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                                                                </svg>
+                                                                En ligne
+                                                            </span>
+                                                        @else
+                                                            <span class="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                </svg>
+                                                                {{ Str::limit($event->location, 20) }}
+                                                            </span>
+                                                        @endif
+                                                        <span class="font-semibold {{ $event->isFree() ? 'text-green-600' : 'text-purple-600' }} bg-white px-2 py-1 rounded">
+                                                            {{ $event->formatted_price }}
                                                         </span>
-                                                    @else
-                                                        <span class="flex items-center mr-4">
-                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                            </svg>
-                                                            {{ $event->location }}
-                                                        </span>
-                                                    @endif
-                                                    <span class="font-semibold {{ $event->isFree() ? 'text-green-600' : 'text-gray-800' }}">
-                                                        {{ $event->formatted_price }}
-                                                    </span>
-                                                </div>
-                                                @if($event->max_participants)
-                                                    <div class="text-xs text-gray-500">
-                                                        {{ $event->current_participants }}/{{ $event->max_participants }} participants
                                                     </div>
-                                                @endif
+                                                    
+                                                    <!-- Participation gauge -->
+                                                    @if($event->max_participants)
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="text-xs text-gray-500">
+                                                                {{ $event->current_participants }}/{{ $event->max_participants }}
+                                                            </div>
+                                                            <div class="w-16 bg-gray-200 rounded-full h-2">
+                                                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ ($event->current_participants / $event->max_participants) * 100 }}%"></div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                
+                                                <!-- Action buttons -->
+                                                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                                    <div class="flex gap-2">
+                                                        <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
+                                                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                                            Voir détails
+                                                        </a>
+                                                        @if(auth()->check() && (auth()->id() === $event->organizer_id || auth()->user()->isAdmin()))
+                                                            <a href="{{ route('events.edit', $event->slug) }}" 
+                                                               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                                                Modifier
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                    <button class="text-gray-400 hover:text-blue-600 transition-colors" title="Partager">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -201,39 +296,80 @@
                         
                         <!-- Past Events -->
                         @if($pastEvents->count() > 0)
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium mr-2">
-                                        Passés
-                                    </span>
-                                    {{ $pastEvents->count() }} événement{{ $pastEvents->count() > 1 ? 's' : '' }} récent{{ $pastEvents->count() > 1 ? 's' : '' }}
-                                </h3>
-                                <div class="grid gap-3">
-                                    @foreach($pastEvents as $event)
-                                        <div class="border border-gray-100 rounded-lg p-3 bg-gray-50">
-                                            <div class="flex justify-between items-center">
-                                                <div class="flex-1">
-                                                    <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
-                                                       class="text-base font-medium text-gray-700 hover:text-blue-600 transition-colors">
-                                                        {{ $event->title }}
-                                                    </a>
-                                                    <div class="flex items-center text-xs text-gray-500 mt-1">
-                                                        <span class="mr-3">{{ ucfirst($event->category) }}</span>
-                                                        <span>{{ $event->country->emoji }} {{ $event->country->name_fr }}</span>
+                            <div class="border-t border-gray-200 pt-8">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-600 flex items-center">
+                                        <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium mr-3 flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Événements passés
+                                        </span>
+                                        <span class="text-sm text-gray-500">{{ $pastEvents->count() }} organisé{{ $pastEvents->count() > 1 ? 's' : '' }}</span>
+                                    </h3>
+                                </div>
+                                
+                                <div class="bg-gray-50 rounded-xl p-6">
+                                    <div class="grid gap-3">
+                                        @foreach($pastEvents as $event)
+                                            <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-colors group">
+                                                <div class="flex justify-between items-center">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center gap-3 mb-2">
+                                                            <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
+                                                               class="text-base font-semibold text-gray-700 hover:text-blue-600 transition-colors group-hover:text-blue-700">
+                                                                {{ $event->title }}
+                                                            </a>
+                                                            @if($event->max_participants)
+                                                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">
+                                                                    ✅ {{ $event->current_participants }} participants
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="flex items-center gap-4 text-sm text-gray-500">
+                                                            <span class="flex items-center">
+                                                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+                                                                {{ ucfirst($event->category) }}
+                                                            </span>
+                                                            <span class="flex items-center">
+                                                                <span class="mr-1">{{ $event->country->emoji }}</span>
+                                                                {{ $event->country->name_fr }}
+                                                            </span>
+                                                            @if($event->is_online)
+                                                                <span class="text-green-600">💻 En ligne</span>
+                                                            @else
+                                                                <span>📍 {{ Str::limit($event->location, 15) }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right ml-6">
+                                                        <div class="text-sm font-medium text-gray-600">
+                                                            {{ $event->start_date->format('d/m/Y') }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500">
+                                                            {{ $event->start_date->diffForHumans() }}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="text-xs text-gray-500 ml-4">
-                                                    {{ $event->start_date->format('d/m/Y') }}
-                                                </div>
                                             </div>
+                                        @endforeach
+                                    </div>
+                                    
+                                    <!-- Show more button if there are more past events -->
+                                    @if($pastEvents->count() === 5)
+                                        <div class="text-center mt-4">
+                                            <button class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">
+                                                Voir tous les événements passés →
+                                            </button>
                                         </div>
-                                    @endforeach
+                                    @endif
                                 </div>
                             </div>
                         @endif
+                        
+                        </div> <!-- End of p-8 div -->
                     </div>
                 @endif
-            </div>
             
             <!-- Sidebar -->
             <div class="space-y-6">
