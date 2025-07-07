@@ -40,7 +40,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100',
             'country_residence' => 'nullable|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'destination_country' => [
@@ -69,7 +69,7 @@ class AuthController extends Controller
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
-            'avatar.max' => 'L\'avatar ne doit pas dépasser 2MB.',
+            'avatar.max' => 'L\'avatar ne doit pas dépasser 100KB.',
         ]);
 
         if ($validator->fails()) {

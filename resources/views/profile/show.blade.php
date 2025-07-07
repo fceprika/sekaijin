@@ -71,9 +71,20 @@
                                          alt="Avatar de {{ $user->name }}">
                                 </div>
                                 <div class="flex-1">
-                                    <input type="file" id="avatar" name="avatar" accept="image/*"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG ou WebP. Maximum 2MB. Laissez vide pour conserver l'avatar actuel.</p>
+                                    <div class="relative">
+                                        <input type="file" id="avatar" name="avatar" accept="image/*" 
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition duration-200 cursor-pointer">
+                                            <div class="text-center">
+                                                <svg class="mx-auto h-8 w-8 text-blue-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <p class="text-sm font-medium text-blue-600">Choisir une image</p>
+                                                <p class="text-xs text-gray-500">ou glisser-déposer ici</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG ou WebP. Maximum 100KB. Laissez vide pour conserver l'avatar actuel.</p>
                                     @if($user->avatar)
                                         <label class="flex items-center mt-2">
                                             <input type="checkbox" name="remove_avatar" value="1" class="mr-2">
@@ -624,6 +635,128 @@ document.addEventListener('DOMContentLoaded', function() {
                 avatarPreview.src = originalAvatarSrc;
             }
         });
+    }
+    
+    // Gestion interactive du upload d'avatar (réutilise avatarInput déjà déclaré)
+    const avatarUploadDiv = avatarInput?.parentNode;
+    
+    if (avatarInput && avatarUploadDiv) {
+        // Mettre à jour le texte quand un fichier est sélectionné
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            const fileName = file?.name;
+            const textElement = avatarUploadDiv.querySelector('p.text-sm');
+            
+            if (file) {
+                // Vérifier la taille du fichier (100KB max)
+                if (file.size > 100 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                    this.value = '';
+                    // Revenir à l'apparence normale
+                    if (textElement) {
+                        textElement.textContent = 'Choisir une image';
+                        textElement.classList.remove('text-green-600');
+                        textElement.classList.add('text-blue-600');
+                    }
+                    const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                    if (uploadDiv) {
+                        uploadDiv.classList.remove('border-green-300', 'bg-green-50');
+                        uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
+                    }
+                    return;
+                }
+                
+                // Vérifier le type de fichier
+                if (!file.type.match('image.*')) {
+                    alert('Veuillez sélectionner un fichier image.');
+                    this.value = '';
+                    return;
+                }
+            }
+            
+            if (fileName) {
+                if (textElement) {
+                    textElement.textContent = fileName;
+                    textElement.classList.remove('text-blue-600');
+                    textElement.classList.add('text-green-600');
+                }
+                // Changer l'apparence pour montrer qu'un fichier est sélectionné
+                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                if (uploadDiv) {
+                    uploadDiv.classList.remove('border-blue-300', 'bg-blue-50');
+                    uploadDiv.classList.add('border-green-300', 'bg-green-50');
+                }
+            } else {
+                if (textElement) {
+                    textElement.textContent = 'Choisir une image';
+                    textElement.classList.remove('text-green-600');
+                    textElement.classList.add('text-blue-600');
+                }
+                // Revenir à l'apparence normale
+                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                if (uploadDiv) {
+                    uploadDiv.classList.remove('border-green-300', 'bg-green-50');
+                    uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
+                }
+            }
+        });
+        
+        // Effet de survol drag & drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            avatarUploadDiv.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            avatarUploadDiv.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            avatarUploadDiv.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+            if (uploadDiv) {
+                uploadDiv.classList.add('border-blue-500', 'bg-blue-200');
+            }
+        }
+        
+        function unhighlight() {
+            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+            if (uploadDiv) {
+                uploadDiv.classList.remove('border-blue-500', 'bg-blue-200');
+            }
+        }
+        
+        avatarUploadDiv.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                const file = files[0];
+                
+                // Vérification immédiate pour le drag & drop
+                if (file.size > 100 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                    return;
+                }
+                
+                if (!file.type.match('image.*')) {
+                    alert('Veuillez sélectionner un fichier image.');
+                    return;
+                }
+                
+                avatarInput.files = files;
+                avatarInput.dispatchEvent(new Event('change'));
+            }
+        }
     }
 });
 </script>
