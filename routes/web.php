@@ -38,6 +38,8 @@ Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/api/expats-by-country', [App\Http\Controllers\Api\ExpatController::class, 'expatsByCountry']);
     Route::get('/api/members-with-location', [App\Http\Controllers\Api\ExpatController::class, 'membersWithLocation']);
+    Route::get('/api/map-config', [App\Http\Controllers\Api\MapController::class, 'getMapConfig']);
+    Route::get('/api/geocode', [App\Http\Controllers\Api\MapController::class, 'geocode']);
 });
 
 Route::middleware(['auth', 'throttle:10,1'])->group(function () {

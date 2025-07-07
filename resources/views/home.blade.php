@@ -14,17 +14,17 @@
             </span>
         </h1>
         <p class="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
-            Rejoignez des milliers d'expatriés français dans plus de 150 pays ! 
+            Rejoignez la communauté française la plus active de Thaïlande ! 
             <span class="block mt-2 text-lg md:text-xl text-yellow-300 font-semibold">
-                👇 Découvrez les membres de votre région sur la carte interactive ci-dessous
+                🇹🇭 Plus de {{ $thailandMembers }} compatriotes vous attendent
             </span>
         </p>
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
             <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto">
-                Rejoindre la communauté
+                👥 Rejoindre la communauté
             </button>
-            <a href="/about" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center">
-                En savoir plus
+            <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center">
+                Découvrir la Thaïlande
             </a>
         </div>
     </div>
@@ -38,15 +38,24 @@
     <div id="map" class="h-[400px] md:h-[500px] lg:h-[600px] w-full"></div>
 </div>
 
-<!-- Latest Content Section -->
+<!-- Thailand Focus Section -->
 <div class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">🇹🇭 Communauté Thaïlande</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Découvrez l'actualité, les événements et les discussions de votre communauté en Thaïlande
+            </p>
+        </div>
+        
         @include('partials.country-content', [
             'country' => $thailand,
             'news' => $thailandNews,
             'articles' => $thailandArticles,
             'events' => $thailandEvents,
-            'isLast' => false
+            'totalMembers' => $totalMembers,
+            'thailandMembers' => $thailandMembers,
+            'isLast' => true
         ])
     </div>
 </div>
@@ -100,29 +109,61 @@
         </div>
     </div>
 
-<!-- Stats Section -->
-<div class="py-16 bg-gray-50">
+<!-- Real Stats Section -->
+<div class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Notre Communauté en Chiffres</h2>
+        </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-                <div class="text-4xl font-bold text-blue-600 mb-2">25K+</div>
-                <div class="text-gray-600">Membres Actifs</div>
+                <div class="text-4xl font-bold text-blue-600 mb-2">{{ $totalMembers }}</div>
+                <div class="text-gray-600">Membres Inscrits</div>
             </div>
             <div>
-                <div class="text-4xl font-bold text-green-600 mb-2">150</div>
-                <div class="text-gray-600">Pays Couverts</div>
+                <div class="text-4xl font-bold text-green-600 mb-2">{{ $thailandMembers }}</div>
+                <div class="text-gray-600">En Thaïlande</div>
             </div>
             <div>
-                <div class="text-4xl font-bold text-purple-600 mb-2">24/7</div>
-                <div class="text-gray-600">Entraide</div>
+                <div class="text-4xl font-bold text-purple-600 mb-2">{{ $thailandNews->count() + $thailandArticles->count() }}</div>
+                <div class="text-gray-600">Publications</div>
             </div>
             <div>
-                <div class="text-4xl font-bold text-indigo-600 mb-2">5 ans</div>
-                <div class="text-gray-600">D'expérience</div>
+                <div class="text-4xl font-bold text-indigo-600 mb-2">{{ $thailandEvents->count() }}</div>
+                <div class="text-gray-600">Événements</div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Recent Members Section -->
+@if($recentMembers->count() > 0)
+<div class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">👋 Nouveaux Membres</h2>
+            <p class="text-xl text-gray-600">Accueillez les derniers arrivants de la communauté</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            @foreach($recentMembers as $member)
+            <div class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
+                    {{ strtoupper(substr($member->name, 0, 1)) }}
+                </div>
+                <h3 class="font-semibold text-gray-800 mb-2">{{ $member->name }}</h3>
+                <p class="text-gray-600 text-sm mb-3">📍 {{ $member->country_residence }}</p>
+                @if($member->city_residence)
+                    <p class="text-gray-500 text-sm mb-3">{{ $member->city_residence }}</p>
+                @endif
+                <span class="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Rejoint {{ $member->created_at->diffForHumans() }}
+                </span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Country Coordinates Script -->
 <script src="/js/country-coordinates.js"></script>
@@ -134,14 +175,30 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/inscription';
     });
     
-    // Initialize Mapbox
-    mapboxgl.accessToken = '{{ config('services.mapbox.access_token') }}';
-    
+    // Initialize Mapbox with secure API proxy
+    $.get('/api/map-config')
+        .done(function(config) {
+            if (!config.accessToken) {
+                console.error('Map service not available');
+                $('#map').html('<div class="flex items-center justify-center h-full text-gray-500">Carte temporairement indisponible</div>');
+                return;
+            }
+            
+            mapboxgl.accessToken = config.accessToken;
+            initializeMap(config);
+        })
+        .fail(function() {
+            console.error('Failed to load map configuration');
+            $('#map').html('<div class="flex items-center justify-center h-full text-gray-500">Erreur de chargement de la carte</div>');
+        });
+});
+
+function initializeMap(config) {
     const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [100.5018, 13.7563], // Centré sur la Thaïlande (Bangkok)
-        zoom: 3,
+        style: config.mapStyle,
+        center: config.center,
+        zoom: config.zoom,
         projection: 'globe',
         // Désactiver la collecte de données pour éviter les erreurs d'ad blocker
         collectResourceTiming: false,
@@ -178,11 +235,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
     
-    // Mettre à jour les marqueurs quand le zoom change
+    // Mettre à jour les marqueurs quand le zoom change avec debouncing
+    let zoomTimeout;
     map.on('zoomend', function() {
-        updateMarkersForZoom(map);
+        clearTimeout(zoomTimeout);
+        zoomTimeout = setTimeout(function() {
+            updateMarkersForZoom(map);
+        }, 150); // Debounce de 150ms pour éviter les appels multiples
     });
-});
+}
 
 function updateMarkersForZoom(map) {
     // Supprimer tous les marqueurs existants
