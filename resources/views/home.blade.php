@@ -148,7 +148,7 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach($recentMembers as $member)
-            <div class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
+            <a href="{{ route('public.profile', $member->name) }}" class="block bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300 cursor-pointer transform hover:scale-105">
                 @if($member->avatar)
                     <div class="w-16 h-16 mx-auto mb-4">
                         <img src="{{ asset('storage/avatars/' . $member->avatar) }}" 
@@ -168,7 +168,7 @@
                 <span class="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                     Rejoint {{ $member->created_at->diffForHumans() }}
                 </span>
-            </div>
+            </a>
             @endforeach
         </div>
     </div>
