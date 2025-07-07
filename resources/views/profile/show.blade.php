@@ -64,18 +64,33 @@
                         <!-- Avatar Section -->
                         <div class="mb-6">
                             <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
-                            <div class="flex items-center space-x-6">
-                                <div class="flex-shrink-0">
-                                    <img id="avatar-preview" class="h-20 w-20 rounded-full object-cover border-2 border-gray-300" 
+                            <!-- Layout responsive: vertical sur mobile, horizontal sur desktop -->
+                            <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                                <!-- Avatar centré sur mobile -->
+                                <div class="flex-shrink-0 flex justify-center sm:justify-start">
+                                    <img id="avatar-preview" class="h-24 w-24 sm:h-20 sm:w-20 rounded-full object-cover border-2 border-gray-300" 
                                          src="{{ $user->getAvatarUrl() }}" 
                                          alt="Avatar de {{ $user->name }}">
                                 </div>
-                                <div class="flex-1">
-                                    <input type="file" id="avatar" name="avatar" accept="image/*"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                    <p class="text-xs text-gray-500 mt-1">JPG, PNG ou WebP. Maximum 2MB. Laissez vide pour conserver l'avatar actuel.</p>
+                                <div class="flex-1 w-full">
+                                    <div class="relative">
+                                        <input type="file" id="avatar" name="avatar" accept="image/*" 
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div class="flex items-center justify-center w-full px-3 py-4 sm:px-4 sm:py-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition duration-200 cursor-pointer min-h-[80px] sm:min-h-[60px]">
+                                            <div class="text-center">
+                                                <svg class="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <p class="text-sm font-medium text-blue-600">Choisir une image</p>
+                                                <p class="text-xs text-gray-500 hidden sm:block">ou glisser-déposer ici</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2 text-center sm:text-left">
+                                        JPG, PNG ou WebP. Maximum <span class="font-bold text-red-600">100KB</span>. Laissez vide pour conserver l'avatar actuel.
+                                    </p>
                                     @if($user->avatar)
-                                        <label class="flex items-center mt-2">
+                                        <label class="flex items-center justify-center sm:justify-start mt-3">
                                             <input type="checkbox" name="remove_avatar" value="1" class="mr-2">
                                             <span class="text-sm text-red-600">Supprimer l'avatar actuel</span>
                                         </label>
@@ -577,9 +592,9 @@ document.addEventListener('DOMContentLoaded', function() {
         avatarInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
-                // Vérifier la taille du fichier (2MB max)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 2MB autorisé.');
+                // Vérifier la taille du fichier (100KB max)
+                if (file.size > 100 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
                     this.value = '';
                     return;
                 }
@@ -624,6 +639,128 @@ document.addEventListener('DOMContentLoaded', function() {
                 avatarPreview.src = originalAvatarSrc;
             }
         });
+    }
+    
+    // Gestion interactive du upload d'avatar (réutilise avatarInput déjà déclaré)
+    const avatarUploadDiv = avatarInput?.parentNode;
+    
+    if (avatarInput && avatarUploadDiv) {
+        // Mettre à jour le texte quand un fichier est sélectionné
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            const fileName = file?.name;
+            const textElement = avatarUploadDiv.querySelector('p.text-sm');
+            
+            if (file) {
+                // Vérifier la taille du fichier (100KB max)
+                if (file.size > 100 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                    this.value = '';
+                    // Revenir à l'apparence normale
+                    if (textElement) {
+                        textElement.textContent = 'Choisir une image';
+                        textElement.classList.remove('text-green-600');
+                        textElement.classList.add('text-blue-600');
+                    }
+                    const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                    if (uploadDiv) {
+                        uploadDiv.classList.remove('border-green-300', 'bg-green-50');
+                        uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
+                    }
+                    return;
+                }
+                
+                // Vérifier le type de fichier
+                if (!file.type.match('image.*')) {
+                    alert('Veuillez sélectionner un fichier image.');
+                    this.value = '';
+                    return;
+                }
+            }
+            
+            if (fileName) {
+                if (textElement) {
+                    textElement.textContent = fileName;
+                    textElement.classList.remove('text-blue-600');
+                    textElement.classList.add('text-green-600');
+                }
+                // Changer l'apparence pour montrer qu'un fichier est sélectionné
+                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                if (uploadDiv) {
+                    uploadDiv.classList.remove('border-blue-300', 'bg-blue-50');
+                    uploadDiv.classList.add('border-green-300', 'bg-green-50');
+                }
+            } else {
+                if (textElement) {
+                    textElement.textContent = 'Choisir une image';
+                    textElement.classList.remove('text-green-600');
+                    textElement.classList.add('text-blue-600');
+                }
+                // Revenir à l'apparence normale
+                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                if (uploadDiv) {
+                    uploadDiv.classList.remove('border-green-300', 'bg-green-50');
+                    uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
+                }
+            }
+        });
+        
+        // Effet de survol drag & drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            avatarUploadDiv.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            avatarUploadDiv.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            avatarUploadDiv.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+            if (uploadDiv) {
+                uploadDiv.classList.add('border-blue-500', 'bg-blue-200');
+            }
+        }
+        
+        function unhighlight() {
+            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+            if (uploadDiv) {
+                uploadDiv.classList.remove('border-blue-500', 'bg-blue-200');
+            }
+        }
+        
+        avatarUploadDiv.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                const file = files[0];
+                
+                // Vérification immédiate pour le drag & drop
+                if (file.size > 100 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                    return;
+                }
+                
+                if (!file.type.match('image.*')) {
+                    alert('Veuillez sélectionner un fichier image.');
+                    return;
+                }
+                
+                avatarInput.files = files;
+                avatarInput.dispatchEvent(new Event('change'));
+            }
+        }
     }
 });
 </script>

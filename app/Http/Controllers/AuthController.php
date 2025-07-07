@@ -40,7 +40,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',
             'country_residence' => 'nullable|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'destination_country' => [
@@ -69,17 +69,23 @@ class AuthController extends Controller
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
-            'avatar.max' => 'L\'avatar ne doit pas dépasser 2MB.',
+            'avatar.max' => 'L\'avatar ne doit pas dépasser 100KB.',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        // Gérer l'upload de l'avatar
+        // Gérer l'upload de l'avatar avec gestion d'erreurs sécurisée
         $avatarPath = null;
         if ($request->hasFile('avatar')) {
-            $avatarPath = $this->uploadAvatar($request->file('avatar'));
+            try {
+                $avatarPath = $this->uploadAvatar($request->file('avatar'));
+            } catch (\InvalidArgumentException $e) {
+                return back()->withErrors(['avatar' => $e->getMessage()])->withInput();
+            } catch (\Exception $e) {
+                return back()->withErrors(['avatar' => 'Erreur lors du traitement de l\'image.'])->withInput();
+            }
         }
 
         $user = User::create([
@@ -218,8 +224,12 @@ class AuthController extends Controller
      */
     private function uploadAvatar($file): string
     {
-        // Generate unique filename
-        $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        // Additional security validation
+        $this->validateImageFile($file);
+        
+        // Generate unique filename with proper extension
+        $extension = $file->getClientOriginalExtension();
+        $filename = uniqid() . '_' . time() . '.' . $extension;
         
         // Ensure avatars directory exists
         $avatarPath = public_path('storage/avatars');
@@ -231,5 +241,45 @@ class AuthController extends Controller
         $file->move($avatarPath, $filename);
         
         return $filename;
+    }
+    
+    /**
+     * Validate image file content and headers
+     */
+    private function validateImageFile($file): void
+    {
+        // Check file size (double-check on server side)
+        if ($file->getSize() > 100 * 1024) {
+            throw new \InvalidArgumentException('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+        }
+        
+        // Validate MIME type
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+            throw new \InvalidArgumentException('Type de fichier non autorisé. Seuls JPEG, PNG et WebP sont acceptés.');
+        }
+        
+        // Validate file headers (magic bytes)
+        $fileContent = file_get_contents($file->getPathname());
+        $validHeaders = [
+            'jpeg' => ["\xFF\xD8\xFF"],
+            'png' => ["\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"],
+            'webp' => ["RIFF", "WEBP"]
+        ];
+        
+        $isValidHeader = false;
+        foreach ($validHeaders as $type => $headers) {
+            foreach ($headers as $header) {
+                if (strpos($fileContent, $header) === 0 || 
+                    ($type === 'webp' && strpos($fileContent, 'RIFF') === 0 && strpos($fileContent, 'WEBP') !== false)) {
+                    $isValidHeader = true;
+                    break 2;
+                }
+            }
+        }
+        
+        if (!$isValidHeader) {
+            throw new \InvalidArgumentException('Fichier image corrompu ou invalide.');
+        }
     }
 }
