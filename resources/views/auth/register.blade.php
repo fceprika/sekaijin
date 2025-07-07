@@ -41,27 +41,31 @@
             <!-- Avatar -->
             <div>
                 <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">Photo de profil (optionnel)</label>
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0">
-                        <img id="avatar-preview" class="h-16 w-16 rounded-full object-cover border-2 border-gray-300" 
+                <!-- Layout responsive: vertical sur mobile, horizontal sur desktop -->
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <!-- Avatar centré sur mobile -->
+                    <div class="flex-shrink-0 flex justify-center sm:justify-start">
+                        <img id="avatar-preview" class="h-20 w-20 sm:h-16 sm:w-16 rounded-full object-cover border-2 border-gray-300" 
                              src="https://ui-avatars.com/api/?name={{ old('name', 'Avatar') }}&background=3B82F6&color=fff&size=64" 
                              alt="Aperçu avatar">
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-1 w-full">
                         <div class="relative">
                             <input type="file" id="avatar" name="avatar" accept="image/*" 
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition duration-200 cursor-pointer">
+                            <div class="flex items-center justify-center w-full px-3 py-4 sm:px-4 sm:py-3 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition duration-200 cursor-pointer min-h-[80px] sm:min-h-[60px]">
                                 <div class="text-center">
-                                    <svg class="mx-auto h-8 w-8 text-blue-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <svg class="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                     <p class="text-sm font-medium text-blue-600">Choisir une image</p>
-                                    <p class="text-xs text-gray-500">ou glisser-déposer ici</p>
+                                    <p class="text-xs text-gray-500 hidden sm:block">ou glisser-déposer ici</p>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">JPG, PNG ou WebP. Maximum 100KB.</p>
+                        <p class="text-xs text-gray-500 mt-2 text-center sm:text-left">
+                            JPG, PNG ou WebP. Maximum <span class="font-bold text-red-600">100KB</span>.
+                        </p>
                     </div>
                 </div>
             </div>
