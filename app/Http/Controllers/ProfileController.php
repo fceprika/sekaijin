@@ -20,7 +20,22 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:users,name,' . $user->id,
+                'unique:users,name_slug,' . $user->id,
+                'regex:/^[a-zA-Z0-9_.-]+$/',
+                'not_regex:/^[._-]/',
+                'not_regex:/[._-]$/',
+                function ($attribute, $value, $fail) use ($user) {
+                    $slug = \App\Models\User::generateSlug($value);
+                    if (\App\Models\User::where('name_slug', $slug)->where('id', '!=', $user->id)->exists()) {
+                        $fail('Ce pseudo génère un identifiant déjà utilisé. Veuillez en choisir un autre.');
+                    }
+                },
+            ],
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             'remove_avatar' => 'nullable|boolean',
@@ -56,6 +71,8 @@ class ProfileController extends Controller
             ],
             'share_location' => 'nullable|boolean',
         ], [
+            'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
+            'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
             'avatar.max' => 'L\'avatar ne doit pas dépasser 2MB.',

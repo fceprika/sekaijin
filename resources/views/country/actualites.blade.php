@@ -59,7 +59,7 @@
                                     <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
                                         {{ strtoupper(substr($featuredNewsItem->author->name, 0, 1)) }}
                                     </div>
-                                    <a href="{{ route('public.profile', $featuredNewsItem->author->name) }}" class="text-sm text-gray-700 font-medium hover:text-blue-600">
+                                    <a href="{{ $featuredNewsItem->author->getPublicProfileUrl() }}" class="text-sm text-gray-700 font-medium hover:text-blue-600">
                                         {{ $featuredNewsItem->author->name }}
                                         @if($featuredNewsItem->author->is_verified)
                                             <i class="fas fa-check-circle text-blue-500 ml-1"></i>
@@ -120,7 +120,7 @@
                                             <div class="w-8 h-8 {{ $avatarColor }} rounded-full flex items-center justify-center text-white font-bold text-xs">
                                                 {{ strtoupper(substr($newsItem->author->name, 0, 1)) }}
                                             </div>
-                                            <a href="{{ route('public.profile', $newsItem->author->name) }}" class="text-sm text-gray-700 font-medium hover:text-blue-600">
+                                            <a href="{{ $newsItem->author->getPublicProfileUrl() }}" class="text-sm text-gray-700 font-medium hover:text-blue-600">
                                                 {{ $newsItem->author->name }}
                                                 @if($newsItem->author->is_verified)
                                                     <i class="fas fa-check-circle text-blue-500 ml-1"></i>

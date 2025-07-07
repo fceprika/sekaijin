@@ -151,7 +151,7 @@
                                         {{ strtoupper(substr($member->name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <a href="{{ route('public.profile', $member->name) }}" 
+                                        <a href="{{ $member->getPublicProfileUrl() }}" 
                                            class="font-medium text-gray-800 hover:text-blue-600">
                                             {{ $member->name }}
                                         </a>

@@ -17,8 +17,12 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    // Route constants
+    public const ROUTE_PUBLIC_PROFILE = 'public.profile';
+
     protected $fillable = [
         'name',
+        'name_slug',
         'first_name',
         'last_name',
         'email',
@@ -238,5 +242,59 @@ class User extends Authenticatable
         
         // Default avatar - using a placeholder service
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=3B82F6&color=fff&size=200';
+    }
+
+    /**
+     * Get the URL-safe slug for this user
+     */
+    public function getSlug(): string
+    {
+        return $this->name_slug ?? strtolower($this->name);
+    }
+
+    /**
+     * Get the public profile URL for this user
+     */
+    public function getPublicProfileUrl(): string
+    {
+        return route(self::ROUTE_PUBLIC_PROFILE, $this->getSlug());
+    }
+
+    /**
+     * Generate URL-safe slug from username
+     */
+    public static function generateSlug(string $name): string
+    {
+        // Clean the name: remove invalid characters, trim, convert to lowercase
+        $cleaned = trim($name);
+        $cleaned = preg_replace('/[^a-zA-Z0-9._-]/', '', $cleaned);
+        $cleaned = strtolower($cleaned);
+        
+        // Ensure slug is not empty after cleaning
+        if (empty($cleaned)) {
+            throw new \InvalidArgumentException('Username cannot be converted to a valid slug');
+        }
+        
+        return $cleaned;
+    }
+
+    /**
+     * Boot method to automatically generate slug
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->name_slug)) {
+                $user->name_slug = self::generateSlug($user->name);
+            }
+        });
+
+        static::updating(function ($user) {
+            if ($user->isDirty('name')) {
+                $user->name_slug = self::generateSlug($user->name);
+            }
+        });
     }
 }

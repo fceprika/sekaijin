@@ -131,7 +131,7 @@
                                     </div>
                                     <span class="text-sm text-gray-700 font-medium">
                                         Organisé par 
-                                        <a href="{{ route('public.profile', $featuredEvent->organizer->name) }}" class="hover:text-green-600">
+                                        <a href="{{ $featuredEvent->organizer->getPublicProfileUrl() }}" class="hover:text-green-600">
                                             {{ $featuredEvent->organizer->name }}
                                         </a>
                                     </span>
