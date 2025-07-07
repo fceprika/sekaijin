@@ -149,7 +149,7 @@
             <div class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
                 @if($member->avatar)
                     <div class="w-16 h-16 mx-auto mb-4">
-                        <img src="{{ asset('storage/' . $member->avatar) }}" 
+                        <img src="{{ asset('storage/avatars/' . $member->avatar) }}" 
                              alt="Photo de {{ $member->name }}" 
                              class="w-16 h-16 rounded-full object-cover border-2 border-gray-200">
                     </div>
