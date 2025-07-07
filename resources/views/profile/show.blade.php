@@ -592,9 +592,9 @@ document.addEventListener('DOMContentLoaded', function() {
         avatarInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
-                // Vérifier la taille du fichier (2MB max)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 2MB autorisé.');
+                // Vérifier la taille du fichier (100KB max)
+                if (file.size > 100 * 1024) {
+                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
                     this.value = '';
                     return;
                 }
