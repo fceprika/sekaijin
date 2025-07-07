@@ -147,9 +147,17 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach($recentMembers as $member)
             <div class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
-                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
-                    {{ strtoupper(substr($member->name, 0, 1)) }}
-                </div>
+                @if($member->avatar)
+                    <div class="w-16 h-16 mx-auto mb-4">
+                        <img src="{{ asset('storage/' . $member->avatar) }}" 
+                             alt="Photo de {{ $member->name }}" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-gray-200">
+                    </div>
+                @else
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
+                        {{ strtoupper(substr($member->name, 0, 1)) }}
+                    </div>
+                @endif
                 <h3 class="font-semibold text-gray-800 mb-2">{{ $member->name }}</h3>
                 <p class="text-gray-600 text-sm mb-3">📍 {{ $member->country_residence }}</p>
                 @if($member->city_residence)
