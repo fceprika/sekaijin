@@ -46,11 +46,11 @@ class SecurityHeaders
         } else {
             // Production CSP - Strict security
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'nonce-{$nonce}' https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com; " .
+                   "script-src 'self' 'nonce-{$nonce}' https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; " .
                    "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://cdnjs.cloudflare.com; " .
                    "img-src 'self' data: https:; " .
                    "font-src 'self' https://cdnjs.cloudflare.com; " .
-                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net; " .
+                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com; " .
                    "worker-src 'self' blob:; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .

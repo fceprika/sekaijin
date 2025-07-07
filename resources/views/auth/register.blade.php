@@ -180,7 +180,7 @@
     </div>
 </div>
 
-<script src="/js/geolocation.js"></script>
+<script src="/js/geolocation.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     // Validation côté client
