@@ -85,11 +85,17 @@
                         @endif
                         
                         <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-sm">
-                                    {{ strtoupper(substr($event->organizer->name, 0, 1)) }}
-                                </span>
-                            </div>
+                            @if($event->organizer->avatar)
+                                <img src="{{ asset('storage/avatars/' . $event->organizer->avatar) }}" 
+                                     alt="Avatar de {{ $event->organizer->name }}" 
+                                     class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
+                            @else
+                                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold text-sm">
+                                        {{ strtoupper(substr($event->organizer->name, 0, 1)) }}
+                                    </span>
+                                </div>
+                            @endif
                             <div>
                                 <p class="text-sm text-gray-500">Organisé par</p>
                                 <a href="{{ $event->organizer->getPublicProfileUrl() }}" class="font-medium text-gray-900 hover:text-blue-600">
@@ -120,6 +126,14 @@
                     @endif
                     
                     <div class="flex items-center space-x-4">
+                        @auth
+                            @if(auth()->user()->id === $event->organizer_id || auth()->user()->isAdmin())
+                                <a href="{{ route('events.edit', $event->slug) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Modifier
+                                </a>
+                            @endif
+                        @endauth
                         <button class="text-gray-600 hover:text-blue-600 transition-colors">
                             <i class="fas fa-share-alt"></i>
                             <span class="ml-1">Partager</span>

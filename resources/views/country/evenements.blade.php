@@ -14,14 +14,15 @@
                     </h1>
                     <p class="text-gray-600 mt-1">Rencontres et activités de la communauté française</p>
                 </div>
-                @auth
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition duration-200">
-                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                @can('create', App\Models\Event::class)
+                    <a href="{{ route('events.create', ['country' => $countryModel->slug]) }}" 
+                       class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition duration-200 inline-flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         Créer un événement
-                    </button>
-                @endauth
+                    </a>
+                @endcan
             </div>
         </div>
     </div>
@@ -228,9 +229,15 @@
                         <h3 class="text-xl font-medium text-gray-900 mb-2">Aucun événement à venir</h3>
                         <p class="text-gray-500 mb-6">Les prochains événements apparaîtront ici.</p>
                         @auth
-                            <button class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                                Créer le premier événement
-                            </button>
+                            @can('create', App\Models\Event::class)
+                                <a href="{{ route('events.create', ['country' => $countryModel->slug]) }}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors inline-block">
+                                    Créer le premier événement
+                                </a>
+                            @else
+                                <div class="bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-medium">
+                                    Réservé aux ambassadeurs
+                                </div>
+                            @endcan
                         @else
                             <a href="{{ route('register') }}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors inline-block">
                                 Rejoindre pour voir les événements
@@ -289,9 +296,15 @@
                     <h3 class="text-lg font-bold text-gray-800 mb-2">Organisez un événement</h3>
                     <p class="text-gray-600 text-sm mb-4">Créez votre propre événement et rassemblez la communauté française !</p>
                     @auth
-                        <button class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition duration-200">
-                            Créer un événement
-                        </button>
+                        @can('create', App\Models\Event::class)
+                            <a href="{{ route('events.create', ['country' => $countryModel->slug]) }}" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition duration-200">
+                                Créer un événement
+                            </a>
+                        @else
+                            <div class="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded-lg font-medium text-center">
+                                Réservé aux ambassadeurs
+                            </div>
+                        @endcan
                     @else
                         <a href="{{ route('register') }}" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition duration-200">
                             Rejoindre la communauté

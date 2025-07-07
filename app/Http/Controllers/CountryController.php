@@ -60,7 +60,9 @@ class CountryController extends Controller
         // Get all news for this country
         $news = News::forCountry($countryModel->id)
             ->published()
-            ->with(['author', 'country'])
+            ->with(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }, 'country'])
             ->latest('published_at')
             ->paginate(12);
             
@@ -68,6 +70,9 @@ class CountryController extends Controller
         $featuredNews = News::forCountry($countryModel->id)
             ->published()
             ->featured()
+            ->with(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }])
             ->latest('published_at')
             ->take(3)
             ->get();
@@ -85,7 +90,9 @@ class CountryController extends Controller
         // Get all articles for this country
         $articles = Article::forCountry($countryModel->id)
             ->published()
-            ->with(['author', 'country'])
+            ->with(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }, 'country'])
             ->latest('published_at')
             ->paginate(12);
             
@@ -93,6 +100,9 @@ class CountryController extends Controller
         $featuredArticles = Article::forCountry($countryModel->id)
             ->published()
             ->featured()
+            ->with(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }])
             ->latest('published_at')
             ->take(3)
             ->get();
@@ -183,6 +193,11 @@ class CountryController extends Controller
             // Check authorization to view this article
             $this->authorize('view', $article);
             
+            // Load author with avatar
+            $article->load(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }]);
+            
             // Increment views
             $article->increment('views');
             
@@ -190,6 +205,9 @@ class CountryController extends Controller
             $relatedArticles = Article::forCountry($countryModel->id)
                 ->published()
                 ->where('id', '!=', $article->id)
+                ->with(['author' => function($query) {
+                    $query->select('id', 'name', 'avatar', 'is_verified');
+                }])
                 ->latest('published_at')
                 ->take(3)
                 ->get();
@@ -223,6 +241,11 @@ class CountryController extends Controller
             // Check authorization to view this news
             $this->authorize('view', $news);
             
+            // Load author with avatar
+            $news->load(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }]);
+            
             // Increment views
             $news->increment('views');
             
@@ -230,6 +253,9 @@ class CountryController extends Controller
             $relatedNews = News::forCountry($countryModel->id)
                 ->published()
                 ->where('id', '!=', $news->id)
+                ->with(['author' => function($query) {
+                    $query->select('id', 'name', 'avatar', 'is_verified');
+                }])
                 ->latest('published_at')
                 ->take(3)
                 ->get();
@@ -263,11 +289,19 @@ class CountryController extends Controller
             // Check authorization to view this event
             $this->authorize('view', $event);
             
+            // Load organizer with avatar
+            $event->load(['organizer' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }]);
+            
             // Get related events with error handling
             $relatedEvents = Event::forCountry($countryModel->id)
                 ->published()
                 ->upcoming()
                 ->where('id', '!=', $event->id)
+                ->with(['organizer' => function($query) {
+                    $query->select('id', 'name', 'avatar', 'is_verified');
+                }])
                 ->orderBy('start_date')
                 ->take(3)
                 ->get();

@@ -47,6 +47,15 @@ Route::middleware(['auth', 'throttle:10,1'])->group(function () {
     Route::post('/api/remove-location', [App\Http\Controllers\Api\ExpatController::class, 'removeLocation']);
 });
 
+// Event management routes for ambassadors and admins
+Route::middleware('auth')->group(function () {
+    Route::get('/evenements/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
+    Route::post('/evenements', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
+    Route::get('/evenements/{event}/edit', [App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
+    Route::put('/evenements/{event}', [App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+    Route::delete('/evenements/{event}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.destroy');
+});
+
 // Routes protégées pour les utilisateurs connectés (AVANT les routes pays)
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');

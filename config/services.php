@@ -39,4 +39,8 @@ return [
         'api_key' => env('TINYMCE_API_KEY'),
     ],
 
+    'google_analytics' => [
+        'id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
 ];

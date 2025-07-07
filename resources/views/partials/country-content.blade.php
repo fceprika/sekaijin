@@ -35,7 +35,18 @@
                                 @endif
                                 <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $newsItem->title }}</h3>
                                 <p class="text-gray-600 text-sm mb-3">{{ strip_tags(Str::limit($newsItem->content, 150)) }}</p>
-                                <span class="text-sm text-gray-500">Publié par {{ $newsItem->author ? $newsItem->author->name : 'Auteur' }}</span>
+                                <div class="flex items-center space-x-2">
+                                    @if($newsItem->author && $newsItem->author->avatar)
+                                        <img src="{{ asset('storage/avatars/' . $newsItem->author->avatar) }}" 
+                                             alt="Avatar de {{ $newsItem->author->name }}" 
+                                             class="w-5 h-5 rounded-full object-cover">
+                                    @else
+                                        <div class="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                            {{ $newsItem->author ? strtoupper(substr($newsItem->author->name, 0, 1)) : 'A' }}
+                                        </div>
+                                    @endif
+                                    <span class="text-sm text-gray-500">Publié par {{ $newsItem->author ? $newsItem->author->name : 'Auteur' }}</span>
+                                </div>
                             </article>
                         </a>
                     @endforeach
@@ -76,7 +87,18 @@
                                 </div>
                                 <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $article->title }}</h3>
                                 <p class="text-gray-600 text-sm mb-3">{{ strip_tags(Str::limit($article->excerpt ?? $article->content, 150)) }}</p>
-                                <span class="text-sm text-gray-500">Par {{ $article->author ? $article->author->name : 'Auteur' }}</span>
+                                <div class="flex items-center space-x-2">
+                                    @if($article->author && $article->author->avatar)
+                                        <img src="{{ asset('storage/avatars/' . $article->author->avatar) }}" 
+                                             alt="Avatar de {{ $article->author->name }}" 
+                                             class="w-5 h-5 rounded-full object-cover">
+                                    @else
+                                        <div class="w-5 h-5 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                            {{ $article->author ? strtoupper(substr($article->author->name, 0, 1)) : 'A' }}
+                                        </div>
+                                    @endif
+                                    <span class="text-sm text-gray-500">Par {{ $article->author ? $article->author->name : 'Auteur' }}</span>
+                                </div>
                             </article>
                         </a>
                     @endforeach

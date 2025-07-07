@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
 class PublicProfileController extends Controller
@@ -22,6 +23,22 @@ class PublicProfileController extends Controller
             return redirect()->route(User::ROUTE_PUBLIC_PROFILE, $user->name_slug, 301);
         }
         
-        return view('profile.public', compact('user'));
+        // Get user's created events (upcoming and past)
+        $upcomingEvents = Event::where('organizer_id', $user->id)
+            ->published()
+            ->upcoming()
+            ->with(['country'])
+            ->orderBy('start_date', 'asc')
+            ->get();
+            
+        $pastEvents = Event::where('organizer_id', $user->id)
+            ->published()
+            ->where('start_date', '<', now())
+            ->with(['country'])
+            ->orderBy('start_date', 'desc')
+            ->take(5)
+            ->get();
+        
+        return view('profile.public', compact('user', 'upcomingEvents', 'pastEvents'));
     }
 }

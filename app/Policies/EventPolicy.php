@@ -35,8 +35,8 @@ class EventPolicy
      */
     public function create(User $user): bool
     {
-        // Any authenticated user can create events
-        return true;
+        // Only ambassadors and admins can create events
+        return $user->isAdmin() || $user->isAmbassador();
     }
 
     /**
