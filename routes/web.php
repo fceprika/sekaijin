@@ -84,6 +84,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::put('/news/{news:id}', [App\Http\Controllers\AdminController::class, 'updateNews'])->name('news.update');
     Route::delete('/news/{news:id}', [App\Http\Controllers\AdminController::class, 'destroyNews'])->name('news.destroy');
     Route::post('/news/bulk', [App\Http\Controllers\AdminController::class, 'bulkNewsAction'])->name('news.bulk');
+    
+    // Upload d'images pour TinyMCE
+    Route::post('/upload-image', [App\Http\Controllers\AdminController::class, 'uploadImage'])->name('upload.image');
 });
 
 // Profils publics

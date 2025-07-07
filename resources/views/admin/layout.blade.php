@@ -127,9 +127,41 @@
                 content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.6; margin: 1rem; }',
                 
                 // Enhanced image handling
-                images_upload_url: false,
-                automatic_uploads: false,
+                images_upload_url: '/admin/upload-image',
+                automatic_uploads: true,
                 file_picker_types: 'image',
+                images_upload_handler: function (blobInfo, success, failure) {
+                    const xhr = new XMLHttpRequest();
+                    const formData = new FormData();
+                    
+                    xhr.withCredentials = false;
+                    xhr.open('POST', '/admin/upload-image');
+                    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                    
+                    xhr.onload = function() {
+                        if (xhr.status === 403) {
+                            failure('HTTP Error: ' + xhr.status, { remove: true });
+                            return;
+                        }
+                        
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            failure('HTTP Error: ' + xhr.status);
+                            return;
+                        }
+                        
+                        const json = JSON.parse(xhr.responseText);
+                        
+                        if (!json || typeof json.location != 'string') {
+                            failure('Invalid JSON: ' + xhr.responseText);
+                            return;
+                        }
+                        
+                        success(json.location);
+                    };
+                    
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    xhr.send(formData);
+                },
                 
                 // Link options
                 link_assume_external_targets: true,
@@ -137,7 +169,6 @@
                 
                 // Table options
                 table_use_colgroups: true,
-                table_responsive_width: true,
                 
                 // Advanced formatting
                 formats: {

@@ -374,4 +374,28 @@ class AdminController extends Controller
 
         return redirect()->route('admin.news')->with('success', $message);
     }
+
+    /**
+     * Upload d'image pour TinyMCE
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|image|max:2048', // 2MB max
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('uploads/images', $filename, 'public');
+            
+            return response()->json([
+                'location' => asset('storage/' . $path)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Erreur lors de l\'upload de l\'image'
+            ], 500);
+        }
+    }
 }
