@@ -119,6 +119,120 @@
                         <p class="text-gray-400">Ce membre n'a pas encore ajouté de biographie.</p>
                     </div>
                 @endif
+                
+                <!-- Events Section -->
+                @if($upcomingEvents->count() > 0 || $pastEvents->count() > 0)
+                    <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Événements organisés
+                        </h2>
+                        
+                        <!-- Upcoming Events -->
+                        @if($upcomingEvents->count() > 0)
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium mr-2">
+                                        À venir
+                                    </span>
+                                    {{ $upcomingEvents->count() }} événement{{ $upcomingEvents->count() > 1 ? 's' : '' }}
+                                </h3>
+                                <div class="grid gap-4">
+                                    @foreach($upcomingEvents as $event)
+                                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <div class="flex-1">
+                                                    <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
+                                                       class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                                        {{ $event->title }}
+                                                    </a>
+                                                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                                                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium mr-2">
+                                                            {{ ucfirst($event->category) }}
+                                                        </span>
+                                                        <span class="mr-3">📍 {{ $event->country->emoji }} {{ $event->country->name_fr }}</span>
+                                                        @if($event->is_featured)
+                                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">
+                                                                ⭐ À la une
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="text-right text-sm text-gray-600 ml-4">
+                                                    <div class="font-medium">{{ $event->start_date->format('d/m/Y') }}</div>
+                                                    <div>{{ $event->start_date->format('H:i') }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center text-sm text-gray-600">
+                                                    @if($event->is_online)
+                                                        <span class="flex items-center mr-4">
+                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                                                            </svg>
+                                                            En ligne
+                                                        </span>
+                                                    @else
+                                                        <span class="flex items-center mr-4">
+                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                            </svg>
+                                                            {{ $event->location }}
+                                                        </span>
+                                                    @endif
+                                                    <span class="font-semibold {{ $event->isFree() ? 'text-green-600' : 'text-gray-800' }}">
+                                                        {{ $event->formatted_price }}
+                                                    </span>
+                                                </div>
+                                                @if($event->max_participants)
+                                                    <div class="text-xs text-gray-500">
+                                                        {{ $event->current_participants }}/{{ $event->max_participants }} participants
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Past Events -->
+                        @if($pastEvents->count() > 0)
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium mr-2">
+                                        Passés
+                                    </span>
+                                    {{ $pastEvents->count() }} événement{{ $pastEvents->count() > 1 ? 's' : '' }} récent{{ $pastEvents->count() > 1 ? 's' : '' }}
+                                </h3>
+                                <div class="grid gap-3">
+                                    @foreach($pastEvents as $event)
+                                        <div class="border border-gray-100 rounded-lg p-3 bg-gray-50">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex-1">
+                                                    <a href="{{ route('country.event.show', [$event->country->slug, $event->slug]) }}" 
+                                                       class="text-base font-medium text-gray-700 hover:text-blue-600 transition-colors">
+                                                        {{ $event->title }}
+                                                    </a>
+                                                    <div class="flex items-center text-xs text-gray-500 mt-1">
+                                                        <span class="mr-3">{{ ucfirst($event->category) }}</span>
+                                                        <span>{{ $event->country->emoji }} {{ $event->country->name_fr }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 ml-4">
+                                                    {{ $event->start_date->format('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </div>
             
             <!-- Sidebar -->

@@ -26,7 +26,8 @@ class StoreEventRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'slug' => [
-                'required',
+                'sometimes',
+                'nullable',
                 'string',
                 'max:255',
                 'regex:/^[a-z0-9-]+$/',
@@ -58,7 +59,6 @@ class StoreEventRequest extends FormRequest
         return [
             'title.required' => 'Le titre est obligatoire.',
             'title.max' => 'Le titre ne peut pas dépasser 255 caractères.',
-            'slug.required' => 'Le slug est obligatoire.',
             'slug.unique' => 'Ce slug est déjà utilisé.',
             'slug.regex' => 'Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.',
             'description.required' => 'La description est obligatoire.',

@@ -289,6 +289,11 @@ class CountryController extends Controller
             // Check authorization to view this event
             $this->authorize('view', $event);
             
+            // Load organizer with avatar
+            $event->load(['organizer' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }]);
+            
             // Get related events with error handling
             $relatedEvents = Event::forCountry($countryModel->id)
                 ->published()

@@ -47,6 +47,11 @@ class EventController extends Controller
         // Set organizer to current user
         $validated['organizer_id'] = Auth::id();
         
+        // Handle checkbox values (default to false if not present)
+        $validated['is_online'] = $request->has('is_online');
+        $validated['is_published'] = $request->has('is_published');
+        $validated['is_featured'] = $request->has('is_featured');
+        
         // Handle online event logic
         if ($validated['is_online']) {
             $validated['location'] = null;
@@ -58,7 +63,7 @@ class EventController extends Controller
         $event = Event::create($validated);
         
         return redirect()
-            ->route('country.event.show', [$event->country->slug, $event->id])
+            ->route('country.event.show', [$event->country->slug, $event->slug])
             ->with('success', 'Événement créé avec succès !');
     }
 
@@ -84,6 +89,11 @@ class EventController extends Controller
             $validated['slug'] = $this->generateUniqueSlug($validated['title'], $event->id);
         }
         
+        // Handle checkbox values (default to false if not present)
+        $validated['is_online'] = $request->has('is_online');
+        $validated['is_published'] = $request->has('is_published');
+        $validated['is_featured'] = $request->has('is_featured');
+        
         // Handle online event logic
         if ($validated['is_online']) {
             $validated['location'] = null;
@@ -95,7 +105,7 @@ class EventController extends Controller
         $event->update($validated);
         
         return redirect()
-            ->route('country.event.show', [$event->country->slug, $event->id])
+            ->route('country.event.show', [$event->country->slug, $event->slug])
             ->with('success', 'Événement mis à jour avec succès !');
     }
 
