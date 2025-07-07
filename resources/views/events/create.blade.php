@@ -197,7 +197,7 @@
                     </label>
                     
                     <!-- Featured -->
-                    @can('feature', App\Models\Event::class)
+                    @if(auth()->user()->isAdmin() || auth()->user()->isAmbassador())
                     <label class="flex items-center space-x-3">
                         <input type="checkbox" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}
                                class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -206,7 +206,7 @@
                             <p class="text-sm text-gray-500">L'événement apparaîtra en priorité sur la page événements</p>
                         </div>
                     </label>
-                    @endcan
+                    @endif
                 </div>
             </div>
 
