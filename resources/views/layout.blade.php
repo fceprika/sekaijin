@@ -8,8 +8,8 @@
     
     @if(config('services.google_analytics.id') && app()->environment('production'))
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google_analytics.id') }}"></script>
-    <script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google_analytics.id') }}" nonce="{{ $csp_nonce ?? '' }}"></script>
+    <script nonce="{{ $csp_nonce ?? '' }}">
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -29,7 +29,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Mapbox JS -->
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 </head>
 <body class="bg-gray-100">
     <nav class="bg-white shadow-lg relative">

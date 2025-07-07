@@ -176,7 +176,7 @@
 @endif
 
 <!-- Country Coordinates Script -->
-<script src="/js/country-coordinates.js"></script>
+<script src="/js/country-coordinates.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {

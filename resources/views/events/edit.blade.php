@@ -264,7 +264,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     const isOnlineCheckbox = document.getElementById('is_online');
     const locationFields = document.getElementById('location-fields');
