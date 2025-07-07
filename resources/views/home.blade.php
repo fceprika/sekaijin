@@ -175,19 +175,30 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/inscription';
     });
     
-    // Initialize Mapbox
-    @if(config('services.mapbox.access_token'))
-    mapboxgl.accessToken = '{{ config('services.mapbox.access_token') }}';
-    @else
-    console.error('Mapbox access token not configured');
-    return;
-    @endif
-    
+    // Initialize Mapbox with secure API proxy
+    $.get('/api/map-config')
+        .done(function(config) {
+            if (!config.accessToken) {
+                console.error('Map service not available');
+                $('#map').html('<div class="flex items-center justify-center h-full text-gray-500">Carte temporairement indisponible</div>');
+                return;
+            }
+            
+            mapboxgl.accessToken = config.accessToken;
+            initializeMap(config);
+        })
+        .fail(function() {
+            console.error('Failed to load map configuration');
+            $('#map').html('<div class="flex items-center justify-center h-full text-gray-500">Erreur de chargement de la carte</div>');
+        });
+});
+
+function initializeMap(config) {
     const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [100.5018, 13.7563], // Centré sur la Thaïlande (Bangkok)
-        zoom: 3,
+        style: config.mapStyle,
+        center: config.center,
+        zoom: config.zoom,
         projection: 'globe',
         // Désactiver la collecte de données pour éviter les erreurs d'ad blocker
         collectResourceTiming: false,
@@ -232,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateMarkersForZoom(map);
         }, 150); // Debounce de 150ms pour éviter les appels multiples
     });
-});
+}
 
 function updateMarkersForZoom(map) {
     // Supprimer tous les marqueurs existants
