@@ -123,21 +123,35 @@ class EventController extends Controller
     }
     
     /**
-     * Generate unique slug for event
+     * Generate unique slug for event with optimized approach
      */
     private function generateUniqueSlug(string $title, ?int $excludeId = null): string
     {
-        $slug = Str::slug($title);
-        $originalSlug = $slug;
-        $counter = 1;
+        $baseSlug = Str::slug($title);
         
-        while (Event::where('slug', $slug)
-            ->when($excludeId, fn($query) => $query->where('id', '!=', $excludeId))
-            ->exists()) {
-            $slug = $originalSlug . '-' . $counter;
-            $counter++;
+        // First, try the base slug
+        $query = Event::where('slug', $baseSlug);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
         }
         
-        return $slug;
+        if (!$query->exists()) {
+            return $baseSlug;
+        }
+        
+        // If base slug exists, get all similar slugs in one query for efficiency
+        $existingSlugs = Event::where('slug', 'LIKE', $baseSlug . '%')
+            ->when($excludeId, fn($query) => $query->where('id', '!=', $excludeId))
+            ->pluck('slug')
+            ->toArray();
+        
+        // Find the next available number
+        $counter = 1;
+        do {
+            $candidateSlug = $baseSlug . '-' . $counter;
+            $counter++;
+        } while (in_array($candidateSlug, $existingSlugs));
+        
+        return $candidateSlug;
     }
 }

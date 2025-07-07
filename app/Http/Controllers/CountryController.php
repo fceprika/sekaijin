@@ -299,6 +299,9 @@ class CountryController extends Controller
                 ->published()
                 ->upcoming()
                 ->where('id', '!=', $event->id)
+                ->with(['organizer' => function($query) {
+                    $query->select('id', 'name', 'avatar', 'is_verified');
+                }])
                 ->orderBy('start_date')
                 ->take(3)
                 ->get();

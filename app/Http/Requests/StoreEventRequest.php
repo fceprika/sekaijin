@@ -12,8 +12,8 @@ class StoreEventRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Any authenticated user can create events
-        return auth()->check();
+        // Only ambassadors and admins can create events
+        return auth()->user()?->isAdmin() || auth()->user()?->isAmbassador();
     }
 
     /**
