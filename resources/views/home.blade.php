@@ -176,7 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initialize Mapbox
+    @if(config('services.mapbox.access_token'))
     mapboxgl.accessToken = '{{ config('services.mapbox.access_token') }}';
+    @else
+    console.error('Mapbox access token not configured');
+    return;
+    @endif
     
     const map = new mapboxgl.Map({
         container: 'map',
@@ -219,9 +224,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
     
-    // Mettre à jour les marqueurs quand le zoom change
+    // Mettre à jour les marqueurs quand le zoom change avec debouncing
+    let zoomTimeout;
     map.on('zoomend', function() {
-        updateMarkersForZoom(map);
+        clearTimeout(zoomTimeout);
+        zoomTimeout = setTimeout(function() {
+            updateMarkersForZoom(map);
+        }, 150); // Debounce de 150ms pour éviter les appels multiples
     });
 });
 

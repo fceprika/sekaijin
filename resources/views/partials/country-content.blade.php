@@ -34,8 +34,8 @@
                                     <span class="text-sm text-gray-500">{{ $newsItem->created_at->diffForHumans() }}</span>
                                 @endif
                                 <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $newsItem->title }}</h3>
-                                <p class="text-gray-600 text-sm mb-3">{!! strip_tags(Str::limit($newsItem->content, 150)) !!}</p>
-                                <span class="text-sm text-gray-500">Publié par {{ $newsItem->author->name }}</span>
+                                <p class="text-gray-600 text-sm mb-3">{{ strip_tags(Str::limit($newsItem->content, 150)) }}</p>
+                                <span class="text-sm text-gray-500">Publié par {{ $newsItem->author ? $newsItem->author->name : 'Auteur' }}</span>
                             </article>
                         </a>
                     @endforeach
@@ -75,8 +75,8 @@
                                     <span class="text-sm text-gray-500">{{ $article->created_at->diffForHumans() }}</span>
                                 </div>
                                 <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $article->title }}</h3>
-                                <p class="text-gray-600 text-sm mb-3">{!! strip_tags(Str::limit($article->excerpt ?? $article->content, 150)) !!}</p>
-                                <span class="text-sm text-gray-500">Par {{ $article->author->name }}</span>
+                                <p class="text-gray-600 text-sm mb-3">{{ strip_tags(Str::limit($article->excerpt ?? $article->content, 150)) }}</p>
+                                <span class="text-sm text-gray-500">Par {{ $article->author ? $article->author->name : 'Auteur' }}</span>
                             </article>
                         </a>
                     @endforeach
@@ -98,37 +98,11 @@
             
             <div class="space-y-6">
                 @if($countrySlug === 'thailande')
-                    <div class="p-4 hover:bg-gray-50 rounded-lg transition duration-200">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">S</div>
-                            <div>
-                                <div class="font-medium text-gray-800">Sophie Bernard</div>
-                                <span class="text-sm text-gray-500">Il y a 2 heures</span>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 mb-3">🦷 Quelqu'un connaît un bon dentiste francophone à Bangkok? Besoin d'urgence !</p>
-                        <div class="flex items-center justify-between text-sm text-gray-500">
-                            <span>💬 12 réponses</span>
-                            <span class="text-xs">🔥 Populaire</span>
-                        </div>
-                    </div>
-                    
-                    <div class="p-4 hover:bg-gray-50 rounded-lg transition duration-200">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">L</div>
-                            <div>
-                                <div class="font-medium text-gray-800">Lucas Martin</div>
-                                <span class="text-sm text-gray-500">Il y a 1 jour</span>
-                            </div>
-                        </div>
-                        <p class="text-gray-700 mb-3">📸 Spots photos secrets à Koh Samui à partager avec vous tous !</p>
-                        <div class="flex items-center text-sm text-gray-500">
-                            <span>💬 8 réponses</span>
-                        </div>
-                    </div>
-                    
-                    <div class="pt-4 border-t border-gray-100 text-center">
-                        <div class="grid grid-cols-2 gap-4 text-center">
+                    <!-- TODO: Replace with dynamic community discussions from database -->
+                    <div class="text-center py-8">
+                        <div class="text-gray-400 text-4xl mb-2">👥</div>
+                        <p class="text-gray-500 mb-4">Rejoignez les discussions de la communauté</p>
+                        <div class="grid grid-cols-2 gap-4 text-center mb-4">
                             <div>
                                 <div class="text-lg font-bold text-blue-600">{{ $totalMembers ?? 0 }}</div>
                                 <div class="text-xs text-gray-500">Membres total</div>
@@ -138,6 +112,9 @@
                                 <div class="text-xs text-gray-500">En Thaïlande</div>
                             </div>
                         </div>
+                        <a href="/{{ $countrySlug }}/communaute" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                            Voir la communauté
+                        </a>
                     </div>
                 @else
                     <div class="text-center py-8">
@@ -164,18 +141,18 @@
                     <h3 class="font-semibold text-gray-800 mb-3 text-base">{{ $event->title }}</h3>
                     <div class="space-y-2 text-sm text-gray-600 mb-4">
                         <div class="flex items-center">
-                            <span>📅 {{ $event->start_date->format('l j F Y') }}</span>
+                            <span>📅 {{ $event->start_date ? $event->start_date->format('l j F Y') : 'Date à définir' }}</span>
                         </div>
                         <div class="flex items-center">
-                            <span>🕒 {{ $event->start_date->format('H:i') }}</span>
+                            <span>🕒 {{ $event->start_date ? $event->start_date->format('H:i') : 'Heure à définir' }}</span>
                         </div>
                         <div class="flex items-center">
                             <span>📍 @if($event->is_online) En ligne @else {{ $event->location }} @endif</span>
                         </div>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">{!! strip_tags(Str::limit($event->description, 120)) !!}</p>
+                    <p class="text-gray-600 text-sm mb-4">{{ strip_tags(Str::limit($event->description, 120)) }}</p>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600">Par {{ $event->organizer->name }}</span>
+                        <span class="text-sm text-gray-600">Par {{ $event->organizer ? $event->organizer->name : 'Organisateur' }}</span>
                         <a href="{{ route('country.event.show', [$countrySlug, $event->id]) }}" class="bg-{{ $countrySlug === 'japon' ? 'red' : 'green' }}-600 text-white px-3 py-2 rounded font-medium hover:bg-{{ $countrySlug === 'japon' ? 'red' : 'green' }}-700 transition duration-200">
                             Voir détails
                         </a>

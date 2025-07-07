@@ -199,28 +199,35 @@ class ExpatController extends Controller
      */
     private function clearLocationCaches(): void
     {
-        // Clear country stats cache
-        Cache::forget('api.expats_by_country');
-        
-        // Clear member location caches (multiple pagination keys)
-        $patterns = [
-            'api.members_with_location.*',
+        // Clear specific cache keys
+        $cacheKeys = [
+            'api.expats_by_country',
             'community.stats',
             'members.recent'
         ];
         
-        foreach ($patterns as $pattern) {
-            if (str_contains($pattern, '*')) {
-                // For wildcard patterns, we'd need to implement a more sophisticated cache clearing
-                // For now, clear common pagination keys
-                for ($offset = 0; $offset <= 500; $offset += 100) {
-                    for ($limit = 100; $limit <= 200; $limit += 100) {
-                        Cache::forget("api.members_with_location.{$limit}.{$offset}");
-                    }
-                }
-            } else {
-                Cache::forget($pattern);
-            }
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
+        
+        // Clear pagination-based cache keys more efficiently
+        $paginationKeys = [
+            'api.members_with_location.100.0',
+            'api.members_with_location.200.0',
+            'api.members_with_location.100.100',
+            'api.members_with_location.200.100',
+            'api.members_with_location.100.200',
+            'api.members_with_location.200.200',
+            'api.members_with_location.100.300',
+            'api.members_with_location.200.300',
+            'api.members_with_location.100.400',
+            'api.members_with_location.200.400',
+            'api.members_with_location.100.500',
+            'api.members_with_location.200.500'
+        ];
+        
+        foreach ($paginationKeys as $key) {
+            Cache::forget($key);
         }
     }
 }
