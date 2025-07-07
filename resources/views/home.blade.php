@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Hero Section with Gradient -->
-<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden">
+<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden cursor-pointer" onclick="window.location.href='/thailande'">
     <div class="absolute inset-0 bg-black bg-opacity-20"></div>
     <div class="relative max-w-7xl mx-auto px-4 text-center">
         <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
@@ -21,15 +21,11 @@
         </p>
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
             @guest
-                <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto">
+                <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative" onclick="event.stopPropagation(); window.location.href='/inscription'">
                     👥 Rejoindre la communauté
                 </button>
-            @else
-                <a href="/profil" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto text-center">
-                    👤 Mon Profil
-                </a>
             @endguest
-            <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center">
+            <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative" onclick="event.stopPropagation()">
                 Découvrir la Thaïlande
             </a>
         </div>
@@ -184,11 +180,6 @@
 
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
-    // Hero button functionality
-    $('#hero-btn').click(function() {
-        window.location.href = '/inscription';
-    });
-    
     // Initialize Mapbox with secure API proxy
     $.get('/api/map-config')
         .done(function(config) {
