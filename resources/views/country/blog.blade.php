@@ -65,9 +65,15 @@
                             </p>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                                        {{ strtoupper(substr($featuredArticle->author->name, 0, 1)) }}
-                                    </div>
+                                    @if($featuredArticle->author->avatar)
+                                        <img src="{{ asset('storage/avatars/' . $featuredArticle->author->avatar) }}" 
+                                             alt="Avatar de {{ $featuredArticle->author->name }}" 
+                                             class="w-10 h-10 rounded-full object-cover">
+                                    @else
+                                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                            {{ strtoupper(substr($featuredArticle->author->name, 0, 1)) }}
+                                        </div>
+                                    @endif
                                     <div>
                                         <a href="{{ $featuredArticle->author->getPublicProfileUrl() }}" class="text-sm font-medium text-gray-800 hover:text-purple-600">
                                             {{ $featuredArticle->author->name }}
@@ -142,9 +148,15 @@
                                         </p>
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center space-x-2">
-                                                <div class="w-6 h-6 bg-{{ $categoryColor }}-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                                    {{ strtoupper(substr($article->author->name, 0, 1)) }}
-                                                </div>
+                                                @if($article->author->avatar)
+                                                    <img src="{{ asset('storage/avatars/' . $article->author->avatar) }}" 
+                                                         alt="Avatar de {{ $article->author->name }}" 
+                                                         class="w-6 h-6 rounded-full object-cover">
+                                                @else
+                                                    <div class="w-6 h-6 bg-{{ $categoryColor }}-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                                                        {{ strtoupper(substr($article->author->name, 0, 1)) }}
+                                                    </div>
+                                                @endif
                                                 <a href="{{ $article->author->getPublicProfileUrl() }}" class="text-xs text-gray-700 hover:text-blue-600">
                                                     {{ $article->author->name }}
                                                 </a>

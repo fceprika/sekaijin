@@ -32,7 +32,7 @@ class HomeController extends Controller
             $thailandNews = Cache::remember("thailand.news.latest", $contentCacheTime, function () use ($thailand) {
                 return News::where('country_id', $thailand->id)
                     ->with(['author' => function($query) {
-                        $query->select('id', 'name', 'is_verified');
+                        $query->select('id', 'name', 'avatar', 'is_verified');
                     }])
                     ->select('id', 'title', 'excerpt', 'content', 'category', 'author_id', 'created_at')
                     ->orderBy('created_at', 'desc')
@@ -43,7 +43,7 @@ class HomeController extends Controller
             $thailandArticles = Cache::remember("thailand.articles.latest", $contentCacheTime, function () use ($thailand) {
                 return Article::where('country_id', $thailand->id)
                     ->with(['author' => function($query) {
-                        $query->select('id', 'name', 'is_verified');
+                        $query->select('id', 'name', 'avatar', 'is_verified');
                     }])
                     ->select('id', 'title', 'slug', 'excerpt', 'content', 'category', 'author_id', 'created_at')
                     ->orderBy('created_at', 'desc')
