@@ -42,11 +42,17 @@
                 <!-- Author Info -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center">
-                            <span class="text-white font-semibold text-lg">
-                                {{ strtoupper(substr($news->author->name, 0, 1)) }}
-                            </span>
-                        </div>
+                        @if($news->author->avatar)
+                            <img src="{{ asset('storage/avatars/' . $news->author->avatar) }}" 
+                                 alt="Avatar de {{ $news->author->name }}" 
+                                 class="w-12 h-12 rounded-full object-cover border-2 border-blue-500">
+                        @else
+                            <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-lg">
+                                    {{ strtoupper(substr($news->author->name, 0, 1)) }}
+                                </span>
+                            </div>
+                        @endif
                         <div>
                             <a href="{{ $news->author->getPublicProfileUrl() }}" class="text-lg font-medium text-gray-900 hover:text-blue-600">
                                 {{ $news->author->name }}

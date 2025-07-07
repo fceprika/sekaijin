@@ -193,6 +193,11 @@ class CountryController extends Controller
             // Check authorization to view this article
             $this->authorize('view', $article);
             
+            // Load author with avatar
+            $article->load(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }]);
+            
             // Increment views
             $article->increment('views');
             
@@ -200,6 +205,9 @@ class CountryController extends Controller
             $relatedArticles = Article::forCountry($countryModel->id)
                 ->published()
                 ->where('id', '!=', $article->id)
+                ->with(['author' => function($query) {
+                    $query->select('id', 'name', 'avatar', 'is_verified');
+                }])
                 ->latest('published_at')
                 ->take(3)
                 ->get();
@@ -233,6 +241,11 @@ class CountryController extends Controller
             // Check authorization to view this news
             $this->authorize('view', $news);
             
+            // Load author with avatar
+            $news->load(['author' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }]);
+            
             // Increment views
             $news->increment('views');
             
@@ -240,6 +253,9 @@ class CountryController extends Controller
             $relatedNews = News::forCountry($countryModel->id)
                 ->published()
                 ->where('id', '!=', $news->id)
+                ->with(['author' => function($query) {
+                    $query->select('id', 'name', 'avatar', 'is_verified');
+                }])
                 ->latest('published_at')
                 ->take(3)
                 ->get();
