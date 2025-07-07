@@ -24,9 +24,17 @@ class ProfileController extends Controller
                 'required',
                 'string',
                 'max:255',
+                'unique:users,name,' . $user->id,
+                'unique:users,name_slug,' . $user->id,
                 'regex:/^[a-zA-Z0-9_.-]+$/',
                 'not_regex:/^[._-]/',
                 'not_regex:/[._-]$/',
+                function ($attribute, $value, $fail) use ($user) {
+                    $slug = \App\Models\User::generateSlug($value);
+                    if (\App\Models\User::where('name_slug', $slug)->where('id', '!=', $user->id)->exists()) {
+                        $fail('Ce pseudo génère un identifiant déjà utilisé. Veuillez en choisir un autre.');
+                    }
+                },
             ],
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',

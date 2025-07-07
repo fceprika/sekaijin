@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -31,7 +32,7 @@ return new class extends Migration
             $table->string('name_slug')->nullable()->change();
         });
         
-        // Clear name_slug values
-        DB::statement('UPDATE users SET name_slug = NULL');
+        // Clear name_slug values only if they exist
+        DB::statement('UPDATE users SET name_slug = NULL WHERE name_slug IS NOT NULL');
     }
 };

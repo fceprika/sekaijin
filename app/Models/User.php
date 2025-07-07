@@ -265,7 +265,17 @@ class User extends Authenticatable
      */
     public static function generateSlug(string $name): string
     {
-        return strtolower(trim($name));
+        // Clean the name: remove invalid characters, trim, convert to lowercase
+        $cleaned = trim($name);
+        $cleaned = preg_replace('/[^a-zA-Z0-9._-]/', '', $cleaned);
+        $cleaned = strtolower($cleaned);
+        
+        // Ensure slug is not empty after cleaning
+        if (empty($cleaned)) {
+            throw new \InvalidArgumentException('Username cannot be converted to a valid slug');
+        }
+        
+        return $cleaned;
     }
 
     /**

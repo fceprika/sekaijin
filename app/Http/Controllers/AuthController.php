@@ -28,9 +28,16 @@ class AuthController extends Controller
                 'string',
                 'max:255',
                 'unique:users',
+                'unique:users,name_slug',
                 'regex:/^[a-zA-Z0-9_.-]+$/',
                 'not_regex:/^[._-]/',
                 'not_regex:/[._-]$/',
+                function ($attribute, $value, $fail) {
+                    $slug = \App\Models\User::generateSlug($value);
+                    if (\App\Models\User::where('name_slug', $slug)->exists()) {
+                        $fail('Ce pseudo génère un identifiant déjà utilisé. Veuillez en choisir un autre.');
+                    }
+                },
             ],
             'email' => 'required|string|email|max:255|unique:users',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
