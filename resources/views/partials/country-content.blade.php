@@ -98,49 +98,54 @@
             
             <div class="space-y-6">
                 @if($countrySlug === 'thailande')
-                    <div class="p-4">
+                    <div class="p-4 hover:bg-gray-50 rounded-lg transition duration-200">
                         <div class="flex items-center space-x-3 mb-4">
-                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">P</div>
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">S</div>
                             <div>
-                                <div class="font-medium text-gray-800">Pierre Dupont</div>
+                                <div class="font-medium text-gray-800">Sophie Bernard</div>
+                                <span class="text-sm text-gray-500">Il y a 2 heures</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 mb-3">🦷 Quelqu'un connaît un bon dentiste francophone à Bangkok? Besoin d'urgence !</p>
+                        <div class="flex items-center justify-between text-sm text-gray-500">
+                            <span>💬 12 réponses</span>
+                            <span class="text-xs">🔥 Populaire</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 hover:bg-gray-50 rounded-lg transition duration-200">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">L</div>
+                            <div>
+                                <div class="font-medium text-gray-800">Lucas Martin</div>
                                 <span class="text-sm text-gray-500">Il y a 1 jour</span>
                             </div>
                         </div>
-                        <p class="text-gray-700 mb-3">Quelqu'un connaît un bon dentiste qui parle français à Bangkok?</p>
+                        <p class="text-gray-700 mb-3">📸 Spots photos secrets à Koh Samui à partager avec vous tous !</p>
                         <div class="flex items-center text-sm text-gray-500">
-                            <span>💬 7 commentaires</span>
+                            <span>💬 8 réponses</span>
                         </div>
                     </div>
                     
                     <div class="pt-4 border-t border-gray-100 text-center">
-                        <p class="text-gray-600">
-                            <span class="font-semibold">25K+</span> membres dans le monde
-                        </p>
-                    </div>
-                @elseif($countrySlug === 'japon')
-                    <div class="p-4">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">A</div>
+                        <div class="grid grid-cols-2 gap-4 text-center">
                             <div>
-                                <div class="font-medium text-gray-800">Antoine Dubois</div>
-                                <span class="text-sm text-gray-500">Il y a 3 jours</span>
+                                <div class="text-lg font-bold text-blue-600">{{ $totalMembers ?? 0 }}</div>
+                                <div class="text-xs text-gray-500">Membres total</div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold text-green-600">{{ $thailandMembers ?? 0 }}</div>
+                                <div class="text-xs text-gray-500">En Thaïlande</div>
                             </div>
                         </div>
-                        <p class="text-gray-700 mb-3">Quelqu'un connaît des cours de japonais intensifs à Tokyo pour débutants?</p>
-                        <div class="flex items-center text-sm text-gray-500">
-                            <span>💬 12 commentaires</span>
-                        </div>
-                    </div>
-                    
-                    <div class="pt-4 border-t border-gray-100 text-center">
-                        <p class="text-gray-600">
-                            <span class="font-semibold">2,5K+</span> membres au Japon
-                        </p>
                     </div>
                 @else
                     <div class="text-center py-8">
                         <div class="text-gray-400 text-4xl mb-2">👥</div>
-                        <p class="text-gray-500">Aucune discussion pour l'instant</p>
+                        <p class="text-gray-500">Rejoignez la discussion !</p>
+                        <a href="/{{ $countrySlug }}/communaute" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition">
+                            Voir la communauté
+                        </a>
                     </div>
                 @endif
             </div>

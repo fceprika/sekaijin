@@ -18,9 +18,13 @@ class ContentSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get countries
+        // Get Thailand only for focused content
         $thailand = Country::where('slug', 'thailande')->first();
-        $japan = Country::where('slug', 'japon')->first();
+        
+        if (!$thailand) {
+            $this->command->warn('Thailand country not found. Please run the countries seeder first.');
+            return;
+        }
         
         // Get or create sample users
         $admin = User::updateOrCreate(
@@ -49,18 +53,48 @@ class ContentSeeder extends Seeder
             ]
         );
 
-        $jean = User::updateOrCreate(
-            ['email' => 'jean.martin@email.fr'],
+        $pierre = User::updateOrCreate(
+            ['email' => 'pierre.dupont@email.fr'],
             [
-                'name' => 'jean_martin',
-                'first_name' => 'Jean',
-                'last_name' => 'Martin',
-                'country_residence' => 'Japon',
-                'city_residence' => 'Tokyo',
+                'name' => 'pierre_dupont',
+                'first_name' => 'Pierre',
+                'last_name' => 'Dupont',
+                'country_residence' => 'Thaïlande',
+                'city_residence' => 'Phuket',
                 'role' => 'premium',
                 'password' => bcrypt('password123'),
-                'bio' => 'Développeur web freelance basé à Tokyo depuis 2 ans.',
+                'bio' => 'Entrepreneur digital nomad à Phuket depuis 4 ans.',
                 'is_verified' => true,
+            ]
+        );
+
+        $sophie = User::updateOrCreate(
+            ['email' => 'sophie.bernard@email.fr'],
+            [
+                'name' => 'sophie_bernard',
+                'first_name' => 'Sophie',
+                'last_name' => 'Bernard',
+                'country_residence' => 'Thaïlande',
+                'city_residence' => 'Chiang Mai',
+                'role' => 'free',
+                'password' => bcrypt('password123'),
+                'bio' => 'Professeure de français en ligne depuis Chiang Mai.',
+                'is_verified' => false,
+            ]
+        );
+
+        $lucas = User::updateOrCreate(
+            ['email' => 'lucas.martin@email.fr'],
+            [
+                'name' => 'lucas_martin',
+                'first_name' => 'Lucas',
+                'last_name' => 'Martin',
+                'country_residence' => 'Thaïlande',
+                'city_residence' => 'Koh Samui',
+                'role' => 'free',
+                'password' => bcrypt('password123'),
+                'bio' => 'Photographe voyageur basé à Koh Samui.',
+                'is_verified' => false,
             ]
         );
 
@@ -86,15 +120,24 @@ class ContentSeeder extends Seeder
             'published_at' => Carbon::now()->subDay(),
         ]);
 
-        // Create News for Japan
         News::create([
-            'title' => 'Festival de la francophonie 2025 à Tokyo',
-            'excerpt' => 'Le plus grand événement culturel français de l\'année au Japon approche.',
-            'content' => 'Le plus grand événement culturel français de l\'année au Japon approche. Programme détaillé, invités spéciaux et informations pratiques pour ne rien manquer.',
+            'title' => 'Mousson 2025 : conseils pour les expatriés',
+            'excerpt' => 'Préparez-vous à la saison des pluies avec nos conseils pratiques pour vivre sereinement en Thaïlande.',
+            'content' => 'La saison des pluies approche en Thaïlande. Découvrez tous nos conseils pour bien vivre cette période : équipements indispensables, activités à faire, précautions sanitaires et astuces pour profiter de cette saison unique.',
+            'category' => 'vie-pratique',
+            'country_id' => $thailand->id,
+            'author_id' => $pierre->id,
+            'published_at' => Carbon::now()->subDays(2),
+        ]);
+
+        News::create([
+            'title' => 'Nouvelle école française accréditée à Bangkok',
+            'excerpt' => 'Une nouvelle école suit le programme français pour les enfants d\'expatriés.',
+            'content' => 'Une nouvelle école française a été accréditée par l\'AEFE à Bangkok. Inscriptions ouvertes pour la rentrée 2025, programme bilingue français-anglais disponible.',
             'category' => 'culture',
-            'country_id' => $japan->id,
-            'author_id' => $jean->id,
-            'published_at' => Carbon::now()->subWeek(),
+            'country_id' => $thailand->id,
+            'author_id' => $sophie->id,
+            'published_at' => Carbon::now()->subDays(3),
         ]);
 
         // Create Articles for Thailand
@@ -127,18 +170,31 @@ class ContentSeeder extends Seeder
             'published_at' => Carbon::now()->subDays(3),
         ]);
 
-        // Create Articles for Japan
         Article::create([
-            'title' => 'Travailler en remote depuis le Japon',
-            'slug' => 'travailler-remote-japon',
-            'excerpt' => 'Mon expérience du télétravail international : défis, avantages et conseils pratiques.',
-            'content' => 'Mon expérience du télétravail international depuis Tokyo : les défis techniques, les avantages culturels et tous mes conseils pratiques pour réussir.',
-            'category' => 'travail',
-            'country_id' => $japan->id,
-            'author_id' => $jean->id,
-            'reading_time' => 8,
-            'likes' => 28,
-            'views' => 198,
+            'title' => 'Les meilleures îles de Thaïlande pour les expatriés',
+            'slug' => 'meilleures-iles-thailande-expatries',
+            'excerpt' => 'Koh Samui, Phuket, Koh Phangan... Découvrez les avantages et inconvénients de chaque île.',
+            'content' => 'Comparatif détaillé des meilleures îles thaïlandaises pour s\'installer : coût de la vie, communauté expat, internet, activités. Mon retour d\'expérience après avoir vécu sur 4 îles différentes.',
+            'category' => 'voyage',
+            'country_id' => $thailand->id,
+            'author_id' => $lucas->id,
+            'reading_time' => 10,
+            'likes' => 34,
+            'views' => 267,
+            'published_at' => Carbon::now()->subDays(5),
+        ]);
+
+        Article::create([
+            'title' => 'Cuisine thaï pour débutants : mes 10 plats préférés',
+            'slug' => 'cuisine-thai-debutants-10-plats',
+            'excerpt' => 'Découvrez la richesse de la gastronomie thaïlandaise avec mes recommandations testées et approuvées.',
+            'content' => 'Guide gastronomique pour expatriés : mes 10 plats thaï favoris, où les trouver, comment les commander et quelques recettes faciles pour les faire chez soi.',
+            'category' => 'gastronomie',
+            'country_id' => $thailand->id,
+            'author_id' => $marie->id,
+            'reading_time' => 7,
+            'likes' => 56,
+            'views' => 423,
             'published_at' => Carbon::now()->subWeek(),
         ]);
 
@@ -177,37 +233,38 @@ class ContentSeeder extends Seeder
             'current_participants' => 12,
         ]);
 
-        // Create Events for Japan
         Event::create([
-            'title' => 'Soirée cinéma français',
-            'slug' => 'soiree-cinema-francais',
-            'description' => 'Projection d\'un film français récent suivi d\'un débat et d\'un pot.',
-            'category' => 'culturel',
-            'country_id' => $japan->id,
-            'organizer_id' => $jean->id,
-            'start_date' => Carbon::now()->addWeeks(3)->setTime(18, 30),
-            'end_date' => Carbon::now()->addWeeks(3)->setTime(21, 0),
-            'location' => 'Cinéma Toho Shibuya',
-            'address' => 'Shibuya, Tokyo',
-            'price' => 8.00,
-            'max_participants' => 25,
-            'current_participants' => 18,
+            'title' => 'Weekend découverte à Chiang Mai',
+            'slug' => 'weekend-decouverte-chiang-mai',
+            'description' => 'Escapade organisée pour découvrir la capitale du Nord de la Thaïlande.',
+            'full_description' => 'Weekend organisé pour découvrir Chiang Mai : temples, marchés locaux, cours de cuisine thaï et rencontres avec la communauté française locale.',
+            'category' => 'voyage',
+            'country_id' => $thailand->id,
+            'organizer_id' => $pierre->id,
+            'start_date' => Carbon::now()->addWeeks(3)->setTime(8, 0),
+            'end_date' => Carbon::now()->addWeeks(3)->addDays(2)->setTime(18, 0),
+            'location' => 'Chiang Mai',
+            'address' => 'Centre-ville de Chiang Mai',
+            'price' => 120.00,
+            'max_participants' => 15,
+            'current_participants' => 8,
         ]);
 
         Event::create([
-            'title' => 'Atelier cuisine française',
-            'slug' => 'atelier-cuisine-francaise',
-            'description' => 'Apprenez à cuisiner des plats traditionnels avec un chef français.',
-            'category' => 'gastronomie',
-            'country_id' => $japan->id,
-            'organizer_id' => $jean->id,
+            'title' => 'Cours de thaï pour francophones',
+            'slug' => 'cours-thai-francophones',
+            'description' => 'Apprenez les bases du thaï avec une méthode adaptée aux francophones.',
+            'full_description' => 'Cours de thaï débutant spécialement conçu pour les expatriés français. Méthode ludique et pratique pour apprendre les expressions essentielles du quotidien.',
+            'category' => 'apprentissage',
+            'country_id' => $thailand->id,
+            'organizer_id' => $sophie->id,
             'start_date' => Carbon::now()->addMonth()->setTime(19, 0),
-            'end_date' => Carbon::now()->addMonth()->setTime(22, 0),
-            'location' => 'École culinaire française',
-            'address' => 'Roppongi, Tokyo',
-            'price' => 45.00,
-            'max_participants' => 12,
-            'current_participants' => 6,
+            'end_date' => Carbon::now()->addMonth()->setTime(21, 0),
+            'location' => 'Centre culturel français',
+            'address' => 'Silom, Bangkok',
+            'price' => 25.00,
+            'max_participants' => 20,
+            'current_participants' => 14,
         ]);
     }
 }

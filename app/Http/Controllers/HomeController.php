@@ -13,55 +13,38 @@ class HomeController extends Controller
     public function index()
     {
         try {
-            // Get countries in a single query for better performance
-            $countries = Country::whereIn('slug', ['thailande', 'japon'])->get()->keyBy('slug');
-            $thailand = $countries->get('thailande');
-            $japan = $countries->get('japon');
-        
+            // Focus on Thailand only for now
+            $thailand = Country::where('slug', 'thailande')->first();
+            
             // Get latest content for Thailand
             $thailandNews = $thailand ? News::where('country_id', $thailand->id)
                 ->with('author')
                 ->orderBy('created_at', 'desc')
-                ->take(2)
+                ->take(3)
                 ->get() : collect();
                 
             $thailandArticles = $thailand ? Article::where('country_id', $thailand->id)
                 ->with('author')
                 ->orderBy('created_at', 'desc')
-                ->take(2)
+                ->take(3)
                 ->get() : collect();
                 
             $thailandEvents = $thailand ? Event::where('country_id', $thailand->id)
                 ->with('organizer')
                 ->where('start_date', '>=', now())
                 ->orderBy('start_date', 'asc')
-                ->take(1)
+                ->take(2)
                 ->get() : collect();
             
-            // Get latest content for Japan
-            $japanNews = $japan ? News::where('country_id', $japan->id)
-                ->with('author')
-                ->orderBy('created_at', 'desc')
-                ->take(2)
-                ->get() : collect();
-                
-            $japanArticles = $japan ? Article::where('country_id', $japan->id)
-                ->with('author')
-                ->orderBy('created_at', 'desc')
-                ->take(2)
-                ->get() : collect();
-                
-            $japanEvents = $japan ? Event::where('country_id', $japan->id)
-                ->with('organizer')
-                ->where('start_date', '>=', now())
-                ->orderBy('start_date', 'asc')
-                ->take(1)
-                ->get() : collect();
+            // Get community stats
+            $totalMembers = User::count();
+            $thailandMembers = User::where('country_residence', 'Thaïlande')->count();
+            $recentMembers = User::orderBy('created_at', 'desc')->take(3)->get();
             
             return view('home', compact(
-                'thailand', 'japan',
+                'thailand',
                 'thailandNews', 'thailandArticles', 'thailandEvents',
-                'japanNews', 'japanArticles', 'japanEvents'
+                'totalMembers', 'thailandMembers', 'recentMembers'
             ));
             
         } catch (\Exception $e) {
@@ -70,13 +53,12 @@ class HomeController extends Controller
             // Return view with empty collections on error
             return view('home', [
                 'thailand' => null,
-                'japan' => null,
                 'thailandNews' => collect(),
                 'thailandArticles' => collect(),
                 'thailandEvents' => collect(),
-                'japanNews' => collect(),
-                'japanArticles' => collect(),
-                'japanEvents' => collect(),
+                'totalMembers' => 0,
+                'thailandMembers' => 0,
+                'recentMembers' => collect(),
             ]);
         }
     }
