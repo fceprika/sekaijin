@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,12 +18,15 @@ class ExpatController extends Controller
      */
     public function expatsByCountry(): JsonResponse
     {
-        $expatsByCountry = User::whereNotNull('country_residence')
-            ->where('country_residence', '!=', '')
-            ->groupBy('country_residence')
-            ->selectRaw('country_residence as country, COUNT(*) as count')
-            ->orderBy('count', 'DESC')
-            ->get();
+        // Cache for 10 minutes since country stats don't change often
+        $expatsByCountry = Cache::remember('api.expats_by_country', 10 * 60, function () {
+            return User::whereNotNull('country_residence')
+                ->where('country_residence', '!=', '')
+                ->groupBy('country_residence')
+                ->selectRaw('country_residence as country, COUNT(*) as count')
+                ->orderBy('count', 'DESC')
+                ->get();
+        });
 
         return response()->json($expatsByCountry);
     }
@@ -36,35 +40,41 @@ class ExpatController extends Controller
         $limit = min($request->input('limit', 100), 200); // Max 200 members per request
         $offset = $request->input('offset', 0);
         
-        $members = User::where('is_visible_on_map', true)
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->with('country:id,name_fr') // Charger la relation country avec le nom français
-            ->select([
-                'name',
-                'latitude',
-                'longitude',
-                'city_detected',
-                'city_residence',
-                'country_residence',
-                'country_id',
-                'role',
-                'updated_at'
-            ])
-            ->offset($offset)
-            ->limit($limit)
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'name' => $user->name,
-                    'latitude' => (float) $user->latitude,
-                    'longitude' => (float) $user->longitude,
-                    'location' => $user->getDisplayLocation(),
-                    'role' => $user->getRoleDisplayName(),
-                    'profile_url' => route('public.profile', $user->name),
-                    'updated_at' => $user->updated_at?->format('Y-m-d H:i:s')
-                ];
-            });
+        // Cache key based on pagination for efficient caching
+        $cacheKey = "api.members_with_location.{$limit}.{$offset}";
+        
+        // Cache for 3 minutes (short cache for location data)
+        $members = Cache::remember($cacheKey, 3 * 60, function () use ($limit, $offset) {
+            return User::where('is_visible_on_map', true)
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->with('country:id,name_fr') // Charger la relation country avec le nom français
+                ->select([
+                    'name',
+                    'latitude',
+                    'longitude',
+                    'city_detected',
+                    'city_residence',
+                    'country_residence',
+                    'country_id',
+                    'role',
+                    'updated_at'
+                ])
+                ->offset($offset)
+                ->limit($limit)
+                ->get()
+                ->map(function ($user) {
+                    return [
+                        'name' => $user->name,
+                        'latitude' => (float) $user->latitude,
+                        'longitude' => (float) $user->longitude,
+                        'location' => $user->getDisplayLocation(),
+                        'role' => $user->getRoleDisplayName(),
+                        'profile_url' => route('public.profile', $user->getSlug()),
+                        'updated_at' => $user->updated_at?->format('Y-m-d H:i:s')
+                    ];
+                });
+        });
 
         return response()->json([
             'members' => $members,
@@ -110,6 +120,9 @@ class ExpatController extends Controller
                 $request->input('longitude'),
                 $request->input('city')
             );
+            
+            // Clear relevant cache when location is updated
+            $this->clearLocationCaches();
 
             Log::info('User location updated', [
                 'user_id' => $user->id,
@@ -154,6 +167,9 @@ class ExpatController extends Controller
                 'longitude' => null,
                 'city_detected' => null,
             ]);
+            
+            // Clear relevant cache when location is removed
+            $this->clearLocationCaches();
 
             Log::info('User location removed', [
                 'user_id' => $user->id
@@ -175,6 +191,36 @@ class ExpatController extends Controller
                 'success' => false,
                 'message' => 'Erreur lors de la suppression de la localisation.'
             ], 500);
+        }
+    }
+    
+    /**
+     * Clear location-related caches
+     */
+    private function clearLocationCaches(): void
+    {
+        // Clear country stats cache
+        Cache::forget('api.expats_by_country');
+        
+        // Clear member location caches (multiple pagination keys)
+        $patterns = [
+            'api.members_with_location.*',
+            'community.stats',
+            'members.recent'
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (str_contains($pattern, '*')) {
+                // For wildcard patterns, we'd need to implement a more sophisticated cache clearing
+                // For now, clear common pagination keys
+                for ($offset = 0; $offset <= 500; $offset += 100) {
+                    for ($limit = 100; $limit <= 200; $limit += 100) {
+                        Cache::forget("api.members_with_location.{$limit}.{$offset}");
+                    }
+                }
+            } else {
+                Cache::forget($pattern);
+            }
         }
     }
 }
