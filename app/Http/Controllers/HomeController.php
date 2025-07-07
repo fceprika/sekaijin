@@ -73,7 +73,7 @@ class HomeController extends Controller
             
             // Cache recent members (short cache for freshness)
             $recentMembers = Cache::remember('members.recent', $statsCacheTime, function () {
-                return User::select('id', 'name', 'country_residence', 'city_residence', 'created_at')
+                return User::select('id', 'name', 'avatar', 'country_residence', 'city_residence', 'created_at')
                     ->orderBy('created_at', 'desc')
                     ->take(3)
                     ->get();

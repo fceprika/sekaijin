@@ -28,9 +28,9 @@ Route::get('/contact', function () {
 });
 
 // Routes d'authentification
-Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register');
+Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
 Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:10,1');
-Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
+Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 

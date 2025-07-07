@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Hero Section with Gradient -->
-<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden">
+<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden cursor-pointer" onclick="window.location.href='/thailande'">
     <div class="absolute inset-0 bg-black bg-opacity-20"></div>
     <div class="relative max-w-7xl mx-auto px-4 text-center">
         <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
@@ -20,10 +20,12 @@
             </span>
         </p>
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-            <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto">
-                👥 Rejoindre la communauté
-            </button>
-            <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center">
+            @guest
+                <button id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative" onclick="event.stopPropagation(); window.location.href='/inscription'">
+                    👥 Rejoindre la communauté
+                </button>
+            @endguest
+            <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative" onclick="event.stopPropagation()">
                 Découvrir la Thaïlande
             </a>
         </div>
@@ -147,9 +149,17 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach($recentMembers as $member)
             <div class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition duration-300">
-                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
-                    {{ strtoupper(substr($member->name, 0, 1)) }}
-                </div>
+                @if($member->avatar)
+                    <div class="w-16 h-16 mx-auto mb-4">
+                        <img src="{{ asset('storage/avatars/' . $member->avatar) }}" 
+                             alt="Photo de {{ $member->name }}" 
+                             class="w-16 h-16 rounded-full object-cover border-2 border-gray-200">
+                    </div>
+                @else
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
+                        {{ strtoupper(substr($member->name, 0, 1)) }}
+                    </div>
+                @endif
                 <h3 class="font-semibold text-gray-800 mb-2">{{ $member->name }}</h3>
                 <p class="text-gray-600 text-sm mb-3">📍 {{ $member->country_residence }}</p>
                 @if($member->city_residence)
@@ -170,11 +180,6 @@
 
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
-    // Hero button functionality
-    $('#hero-btn').click(function() {
-        window.location.href = '/inscription';
-    });
-    
     // Initialize Mapbox with secure API proxy
     $.get('/api/map-config')
         .done(function(config) {
