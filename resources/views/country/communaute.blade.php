@@ -46,9 +46,13 @@
                                 <!-- Profile Header -->
                                 <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-24 relative">
                                     <div class="absolute -bottom-8 left-6">
-                                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-blue-600 shadow-lg border-4 border-white">
-                                            {{ strtoupper(substr($member->name, 0, 1)) }}
-                                        </div>
+                                        @if($member->avatar)
+                                            <img src="{{ $member->getAvatarUrl() }}" alt="{{ $member->name }}" class="w-16 h-16 rounded-full shadow-lg border-4 border-white object-cover">
+                                        @else
+                                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-blue-600 shadow-lg border-4 border-white">
+                                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                                            </div>
+                                        @endif
                                     </div>
                                     <!-- Role Badge -->
                                     @if($member->role !== 'free')
