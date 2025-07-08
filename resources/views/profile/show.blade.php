@@ -161,6 +161,26 @@
                             Localisation
                         </h2>
                         
+                        <!-- Message de géolocalisation -->
+                        <div id="geolocation-message" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="text-green-600 text-xl mr-3">📍</span>
+                                <div>
+                                    <p class="text-green-800 font-medium">Localisation détectée</p>
+                                    <p class="text-green-700 text-sm mt-1" id="detected-location"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bouton géolocalisation -->
+                        <div class="mb-6">
+                            <button type="button" id="geolocate-btn" 
+                                class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 transition duration-200 flex items-center justify-center">
+                                <span id="geolocate-icon" class="mr-2">🌍</span>
+                                <span id="geolocate-text">Détecter automatiquement ma position</span>
+                            </button>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
@@ -219,8 +239,8 @@
                             </div>
                             
                             <!-- Informations de localisation actuelle -->
-                            <div id="current-location-info" class="mt-4 p-4 bg-white rounded-lg border border-blue-200">
-                                @if($user->hasLocationSharing())
+                            @if($user->hasLocationSharing())
+                                <div id="current-location-info" class="mt-4 p-4 bg-white rounded-lg border border-blue-200">
                                     <div class="flex items-center text-green-600">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -233,35 +253,9 @@
                                     <p class="text-xs text-gray-500 mt-1">
                                         Dernière mise à jour: {{ $user->updated_at ? $user->updated_at->format('d/m/Y à H:i') : 'Jamais' }}
                                     </p>
-                                @else
-                                    <div class="flex items-center text-gray-600">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                        </svg>
-                                        <span class="font-medium">Localisation inactive</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">
-                                        Vous n'apparaissez pas sur la carte des membres.
-                                    </p>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                             
-                            <!-- Boutons de gestion de localisation -->
-                            <div id="location-controls" class="flex space-x-3 mt-4">
-                                <button type="button" id="updateLocationBtn" 
-                                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition duration-200 text-sm font-medium">
-                                    📍 Mettre à jour ma position
-                                </button>
-                                <button type="button" id="removeLocationBtn" 
-                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 transition duration-200 text-sm font-medium">
-                                    🗑️ Supprimer ma position
-                                </button>
-                            </div>
-                            
-                            <!-- Status de localisation -->
-                            <div id="location-status" class="mt-4 p-3 rounded-lg" style="display: none;">
-                                <!-- Les messages de statut apparaîtront ici -->
-                            </div>
                         </div>
                     </div>
 
@@ -481,105 +475,96 @@ document.addEventListener('DOMContentLoaded', function() {
     // Vérifier au chargement
     toggleDestinationCountry();
     
-    // Gestion de la localisation
-    const geoService = new GeolocationService();
-    const locationUI = new LocationUI(geoService);
-    const updateLocationBtn = document.getElementById('updateLocationBtn');
-    const removeLocationBtn = document.getElementById('removeLocationBtn');
-    const locationStatus = document.getElementById('location-status');
-    const shareLocationCheckbox = document.getElementById('share_location');
+    // Géolocalisation automatique (même logique que l'inscription)
+    const geolocateBtn = document.getElementById('geolocate-btn');
+    const geolocationMessage = document.getElementById('geolocation-message');
+    const detectedLocation = document.getElementById('detected-location');
+    const geolocateIcon = document.getElementById('geolocate-icon');
+    const geolocateText = document.getElementById('geolocate-text');
     
-    // Fonction d'affichage des messages de statut
-    function showLocationStatus(message, type = 'info') {
-        locationStatus.style.display = 'block';
-        locationStatus.className = `mt-4 p-3 rounded-lg ${type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 
-                                                          type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 
-                                                          'bg-blue-50 border border-blue-200 text-blue-700'}`;
-        locationStatus.innerHTML = message;
-        
-        // Masquer après 5 secondes pour les messages de succès
-        if (type === 'success') {
-            setTimeout(() => {
-                locationStatus.style.display = 'none';
-            }, 5000);
-        }
+    if (geolocateBtn) {
+        geolocateBtn.addEventListener('click', async function() {
+            if (!navigator.geolocation) {
+                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                return;
+            }
+
+            geolocateIcon.textContent = '⏳';
+            geolocateText.textContent = 'Localisation en cours...';
+            geolocateBtn.disabled = true;
+
+            try {
+                // Use the same geolocation logic as the registration page
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        resolve,
+                        reject,
+                        {
+                            enableHighAccuracy: false,
+                            timeout: 10000,
+                            maximumAge: 300000 // 5 minutes cache
+                        }
+                    );
+                });
+
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Use internal API to avoid CSP issues
+                const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+
+                if (!response.ok) {
+                    throw new Error('Erreur de géocodage');
+                }
+
+                const data = await response.json();
+                
+                if (!data.success || !data.city || !data.countryName) {
+                    throw new Error('Impossible de déterminer votre localisation');
+                }
+
+                const city = data.city;
+                const countryDisplayName = data.countryName;
+                
+                // Find and select the corresponding country option
+                const countryOption = Array.from(countryResidence.options).find(option => 
+                    option.textContent.includes(countryDisplayName) || option.value === countryDisplayName
+                );
+                
+                if (countryOption) {
+                    countryResidence.value = countryOption.value;
+                    // Trigger change event to update destination country visibility
+                    toggleDestinationCountry();
+                }
+
+                document.getElementById('city_residence').value = city;
+                detectedLocation.textContent = `${countryDisplayName}, ${city}`;
+                geolocationMessage.classList.remove('hidden');
+
+                geolocateIcon.textContent = '✅';
+                geolocateText.textContent = 'Localisation détectée';
+                geolocateBtn.style.display = 'none';
+
+            } catch (error) {
+                console.warn('Erreur de géolocalisation:', error);
+                geolocateIcon.textContent = '❌';
+                geolocateText.textContent = 'Erreur de localisation';
+                geolocateBtn.disabled = false;
+                
+                // Show user-friendly error message
+                let errorMessage = 'Erreur de localisation';
+                if (error.code === 1) {
+                    errorMessage = 'Autorisation refusée';
+                } else if (error.code === 2) {
+                    errorMessage = 'Position indisponible';
+                } else if (error.code === 3) {
+                    errorMessage = 'Délai dépassé';
+                }
+                geolocateText.textContent = errorMessage;
+            }
+        });
     }
     
-    // Mettre à jour la position
-    updateLocationBtn.addEventListener('click', async function() {
-        if (!geoService.isGeolocationSupported()) {
-            showLocationStatus('❌ La géolocalisation n\'est pas supportée par votre navigateur.', 'error');
-            return;
-        }
-        
-        this.disabled = true;
-        this.textContent = '📍 Localisation en cours...';
-        
-        try {
-            showLocationStatus('🔍 Obtention de votre position...', 'info');
-            
-            const position = await geoService.getCurrentPosition();
-            
-            showLocationStatus(`📍 Position détectée: ${position.city}. Enregistrement...`, 'info');
-            
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const result = await geoService.saveLocationToServer(csrfToken);
-            
-            showLocationStatus('✅ Votre position a été mise à jour avec succès!', 'success');
-            shareLocationCheckbox.checked = true;
-            
-            // Recharger la page après 2 secondes pour afficher les nouvelles données
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-            
-        } catch (error) {
-            showLocationStatus('❌ ' + error.message, 'error');
-        } finally {
-            this.disabled = false;
-            this.textContent = '📍 Mettre à jour ma position';
-        }
-    });
-    
-    // Supprimer la position
-    removeLocationBtn.addEventListener('click', async function() {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer votre position de la carte ?')) {
-            return;
-        }
-        
-        this.disabled = true;
-        this.textContent = '🗑️ Suppression...';
-        
-        try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            
-            const response = await fetch('/api/remove-location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('Erreur lors de la suppression');
-            }
-            
-            showLocationStatus('✅ Votre position a été supprimée de la carte.', 'success');
-            shareLocationCheckbox.checked = false;
-            
-            // Recharger la page après 2 secondes
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-            
-        } catch (error) {
-            showLocationStatus('❌ Erreur lors de la suppression: ' + error.message, 'error');
-        } finally {
-            this.disabled = false;
-            this.textContent = '🗑️ Supprimer ma position';
-        }
-    });
     
     // Gestion de l'aperçu de l'avatar dans le profil
     const avatarInput = document.getElementById('avatar');
