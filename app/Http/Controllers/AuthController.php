@@ -22,6 +22,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Validation pour l'étape 1 : création de compte
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required',
@@ -40,16 +41,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',
-            'country_residence' => 'nullable|string|max:255',
-            'city_residence' => 'nullable|string|max:255',
-            'destination_country' => [
-                'nullable', 
-                'string', 
-                'max:255',
-                'required_if:country_residence,France',
-                'different:country_residence'
-            ],
+            'destination_country' => 'required|string|in:Thaïlande',
             'password' => [
                 'required',
                 'string',
@@ -57,75 +49,127 @@ class AuthController extends Controller
                 'confirmed',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/',
             ],
-            'terms' => 'required|accepted',
-            'share_location' => 'nullable|boolean',
-            'initial_latitude' => 'nullable|numeric|between:-90,90',
-            'initial_longitude' => 'nullable|numeric|between:-180,180',
-            'initial_city' => 'nullable|string|max:255'
+            'terms' => 'required|accepted'
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
+            'destination_country.required' => 'Veuillez sélectionner un pays d\'intérêt.',
+            'destination_country.in' => 'Seule la Thaïlande est disponible pour le moment.'
+        ]);
+
+        if ($validator->fails()) {
+            // Check if request is AJAX
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // Créer le compte utilisateur (étape 1)
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'destination_country' => $request->destination_country,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Connecter l'utilisateur immédiatement
+        Auth::login($user);
+
+        // Retourner une réponse JSON pour l'étape 2
+        return response()->json([
+            'success' => true,
+            'message' => 'Compte créé avec succès !',
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'destination_country' => $user->destination_country
+            ]
+        ]);
+    }
+
+    public function enrichProfile(Request $request)
+    {
+        // Validation pour l'étape 2 : enrichissement du profil
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',
+            'country_residence' => 'nullable|string|max:255',
+            'city_residence' => 'nullable|string|max:255',
+            'share_location' => 'nullable|boolean',
+            'initial_latitude' => 'nullable|numeric|between:-90,90',
+            'initial_longitude' => 'nullable|numeric|between:-180,180',
+        ], [
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
             'avatar.max' => 'L\'avatar ne doit pas dépasser 100KB.',
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        // Gérer l'upload de l'avatar avec gestion d'erreurs sécurisée
-        $avatarPath = null;
+        $user = Auth::user();
+
+        // Gérer l'upload de l'avatar
+        $avatarPath = $user->avatar;
         if ($request->hasFile('avatar')) {
             try {
                 $avatarPath = $this->uploadAvatar($request->file('avatar'));
             } catch (\InvalidArgumentException $e) {
-                return back()->withErrors(['avatar' => $e->getMessage()])->withInput();
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['avatar' => [$e->getMessage()]]
+                ], 422);
             } catch (\Exception $e) {
-                return back()->withErrors(['avatar' => 'Erreur lors du traitement de l\'image.'])->withInput();
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['avatar' => ['Erreur lors du traitement de l\'image.']]
+                ], 422);
             }
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+        // Mettre à jour les informations du profil
+        $user->update([
             'avatar' => $avatarPath,
             'country_residence' => $request->country_residence,
             'city_residence' => $request->city_residence,
-            'destination_country' => $request->destination_country,
-            'password' => Hash::make($request->password),
             'is_visible_on_map' => $request->boolean('share_location', false),
         ]);
 
-        Auth::login($user);
-
-        // Si des coordonnées initiales sont fournies, les traiter
+        // Gérer la géolocalisation si demandée
         if ($request->filled('initial_latitude') && $request->filled('initial_longitude') && $user->is_visible_on_map) {
             try {
-                // Utiliser une API de géocodage inversé simple pour obtenir la ville
                 $latitude = $request->input('initial_latitude');
                 $longitude = $request->input('initial_longitude');
                 
                 $city = $this->getCityFromCoordinates($latitude, $longitude);
-                
-                // Mettre à jour la localisation avec protection de la vie privée
                 $user->updateLocation($latitude, $longitude, $city);
                 
-                \Log::info('User registered with location', [
+                \Log::info('User location updated during profile enrichment', [
                     'user_id' => $user->id,
                     'city' => $city
                 ]);
             } catch (\Exception $e) {
-                \Log::warning('Failed to set initial location for user', [
+                \Log::warning('Failed to set location during profile enrichment', [
                     'user_id' => $user->id,
                     'error' => $e->getMessage()
                 ]);
             }
         }
 
-        return redirect('/')->with('success', 'Bienvenue dans la communauté Sekaijin !');
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil enrichi avec succès !',
+            'redirect_url' => '/'
+        ]);
     }
 
     public function login(Request $request)
@@ -159,7 +203,72 @@ class AuthController extends Controller
     }
 
     /**
-     * Get city name from coordinates using reverse geocoding with caching
+     * Check username availability for real-time validation
+     */
+    public function checkUsername($username)
+    {
+        try {
+            // Clean the username
+            $cleanedUsername = trim($username);
+            
+            // Validate format
+            if (empty($cleanedUsername) || strlen($cleanedUsername) < 3) {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Le pseudo doit contenir au moins 3 caractères.'
+                ]);
+            }
+            
+            // Check if username matches regex requirements
+            if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $cleanedUsername)) {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.'
+                ]);
+            }
+            
+            // Check if starts or ends with special characters
+            if (preg_match('/^[._-]/', $cleanedUsername) || preg_match('/[._-]$/', $cleanedUsername)) {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.'
+                ]);
+            }
+            
+            // Check if username exists (case-insensitive)
+            $exists = User::whereRaw('LOWER(name) = ?', [strtolower($cleanedUsername)])->exists();
+            
+            // Also check if the generated slug would conflict
+            $slug = User::generateSlug($cleanedUsername);
+            $slugExists = User::whereRaw('LOWER(name_slug) = ?', [strtolower($slug)])->exists();
+            
+            if ($exists || $slugExists) {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Ce pseudo est déjà pris.'
+                ]);
+            }
+            
+            return response()->json([
+                'available' => true,
+                'message' => 'Ce pseudo est disponible.'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Username check error', [
+                'username' => $username,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'available' => false,
+                'message' => 'Erreur lors de la vérification.'
+            ]);
+        }
+    }
+
+    /**
+     * Get city name from coordinates using reverse geocoding with caching and retry logic
      */
     private function getCityFromCoordinates(float $latitude, float $longitude): string
     {
@@ -169,54 +278,154 @@ class AuthController extends Controller
             $roundedLng = round($longitude, 2);
             $cacheKey = "geocoding_{$roundedLat}_{$roundedLng}";
             
-            // Check cache first (5 minute cache)
+            // Check cache first (1 hour cache for successful responses)
             if (\Cache::has($cacheKey)) {
                 return \Cache::get($cacheKey);
             }
             
-            // Use a free geocoding service (Nominatim OpenStreetMap)
-            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=10&addressdetails=1";
-            
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 5,
-                    'user_agent' => 'Sekaijin/1.0 (contact@sekaijin.com)'
-                ]
-            ]);
-            
-            $response = file_get_contents($url, false, $context);
-            
-            if ($response === false) {
-                throw new \Exception('Failed to fetch geocoding data');
-            }
-
-            $data = json_decode($response, true);
-            
-            if (!$data || !isset($data['address'])) {
-                throw new \Exception('Invalid geocoding response');
+            // Check if we have a recent failure cached (5 minute cache for failures)
+            $failureCacheKey = "geocoding_failure_{$roundedLat}_{$roundedLng}";
+            if (\Cache::has($failureCacheKey)) {
+                return 'Ville inconnue';
             }
             
-            // Extract city name from various possible fields
-            $address = $data['address'];
-            $city = $address['city'] ?? 
-                   $address['town'] ?? 
-                   $address['village'] ?? 
-                   $address['county'] ?? 
-                   $address['state'] ?? 
-                   'Ville inconnue';
-
-            // Cache the result for 5 minutes
-            \Cache::put($cacheKey, $city, 300);
-
-            return $city;
+            $city = $this->attemptGeocoding($latitude, $longitude);
+            
+            if ($city && $city !== 'Ville inconnue') {
+                // Cache successful result for 1 hour
+                \Cache::put($cacheKey, $city, 3600);
+                return $city;
+            } else {
+                // Cache failure for 5 minutes to avoid repeated requests
+                \Cache::put($failureCacheKey, true, 300);
+                return 'Ville inconnue';
+            }
+            
         } catch (\Exception $e) {
             \Log::warning('Failed to get city from coordinates', [
                 'latitude' => $latitude,
                 'longitude' => $longitude,
                 'error' => $e->getMessage()
             ]);
+            
+            // Cache failure for 5 minutes
+            $failureCacheKey = "geocoding_failure_{$roundedLat}_{$roundedLng}";
+            \Cache::put($failureCacheKey, true, 300);
+            
             return 'Ville inconnue';
         }
+    }
+    
+    /**
+     * Attempt geocoding with retry logic and multiple fallback APIs
+     */
+    private function attemptGeocoding(float $latitude, float $longitude): string
+    {
+        $apis = [
+            // Primary: Nominatim OpenStreetMap
+            [
+                'url' => "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=10&addressdetails=1",
+                'headers' => [
+                    'User-Agent: Sekaijin/1.0 (contact@sekaijin.com)',
+                    'Accept: application/json'
+                ],
+                'parser' => 'parseNominatimResponse'
+            ],
+            // Fallback: OpenCage (if you have an API key)
+            // [
+            //     'url' => "https://api.opencagedata.com/geocode/v1/json?q={$latitude}+{$longitude}&key=YOUR_API_KEY",
+            //     'headers' => ['Accept: application/json'],
+            //     'parser' => 'parseOpenCageResponse'
+            // ]
+        ];
+        
+        foreach ($apis as $api) {
+            $maxRetries = 2;
+            $retryDelay = 1; // seconds
+            
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $context = stream_context_create([
+                        'http' => [
+                            'timeout' => 8,
+                            'method' => 'GET',
+                            'header' => implode("\r\n", $api['headers']),
+                            'ignore_errors' => true
+                        ]
+                    ]);
+                    
+                    $response = file_get_contents($api['url'], false, $context);
+                    
+                    if ($response === false) {
+                        throw new \Exception('HTTP request failed');
+                    }
+                    
+                    // Check HTTP status code
+                    $httpStatus = $this->parseHttpStatus($http_response_header ?? []);
+                    if ($httpStatus >= 400) {
+                        throw new \Exception("HTTP {$httpStatus} error");
+                    }
+                    
+                    $city = $this->{$api['parser']}($response);
+                    
+                    if ($city && $city !== 'Ville inconnue') {
+                        return $city;
+                    }
+                    
+                    break; // Don't retry if parsing was successful but no city found
+                    
+                } catch (\Exception $e) {
+                    \Log::debug("Geocoding attempt {$attempt} failed", [
+                        'api' => $api['url'],
+                        'error' => $e->getMessage(),
+                        'latitude' => $latitude,
+                        'longitude' => $longitude
+                    ]);
+                    
+                    if ($attempt < $maxRetries) {
+                        sleep($retryDelay);
+                        $retryDelay *= 2; // Exponential backoff
+                    }
+                }
+            }
+        }
+        
+        return 'Ville inconnue';
+    }
+    
+    /**
+     * Parse HTTP status from response headers
+     */
+    private function parseHttpStatus(array $headers): int
+    {
+        foreach ($headers as $header) {
+            if (preg_match('/^HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
+                return (int) $matches[1];
+            }
+        }
+        return 200; // Default to OK if not found
+    }
+    
+    /**
+     * Parse Nominatim API response
+     */
+    private function parseNominatimResponse(string $response): string
+    {
+        $data = json_decode($response, true);
+        
+        if (!$data || !isset($data['address'])) {
+            return 'Ville inconnue';
+        }
+        
+        // Extract city name from various possible fields
+        $address = $data['address'];
+        return $address['city'] ?? 
+               $address['town'] ?? 
+               $address['village'] ?? 
+               $address['municipality'] ?? 
+               $address['county'] ?? 
+               $address['state'] ?? 
+               'Ville inconnue';
     }
 
     /**
