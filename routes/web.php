@@ -91,7 +91,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/upload-image', [App\Http\Controllers\AdminController::class, 'uploadImage'])->name('upload.image');
 });
 
-// Profils publics
+// Page d'invitation pour les non-membres
+Route::get('/invitation-membre', function () {
+    return view('auth.member-invitation');
+})->name('member.invitation');
+
+// Profils publics (protégés par l'authentification)
 Route::get('/membre/{name}', [App\Http\Controllers\PublicProfileController::class, 'show'])->name('public.profile');
 
 // Routes par pays avec middleware de validation (EN DERNIER pour éviter les conflits)
