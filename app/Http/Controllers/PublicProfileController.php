@@ -10,6 +10,11 @@ class PublicProfileController extends Controller
 {
     public function show($name)
     {
+        // Vérifier si l'utilisateur est connecté
+        if (!auth()->check()) {
+            return redirect()->route('member.invitation');
+        }
+        
         // Recherche optimisée avec le champ indexé name_slug
         $slug = strtolower(trim($name));
         $user = User::where('name_slug', $slug)->first();
