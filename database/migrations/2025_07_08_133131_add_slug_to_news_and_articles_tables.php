@@ -28,19 +28,21 @@ return new class extends Migration
     
     private function populateSlugs()
     {
-        // Populate news slugs
-        $news = \App\Models\News::all();
-        foreach ($news as $item) {
-            $slug = $this->generateSlug($item->title, 'news');
-            $item->update(['slug' => $slug]);
-        }
+        // Populate news slugs in chunks for better memory management
+        \App\Models\News::whereNull('slug')->orWhere('slug', '')->chunk(100, function ($newsChunk) {
+            foreach ($newsChunk as $item) {
+                $slug = $this->generateSlug($item->title, 'news');
+                $item->update(['slug' => $slug]);
+            }
+        });
         
-        // Populate article slugs
-        $articles = \App\Models\Article::all();
-        foreach ($articles as $item) {
-            $slug = $this->generateSlug($item->title, 'articles', $item->id);
-            $item->update(['slug' => $slug]);
-        }
+        // Populate article slugs in chunks for better memory management
+        \App\Models\Article::whereNull('slug')->orWhere('slug', '')->chunk(100, function ($articlesChunk) {
+            foreach ($articlesChunk as $item) {
+                $slug = $this->generateSlug($item->title, 'articles', $item->id);
+                $item->update(['slug' => $slug]);
+            }
+        });
     }
     
     private function generateSlug($title, $table, $excludeId = null)

@@ -122,9 +122,45 @@ class Article extends Model
         });
         
         static::updating(function ($article) {
-            if ($article->isDirty('title') && empty($article->slug)) {
+            // Regenerate slug if title changed OR if slug is empty OR if force update is requested
+            if ($article->isDirty('title') && (empty($article->slug) || $article->shouldForceSlugUpdate())) {
                 $article->slug = self::generateSlug($article->title, $article->id);
             }
         });
+        
+        // Invalidate content cache when article is created, updated, or deleted
+        static::created(function ($article) {
+            \App\Services\ContentCacheService::invalidateContentCache();
+        });
+        
+        static::updated(function ($article) {
+            \App\Services\ContentCacheService::invalidateContentCache();
+        });
+        
+        static::deleted(function ($article) {
+            \App\Services\ContentCacheService::invalidateContentCache();
+        });
+    }
+    
+    /**
+     * Temporary flag for forcing slug update (not persisted to DB)
+     */
+    private $forceSlugUpdateFlag = false;
+    
+    /**
+     * Force slug regeneration on next save
+     */
+    public function forceSlugUpdate()
+    {
+        $this->forceSlugUpdateFlag = true;
+        return $this;
+    }
+    
+    /**
+     * Check if force slug update is requested
+     */
+    public function shouldForceSlugUpdate()
+    {
+        return $this->forceSlugUpdateFlag;
     }
 }
