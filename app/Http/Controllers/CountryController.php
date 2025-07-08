@@ -119,7 +119,7 @@ class CountryController extends Controller
         
         // Get community members from this country with optimized pagination
         $communityMembers = User::where('country_residence', $countryModel->name_fr)
-            ->select(['id', 'name', 'is_verified', 'role', 'city_residence', 'bio', 'created_at'])
+            ->select(['id', 'name', 'avatar', 'is_verified', 'role', 'city_residence', 'bio', 'created_at'])
             ->paginate(12);
         
         return view('country.communaute', compact('countryModel', 'communityMembers'));
