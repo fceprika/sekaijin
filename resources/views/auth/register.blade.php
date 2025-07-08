@@ -619,13 +619,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const countrySelect = document.getElementById('country_residence');
     const cityInput = document.getElementById('city_residence');
     
-    const countryMappings = {
-        'FR': 'France', 'TH': 'Thaïlande', 'JP': 'Japon', 'US': 'États-Unis', 'CA': 'Canada',
-        'DE': 'Allemagne', 'GB': 'Royaume-Uni', 'ES': 'Espagne', 'IT': 'Italie', 'CH': 'Suisse',
-        'BE': 'Belgique', 'AU': 'Australie', 'NL': 'Pays-Bas', 'PT': 'Portugal', 'AT': 'Autriche'
-    };
     
-    geolocateBtn.addEventListener('click', function() {
+    geolocateBtn.addEventListener('click', async function() {
         if (!navigator.geolocation) {
             alert('La géolocalisation n\'est pas supportée par votre navigateur.');
             return;
@@ -635,48 +630,73 @@ document.addEventListener('DOMContentLoaded', function() {
         geolocateText.textContent = 'Localisation en cours...';
         geolocateBtn.disabled = true;
 
-        navigator.geolocation.getCurrentPosition(
-            async function(position) {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-
-                try {
-                    const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
-                    const data = await response.json();
-
-                    if (data.success && data.country && data.city) {
-                        const countryName = countryMappings[data.country] || data.countryName || data.country;
-                        
-                        const countryOption = Array.from(countrySelect.options).find(option => 
-                            option.textContent.includes(countryName) || option.value === countryName
-                        );
-                        
-                        if (countryOption) {
-                            countrySelect.value = countryOption.value;
-                        }
-
-                        cityInput.value = data.city;
-                        detectedLocation.textContent = `${countryName}, ${data.city}`;
-                        geolocationMessage.classList.remove('hidden');
-
-                        geolocateIcon.textContent = '✅';
-                        geolocateText.textContent = 'Localisation détectée';
-                        geolocateBtn.style.display = 'none';
-                    } else {
-                        throw new Error('Impossible de déterminer votre localisation');
+        try {
+            // Use the same geolocation logic as the profile page
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    reject,
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes cache
                     }
-                } catch (error) {
-                    geolocateIcon.textContent = '❌';
-                    geolocateText.textContent = 'Erreur de localisation';
-                    geolocateBtn.disabled = false;
-                }
-            },
-            function(error) {
-                geolocateIcon.textContent = '❌';
-                geolocateText.textContent = 'Localisation refusée';
-                geolocateBtn.disabled = false;
+                );
+            });
+
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // Use internal API to avoid CSP issues
+            const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+
+            if (!response.ok) {
+                throw new Error('Erreur de géocodage');
             }
-        );
+
+            const data = await response.json();
+            
+            if (!data.success || !data.city || !data.countryName) {
+                throw new Error('Impossible de déterminer votre localisation');
+            }
+
+            const city = data.city;
+            const countryDisplayName = data.countryName;
+            
+            // Find and select the corresponding country option
+            const countryOption = Array.from(countrySelect.options).find(option => 
+                option.textContent.includes(countryDisplayName) || option.value === countryDisplayName
+            );
+            
+            if (countryOption) {
+                countrySelect.value = countryOption.value;
+            }
+
+            cityInput.value = city;
+            detectedLocation.textContent = `${countryDisplayName}, ${city}`;
+            geolocationMessage.classList.remove('hidden');
+
+            geolocateIcon.textContent = '✅';
+            geolocateText.textContent = 'Localisation détectée';
+            geolocateBtn.style.display = 'none';
+
+        } catch (error) {
+            console.warn('Erreur de géolocalisation:', error);
+            geolocateIcon.textContent = '❌';
+            geolocateText.textContent = 'Erreur de localisation';
+            geolocateBtn.disabled = false;
+            
+            // Show user-friendly error message
+            let errorMessage = 'Erreur de localisation';
+            if (error.code === 1) {
+                errorMessage = 'Autorisation refusée';
+            } else if (error.code === 2) {
+                errorMessage = 'Position indisponible';
+            } else if (error.code === 3) {
+                errorMessage = 'Délai dépassé';
+            }
+            geolocateText.textContent = errorMessage;
+        }
     });
     
     // Variables globales pour la géolocalisation
