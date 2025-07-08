@@ -23,6 +23,12 @@ Route::get('/maintenance-status', function () {
     ]);
 })->name('maintenance.status');
 
+// Temporary cache clear route
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Cache::flush();
+    return response()->json(['message' => 'Cache cleared']);
+});
+
 Route::get('/about', function () {
     return view('about');
 });

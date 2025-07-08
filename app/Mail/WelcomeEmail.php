@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\User;
+use App\Services\CommunityStatsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -38,8 +39,15 @@ class WelcomeEmail extends Mailable
      */
     public function content(): Content
     {
+        // Get cached community statistics
         return new Content(
             view: 'emails.welcome',
+            with: [
+                'user' => $this->user,
+                'totalMembers' => CommunityStatsService::getTotalMembers(),
+                'countriesCovered' => CommunityStatsService::getCountriesCovered(),
+                'totalContent' => CommunityStatsService::getTotalContent(),
+            ]
         );
     }
 

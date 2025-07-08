@@ -22,11 +22,11 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'name_slug',
+        'name_slug', // Now in DB and populated
         'first_name',
         'last_name',
         'email',
-        'avatar',
+        'avatar', // Now in DB
         'role',
         'birth_date',
         'phone',
@@ -36,19 +36,19 @@ class User extends Authenticatable
         'city_residence',
         'bio',
         'youtube_username',
-        'instagram_username',
-        'tiktok_username',
-        'linkedin_username',
-        'twitter_username',
-        'facebook_username',
-        'telegram_username',
+        'instagram_username', // Now in DB
+        'tiktok_username', // Now in DB
+        'linkedin_username', // Now in DB
+        'twitter_username', // Now in DB
+        'facebook_username', // Now in DB
+        'telegram_username', // Now in DB
         'password',
         'is_verified',
         'last_login',
-        'is_visible_on_map',
-        'latitude',
-        'longitude',
-        'city_detected',
+        'is_visible_on_map', // Needed for map
+        'latitude', // Needed for map  
+        'longitude', // Needed for map
+        'city_detected', // Needed for map
     ];
 
     /**

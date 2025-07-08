@@ -88,4 +88,43 @@ class Article extends Model
         if (!$value) return null;
         return $value . ' min de lecture';
     }
+
+    /**
+     * Generate a unique slug from title
+     */
+    public static function generateSlug($title, $id = null)
+    {
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+        
+        while (self::where('slug', $slug)->when($id, function($query, $id) {
+            return $query->where('id', '!=', $id);
+        })->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        return $slug;
+    }
+
+    /**
+     * Boot the model events
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($article) {
+            if (empty($article->slug)) {
+                $article->slug = self::generateSlug($article->title);
+            }
+        });
+        
+        static::updating(function ($article) {
+            if ($article->isDirty('title') && empty($article->slug)) {
+                $article->slug = self::generateSlug($article->title, $article->id);
+            }
+        });
+    }
 }

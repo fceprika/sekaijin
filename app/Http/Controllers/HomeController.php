@@ -9,6 +9,7 @@ use App\Models\News;
 use App\Models\Article;
 use App\Models\Event;
 use App\Models\User;
+use App\Services\CommunityStatsService;
 
 class HomeController extends Controller
 {
@@ -56,20 +57,15 @@ class HomeController extends Controller
                     ->with(['organizer' => function($query) {
                         $query->select('id', 'name', 'is_verified');
                     }])
-                    ->select('id', 'title', 'slug', 'description', 'start_date', 'location', 'is_online', 'organizer_id')
+                    ->select('id', 'title', 'description', 'start_date', 'location', 'is_online', 'organizer_id')
                     ->where('start_date', '>=', now())
                     ->orderBy('start_date', 'asc')
                     ->take(2)
                     ->get();
             });
             
-            // Cache community stats (updated more frequently)
-            $communityStats = Cache::remember('community.stats', $statsCacheTime, function () {
-                return [
-                    'totalMembers' => User::count(),
-                    'thailandMembers' => User::where('country_residence', 'Thaïlande')->count(),
-                ];
-            });
+            // Get cached community stats
+            $communityStats = CommunityStatsService::getCommunityStats();
             
             // Cache recent members (short cache for freshness)
             $recentMembers = Cache::remember('members.recent', $statsCacheTime, function () {
@@ -117,13 +113,15 @@ class HomeController extends Controller
             'thailand.news.latest',
             'thailand.articles.latest', 
             'thailand.events.upcoming',
-            'community.stats',
             'members.recent'
         ];
         
         foreach ($cacheKeys as $key) {
             Cache::forget($key);
         }
+        
+        // Clear community stats cache
+        CommunityStatsService::clearCache();
         
         return response()->json(['message' => 'Homepage cache cleared successfully']);
     }
