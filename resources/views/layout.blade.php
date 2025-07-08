@@ -38,9 +38,9 @@
                 <div class="flex space-x-7">
                     <div>
                         <a href="/" class="flex items-center py-4 px-2">
-                            <span class="font-bold text-blue-600 text-xl">🌍 Sekaijin</span>
+                            <img src="/images/sekaijin_logo.png" alt="Sekaijin" class="h-8 w-auto">
                             @if(isset($currentCountry))
-                                <span class="ml-2 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                <span class="ml-3 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                                     {{ $currentCountry->name_fr }}
                                 </span>
                             @endif
@@ -127,7 +127,7 @@
             <div class="flex flex-col h-full">
                 <!-- Header -->
                 <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                    <span class="font-bold text-blue-600 text-xl">🌍 Sekaijin</span>
+                    <img src="/images/sekaijin_logo.png" alt="Sekaijin" class="h-6 w-auto">
                     <button id="close-mobile-menu" class="text-gray-500 hover:text-blue-600 p-1">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -292,9 +292,149 @@
         @yield('content')
     </main>
 
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; 2024 Sekaijin - Communauté des expatriés français. Tous droits réservés.</p>
+    <!-- Footer -->
+    <footer class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- À propos de Sekaijin -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <img src="/images/sekaijin_logo.png" alt="Sekaijin" class="h-10 w-auto">
+                    </div>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        La communauté qui connecte les expatriés français du monde entier. 
+                        Partagez vos expériences, découvrez de nouveaux horizons et créez des liens durables avec vos compatriotes.
+                    </p>
+                    <div class="flex items-center space-x-6 text-sm">
+                        <div class="flex items-center">
+                            <span class="text-green-400 mr-2">👥</span>
+                            <span>{{ $totalMembers ?? '25K+' }} membres</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-blue-400 mr-2">🌏</span>
+                            <span>{{ $totalCountries ?? '150+' }} pays</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation rapide -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="mr-2">🚀</span>
+                        Navigation
+                    </h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="/" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                <span class="mr-2">🏠</span>Accueil
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/about" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                <span class="mr-2">ℹ️</span>À propos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/contact" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                <span class="mr-2">✉️</span>Contact
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('terms') }}" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                <span class="mr-2">📋</span>Conditions d'utilisation
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('privacy') }}" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                <span class="mr-2">🔒</span>Confidentialité
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('legal') }}" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                <span class="mr-2">⚖️</span>Mentions légales
+                            </a>
+                        </li>
+                        @guest
+                            <li>
+                                <a href="{{ route('register') }}" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                    <span class="mr-2">📝</span>Inscription
+                                </a>
+                            </li>
+                        @else
+                            <li>
+                                <a href="{{ route('profile.show') }}" class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                    <span class="mr-2">👤</span>Mon profil
+                                </a>
+                            </li>
+                        @endguest
+                    </ul>
+                </div>
+
+                <!-- Destinations populaires -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="mr-2">✈️</span>
+                        Destinations
+                    </h4>
+                    <ul class="space-y-2">
+                        @foreach($allCountries->take(4) as $country)
+                            <li>
+                                <a href="{{ route('country.index', $country->slug) }}" 
+                                   class="text-gray-300 hover:text-yellow-400 transition duration-300 flex items-center">
+                                    <span class="mr-2">{{ $country->emoji }}</span>
+                                    {{ $country->name_fr }}
+                                </a>
+                            </li>
+                        @endforeach
+                        @if($allCountries->count() > 4)
+                            <li>
+                                <span class="text-gray-400 text-sm flex items-center">
+                                    <span class="mr-2">🌟</span>
+                                    Et {{ $allCountries->count() - 4 }} autres pays...
+                                </span>
+                            </li>
+                        @endif
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-700 my-8"></div>
+
+            <!-- Bottom section -->
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                    &copy; {{ date('Y') }} Sekaijin - Communauté des expatriés français. Tous droits réservés.
+                </div>
+                
+                <!-- Social links (placeholder) -->
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-400 text-sm">Rejoignez-nous :</span>
+                    <div class="flex space-x-3">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-300" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-300" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-300" title="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Made with love -->
+            <div class="text-center mt-6 pt-4 border-t border-gray-700">
+                <p class="text-gray-500 text-sm flex items-center justify-center">
+                    Fait avec <span class="text-red-500 mx-1">❤️</span> pour les expatriés français
+                    <span class="ml-2">🇫🇷</span>
+                </p>
+            </div>
         </div>
     </footer>
 </body>

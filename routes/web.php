@@ -27,6 +27,19 @@ Route::get('/contact', function () {
     return view('contact');
 });
 
+// Pages légales
+Route::get('/conditions-utilisation', function () {
+    return view('legal.terms');
+})->name('terms');
+
+Route::get('/politique-confidentialite', function () {
+    return view('legal.privacy');
+})->name('privacy');
+
+Route::get('/mentions-legales', function () {
+    return view('legal.mentions');
+})->name('legal');
+
 // Routes d'authentification
 Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
 Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:10,1');

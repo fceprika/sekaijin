@@ -158,8 +158,8 @@
                                         <input id="terms_step1" name="terms" type="checkbox" required
                                             class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-0.5 mr-3">
                                         <span class="text-sm text-gray-700">
-                                            J'accepte les <a href="#" class="text-blue-600 hover:text-blue-800 underline">conditions d'utilisation</a> 
-                                            et la <a href="#" class="text-blue-600 hover:text-blue-800 underline">politique de confidentialité</a> *
+                                            J'accepte les <a href="{{ route('terms') }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">conditions d'utilisation</a> 
+                                            et la <a href="{{ route('privacy') }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">politique de confidentialité</a> *
                                         </span>
                                     </label>
                                 </div>
