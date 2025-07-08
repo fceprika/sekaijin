@@ -96,7 +96,7 @@
                                 </div>
 
                                 <!-- Pays d'intérêt (forcé à Thaïlande pour le moment) -->
-                                <input type="hidden" id="country_interest" name="country_interest" value="Thaïlande">
+                                <input type="hidden" id="destination_country" name="destination_country" value="Thaïlande">
                                 
                                 <!-- Message informatif -->
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Éléments du formulaire
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
-    const countryInterestSelect = document.getElementById('country_interest');
+    const destinationCountryInput = document.getElementById('destination_country');
     const passwordInput = document.getElementById('password_step1');
     const passwordConfirmInput = document.getElementById('password_confirmation_step1');
     const avatarInput = document.getElementById('avatar');
