@@ -131,9 +131,10 @@
         }
         
         .tips li {
-            margin-bottom: 8px;
-            padding-left: 20px;
+            margin-bottom: 12px;
+            padding-left: 25px;
             position: relative;
+            line-height: 1.6;
         }
         
         .tips li:before {
@@ -142,6 +143,8 @@
             left: 0;
             color: #48bb78;
             font-weight: bold;
+            font-size: 16px;
+            margin-right: 8px;
         }
         
         .footer {
@@ -234,16 +237,16 @@
             <!-- Statistics -->
             <div class="stats">
                 <div class="stat">
-                    <div class="stat-number">25K+</div>
+                    <div class="stat-number">{{ $totalMembers ?? 12 }}+</div>
                     <div class="stat-label">Membres actifs</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">150+</div>
+                    <div class="stat-number">{{ $countriesCovered ?? 3 }}+</div>
                     <div class="stat-label">Pays couverts</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">1000+</div>
-                    <div class="stat-label">Conversations par mois</div>
+                    <div class="stat-number">{{ $totalContent ?? 20 }}+</div>
+                    <div class="stat-label">Articles & actualités</div>
                 </div>
             </div>
             

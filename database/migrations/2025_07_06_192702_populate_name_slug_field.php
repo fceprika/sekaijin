@@ -12,14 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Populate name_slug for existing users
-        DB::statement('UPDATE users SET name_slug = LOWER(name) WHERE name_slug IS NULL');
+        // Populate name_slug for existing users where it's NULL or empty
+        DB::statement('UPDATE users SET name_slug = LOWER(name) WHERE name_slug IS NULL OR name_slug = ""');
         
         // Make name_slug NOT NULL after populating
         Schema::table('users', function (Blueprint $table) {
             $table->string('name_slug')->nullable(false)->change();
-            $table->unique('name_slug', 'idx_users_name_slug_unique');
         });
+        
+        // Add unique constraint separately with try-catch
+        try {
+            Schema::table('users', function (Blueprint $table) {
+                $table->unique('name_slug', 'idx_users_name_slug_unique');
+            });
+        } catch (\Exception $e) {
+            // Unique constraint might already exist, ignore error
+        }
     }
 
     /**
@@ -28,7 +36,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropUnique('idx_users_name_slug_unique');
+            try {
+                $table->dropUnique('idx_users_name_slug_unique');
+            } catch (\Exception $e) {
+                // Unique constraint might not exist, ignore error
+            }
             $table->string('name_slug')->nullable()->change();
         });
         
