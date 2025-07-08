@@ -408,21 +408,12 @@
                     &copy; {{ date('Y') }} Sekaijin - Communauté des expatriés français. Tous droits réservés.
                 </div>
                 
-                <!-- Social links (placeholder) -->
+                <!-- Social links -->
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-400 text-sm">Rejoignez-nous :</span>
                     <div class="flex space-x-3">
-                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-300" title="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-300" title="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-pink-400 transition duration-300" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-blue-400 transition duration-300" title="LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
+                        <a href="https://discord.gg/uz9DnRBMJc" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-indigo-400 transition duration-300" title="Discord">
+                            <i class="fab fa-discord"></i>
                         </a>
                     </div>
                 </div>
