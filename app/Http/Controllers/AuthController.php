@@ -236,11 +236,11 @@ class AuthController extends Controller
             }
             
             // Check if username exists (case-insensitive)
-            $exists = User::where('name', 'LIKE', $cleanedUsername)->exists();
+            $exists = User::whereRaw('LOWER(name) = ?', [strtolower($cleanedUsername)])->exists();
             
             // Also check if the generated slug would conflict
             $slug = User::generateSlug($cleanedUsername);
-            $slugExists = User::where('name_slug', $slug)->exists();
+            $slugExists = User::whereRaw('LOWER(name_slug) = ?', [strtolower($slug)])->exists();
             
             if ($exists || $slugExists) {
                 return response()->json([
@@ -268,7 +268,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Get city name from coordinates using reverse geocoding with caching
+     * Get city name from coordinates using reverse geocoding with caching and retry logic
      */
     private function getCityFromCoordinates(float $latitude, float $longitude): string
     {
@@ -278,54 +278,154 @@ class AuthController extends Controller
             $roundedLng = round($longitude, 2);
             $cacheKey = "geocoding_{$roundedLat}_{$roundedLng}";
             
-            // Check cache first (5 minute cache)
+            // Check cache first (1 hour cache for successful responses)
             if (\Cache::has($cacheKey)) {
                 return \Cache::get($cacheKey);
             }
             
-            // Use a free geocoding service (Nominatim OpenStreetMap)
-            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=10&addressdetails=1";
-            
-            $context = stream_context_create([
-                'http' => [
-                    'timeout' => 5,
-                    'user_agent' => 'Sekaijin/1.0 (contact@sekaijin.com)'
-                ]
-            ]);
-            
-            $response = file_get_contents($url, false, $context);
-            
-            if ($response === false) {
-                throw new \Exception('Failed to fetch geocoding data');
-            }
-
-            $data = json_decode($response, true);
-            
-            if (!$data || !isset($data['address'])) {
-                throw new \Exception('Invalid geocoding response');
+            // Check if we have a recent failure cached (5 minute cache for failures)
+            $failureCacheKey = "geocoding_failure_{$roundedLat}_{$roundedLng}";
+            if (\Cache::has($failureCacheKey)) {
+                return 'Ville inconnue';
             }
             
-            // Extract city name from various possible fields
-            $address = $data['address'];
-            $city = $address['city'] ?? 
-                   $address['town'] ?? 
-                   $address['village'] ?? 
-                   $address['county'] ?? 
-                   $address['state'] ?? 
-                   'Ville inconnue';
-
-            // Cache the result for 5 minutes
-            \Cache::put($cacheKey, $city, 300);
-
-            return $city;
+            $city = $this->attemptGeocoding($latitude, $longitude);
+            
+            if ($city && $city !== 'Ville inconnue') {
+                // Cache successful result for 1 hour
+                \Cache::put($cacheKey, $city, 3600);
+                return $city;
+            } else {
+                // Cache failure for 5 minutes to avoid repeated requests
+                \Cache::put($failureCacheKey, true, 300);
+                return 'Ville inconnue';
+            }
+            
         } catch (\Exception $e) {
             \Log::warning('Failed to get city from coordinates', [
                 'latitude' => $latitude,
                 'longitude' => $longitude,
                 'error' => $e->getMessage()
             ]);
+            
+            // Cache failure for 5 minutes
+            $failureCacheKey = "geocoding_failure_{$roundedLat}_{$roundedLng}";
+            \Cache::put($failureCacheKey, true, 300);
+            
             return 'Ville inconnue';
         }
+    }
+    
+    /**
+     * Attempt geocoding with retry logic and multiple fallback APIs
+     */
+    private function attemptGeocoding(float $latitude, float $longitude): string
+    {
+        $apis = [
+            // Primary: Nominatim OpenStreetMap
+            [
+                'url' => "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=10&addressdetails=1",
+                'headers' => [
+                    'User-Agent: Sekaijin/1.0 (contact@sekaijin.com)',
+                    'Accept: application/json'
+                ],
+                'parser' => 'parseNominatimResponse'
+            ],
+            // Fallback: OpenCage (if you have an API key)
+            // [
+            //     'url' => "https://api.opencagedata.com/geocode/v1/json?q={$latitude}+{$longitude}&key=YOUR_API_KEY",
+            //     'headers' => ['Accept: application/json'],
+            //     'parser' => 'parseOpenCageResponse'
+            // ]
+        ];
+        
+        foreach ($apis as $api) {
+            $maxRetries = 2;
+            $retryDelay = 1; // seconds
+            
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $context = stream_context_create([
+                        'http' => [
+                            'timeout' => 8,
+                            'method' => 'GET',
+                            'header' => implode("\r\n", $api['headers']),
+                            'ignore_errors' => true
+                        ]
+                    ]);
+                    
+                    $response = file_get_contents($api['url'], false, $context);
+                    
+                    if ($response === false) {
+                        throw new \Exception('HTTP request failed');
+                    }
+                    
+                    // Check HTTP status code
+                    $httpStatus = $this->parseHttpStatus($http_response_header ?? []);
+                    if ($httpStatus >= 400) {
+                        throw new \Exception("HTTP {$httpStatus} error");
+                    }
+                    
+                    $city = $this->{$api['parser']}($response);
+                    
+                    if ($city && $city !== 'Ville inconnue') {
+                        return $city;
+                    }
+                    
+                    break; // Don't retry if parsing was successful but no city found
+                    
+                } catch (\Exception $e) {
+                    \Log::debug("Geocoding attempt {$attempt} failed", [
+                        'api' => $api['url'],
+                        'error' => $e->getMessage(),
+                        'latitude' => $latitude,
+                        'longitude' => $longitude
+                    ]);
+                    
+                    if ($attempt < $maxRetries) {
+                        sleep($retryDelay);
+                        $retryDelay *= 2; // Exponential backoff
+                    }
+                }
+            }
+        }
+        
+        return 'Ville inconnue';
+    }
+    
+    /**
+     * Parse HTTP status from response headers
+     */
+    private function parseHttpStatus(array $headers): int
+    {
+        foreach ($headers as $header) {
+            if (preg_match('/^HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
+                return (int) $matches[1];
+            }
+        }
+        return 200; // Default to OK if not found
+    }
+    
+    /**
+     * Parse Nominatim API response
+     */
+    private function parseNominatimResponse(string $response): string
+    {
+        $data = json_decode($response, true);
+        
+        if (!$data || !isset($data['address'])) {
+            return 'Ville inconnue';
+        }
+        
+        // Extract city name from various possible fields
+        $address = $data['address'];
+        return $address['city'] ?? 
+               $address['town'] ?? 
+               $address['village'] ?? 
+               $address['municipality'] ?? 
+               $address['county'] ?? 
+               $address['state'] ?? 
+               'Ville inconnue';
     }
 
     /**

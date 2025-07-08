@@ -679,6 +679,74 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     });
     
+    // Variables globales pour la géolocalisation
+    let userGeolocation = null;
+    let geolocationRequested = false;
+    
+    // Gestion du checkbox de géolocalisation
+    const shareLocationCheckbox = document.getElementById('share_location');
+    if (shareLocationCheckbox) {
+        shareLocationCheckbox.addEventListener('change', async function() {
+            if (this.checked && !geolocationRequested && 'geolocation' in navigator) {
+                geolocationRequested = true;
+                
+                // Afficher un indicateur de demande de géolocalisation
+                const geoStatus = document.createElement('div');
+                geoStatus.id = 'geo-status';
+                geoStatus.className = 'mt-2 text-sm text-blue-600';
+                geoStatus.textContent = '📍 Demande d\'autorisation de géolocalisation...';
+                this.parentNode.appendChild(geoStatus);
+                
+                try {
+                    const position = await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => {
+                            reject(new Error('Timeout'));
+                        }, 10000); // 10 secondes timeout
+                        
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                clearTimeout(timeout);
+                                resolve(pos);
+                            },
+                            (err) => {
+                                clearTimeout(timeout);
+                                reject(err);
+                            },
+                            {
+                                enableHighAccuracy: false,
+                                timeout: 8000,
+                                maximumAge: 300000 // 5 minutes
+                            }
+                        );
+                    });
+                    
+                    userGeolocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    
+                    geoStatus.textContent = '✅ Géolocalisation obtenue';
+                    geoStatus.className = 'mt-2 text-sm text-green-600';
+                    
+                } catch (geoError) {
+                    console.warn('Impossible d\'obtenir la géolocalisation:', geoError);
+                    userGeolocation = null;
+                    geoStatus.textContent = '❌ Géolocalisation non disponible (optionnel)';
+                    geoStatus.className = 'mt-2 text-sm text-orange-600';
+                    
+                    // Ne pas décocher automatiquement, laisser l'utilisateur décider
+                }
+                
+                // Supprimer le message après 3 secondes
+                setTimeout(() => {
+                    if (geoStatus && geoStatus.parentNode) {
+                        geoStatus.parentNode.removeChild(geoStatus);
+                    }
+                }, 3000);
+            }
+        });
+    }
+    
     // Soumission du formulaire étape 2 (enrichissement du profil)
     step2Form.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -686,7 +754,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const enrichBtn = document.getElementById('enrich-profile-btn');
         const enrichText = document.getElementById('enrich-text');
         const enrichLoading = document.getElementById('enrich-loading');
-        const shareLocationCheckbox = document.getElementById('share_location');
         
         // Désactiver le bouton et afficher le loading
         enrichBtn.disabled = true;
@@ -696,18 +763,10 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const formData = new FormData(this);
             
-            // Ajouter les coordonnées de géolocalisation si demandées
-            if (shareLocationCheckbox.checked && 'geolocation' in navigator) {
-                try {
-                    const position = await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(resolve, reject);
-                    });
-                    
-                    formData.append('initial_latitude', position.coords.latitude);
-                    formData.append('initial_longitude', position.coords.longitude);
-                } catch (geoError) {
-                    console.warn('Impossible d\'obtenir la géolocalisation:', geoError);
-                }
+            // Ajouter les coordonnées si disponibles et si l'utilisateur a coché la case
+            if (shareLocationCheckbox && shareLocationCheckbox.checked && userGeolocation) {
+                formData.append('initial_latitude', userGeolocation.latitude);
+                formData.append('initial_longitude', userGeolocation.longitude);
             }
             
             const response = await fetch(this.action, {
