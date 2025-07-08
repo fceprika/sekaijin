@@ -34,7 +34,8 @@
       "Bash(git branch:*)",
       "Bash(sed:*)",
       "Bash(gh pr close:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
