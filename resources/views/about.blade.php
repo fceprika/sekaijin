@@ -13,8 +13,8 @@
         <!-- Nos débuts -->
         <div class="mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="rounded-lg h-64 overflow-hidden">
-                    <img src="{{ asset('images/my_story.webp') }}" alt="Nos débuts - Histoire de Wecko" class="w-full h-full object-cover rounded-lg">
+                <div class="rounded-lg h-64 overflow-hidden shadow-lg">
+                    <img src="{{ asset('images/my_story.webp') }}" alt="Nos débuts - Histoire de Wecko" class="w-full h-full object-cover object-center">
                 </div>
                 <div>
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Nos débuts</h2>
@@ -61,8 +61,8 @@
                         repère qui manquait à beaucoup.
                     </p>
                 </div>
-                <div class="order-1 lg:order-2 rounded-lg h-64 overflow-hidden">
-                    <img src="{{ asset('images/mission.webp') }}" alt="Notre mission - Connecter les expatriés français" class="w-full h-full object-cover rounded-lg">
+                <div class="order-1 lg:order-2 rounded-lg h-64 overflow-hidden shadow-lg">
+                    <img src="{{ asset('images/mission.webp') }}" alt="Notre mission - Connecter les expatriés français" class="w-full h-full object-cover object-center">
                 </div>
             </div>
         </div>
@@ -70,8 +70,8 @@
         <!-- Notre communauté aujourd'hui -->
         <div class="mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="rounded-lg h-64 overflow-hidden">
-                    <img src="{{ asset('images/about-community.webp') }}" alt="Notre communauté - Expatriés français connectés" class="w-full h-full object-cover rounded-lg">
+                <div class="rounded-lg h-64 overflow-hidden shadow-lg">
+                    <img src="{{ asset('images/about-community.webp') }}" alt="Notre communauté - Expatriés français connectés" class="w-full h-full object-cover object-center">
                 </div>
                 <div>
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Notre communauté aujourd'hui</h2>
