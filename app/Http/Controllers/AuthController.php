@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Mail\WelcomeEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -80,6 +82,22 @@ class AuthController extends Controller
 
         // Connecter l'utilisateur immédiatement
         Auth::login($user);
+
+        // Envoyer l'email de bienvenue (en arrière-plan, ne pas bloquer si échec)
+        try {
+            Mail::to($user->email)->send(new WelcomeEmail($user));
+            \Log::info('Welcome email sent successfully', [
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send welcome email', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage()
+            ]);
+            // Ne pas échouer l'inscription si l'email ne peut pas être envoyé
+        }
 
         // Retourner une réponse JSON pour l'étape 2
         return response()->json([
