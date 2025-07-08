@@ -111,9 +111,45 @@ class News extends Model
         });
         
         static::updating(function ($news) {
-            if ($news->isDirty('title') && empty($news->slug)) {
+            // Regenerate slug if title changed OR if slug is empty OR if force update is requested
+            if ($news->isDirty('title') && (empty($news->slug) || $news->shouldForceSlugUpdate())) {
                 $news->slug = self::generateSlug($news->title, $news->id);
             }
         });
+        
+        // Invalidate content cache when news is created, updated, or deleted
+        static::created(function ($news) {
+            \App\Services\ContentCacheService::invalidateContentCache();
+        });
+        
+        static::updated(function ($news) {
+            \App\Services\ContentCacheService::invalidateContentCache();
+        });
+        
+        static::deleted(function ($news) {
+            \App\Services\ContentCacheService::invalidateContentCache();
+        });
+    }
+    
+    /**
+     * Temporary flag for forcing slug update (not persisted to DB)
+     */
+    private $forceSlugUpdateFlag = false;
+    
+    /**
+     * Force slug regeneration on next save
+     */
+    public function forceSlugUpdate()
+    {
+        $this->forceSlugUpdateFlag = true;
+        return $this;
+    }
+    
+    /**
+     * Check if force slug update is requested
+     */
+    public function shouldForceSlugUpdate()
+    {
+        return $this->forceSlugUpdateFlag;
     }
 }
