@@ -15,6 +15,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+// Maintenance status route (for checking if maintenance is enabled)
+Route::get('/maintenance-status', function () {
+    return response()->json([
+        'maintenance_mode' => config('app.maintenance_mode', false),
+        'message' => config('app.maintenance_mode', false) ? 'Site en maintenance' : 'Site disponible'
+    ]);
+})->name('maintenance.status');
+
 Route::get('/about', function () {
     return view('about');
 });
@@ -25,7 +33,7 @@ Route::get('/services', function () {
 
 Route::get('/contact', function () {
     return view('contact');
-});
+})->name('contact');
 
 // Pages légales
 Route::get('/conditions-utilisation', function () {
