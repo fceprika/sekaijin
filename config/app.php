@@ -46,6 +46,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Maintenance Mode
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether the application is in maintenance mode.
+    | When enabled, users will see a maintenance page while admins can still
+    | access the site normally.
+    |
+    */
+
+    'maintenance_mode' => (bool) env('MAINTENANCE_MODE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |
