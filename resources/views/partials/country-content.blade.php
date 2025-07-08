@@ -23,7 +23,8 @@
             <div class="space-y-6">
                 @if($country && $news->count() > 0)
                     @foreach($news as $index => $newsItem)
-                        <a href="{{ route('country.news.show', [$countrySlug, $newsItem->slug]) }}" class="block">
+                        @if($newsItem->slug)
+                            <a href="{{ route('country.news.show', [$countrySlug, $newsItem->slug]) }}" class="block">
                             <article class="{{ $index === 0 ? 'border border-orange-200 rounded-lg p-4 hover:border-orange-400 hover:shadow-md' : 'p-4 border-b border-gray-100 hover:bg-gray-50 rounded-lg' }} transition-all duration-200 cursor-pointer">
                                 @if($index === 0)
                                     <div class="flex items-center space-x-2 mb-3">
@@ -49,6 +50,7 @@
                                 </div>
                             </article>
                         </a>
+                        @endif
                     @endforeach
                 @else
                     <div class="text-center py-8">

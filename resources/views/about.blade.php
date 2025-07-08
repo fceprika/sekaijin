@@ -13,8 +13,8 @@
         <!-- Nos débuts -->
         <div class="mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                    <span class="text-gray-500">Image - Nos débuts</span>
+                <div class="rounded-lg h-64 overflow-hidden">
+                    <img src="{{ asset('images/my_story.webp') }}" alt="Nos débuts - Histoire de Wecko" class="w-full h-full object-cover rounded-lg">
                 </div>
                 <div>
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Nos débuts</h2>
@@ -61,8 +61,8 @@
                         repère qui manquait à beaucoup.
                     </p>
                 </div>
-                <div class="order-1 lg:order-2 bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                    <span class="text-gray-500">Image - Notre mission</span>
+                <div class="order-1 lg:order-2 rounded-lg h-64 overflow-hidden">
+                    <img src="{{ asset('images/mission.webp') }}" alt="Notre mission - Connecter les expatriés français" class="w-full h-full object-cover rounded-lg">
                 </div>
             </div>
         </div>
@@ -70,8 +70,8 @@
         <!-- Notre communauté aujourd'hui -->
         <div class="mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                    <span class="text-gray-500">Image - Notre communauté</span>
+                <div class="rounded-lg h-64 overflow-hidden">
+                    <img src="{{ asset('images/about-community.webp') }}" alt="Notre communauté - Expatriés français connectés" class="w-full h-full object-cover rounded-lg">
                 </div>
                 <div>
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Notre communauté aujourd'hui</h2>
@@ -153,8 +153,8 @@
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 shadow-lg">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                         <div class="md:col-span-1 text-center">
-                            <div class="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
-                                <span class="text-gray-500 text-sm">Photo Wecko</span>
+                            <div class="w-32 h-32 mx-auto mb-4 overflow-hidden rounded-full">
+                                <img src="{{ asset('images/wecko_avatar.webp') }}" alt="Wecko - Fondateur de Sekaijin" class="w-full h-full object-cover">
                             </div>
                             <h3 class="text-2xl font-semibold text-gray-800 mb-2">Wecko</h3>
                             <p class="text-blue-600 font-medium">Fondateur de Sekaijin</p>
