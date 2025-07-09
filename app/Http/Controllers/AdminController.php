@@ -183,34 +183,53 @@ class AdminController extends Controller
      */
     public function previewArticle(Request $request)
     {
-        $data = $request->all();
+        // Validate input data
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'required|string',
+            'category' => 'nullable|string|in:témoignage,guide-pratique,travail,lifestyle,cuisine',
+            'country_id' => 'nullable|exists:countries,id',
+            'is_featured' => 'nullable|boolean',
+            'is_published' => 'nullable|boolean',
+            'published_at' => 'nullable|date',
+            'views' => 'nullable|integer|min:0',
+            'likes' => 'nullable|integer|min:0',
+            'reading_time' => 'nullable|string|max:50'
+        ]);
         
-        // Debug: Log received data
-        \Log::info('Preview Article Data:', $data);
+        // Debug logging only in development
+        if (config('app.debug')) {
+            \Log::debug('Preview Article Data', ['title' => $validatedData['title'], 'category' => $validatedData['category'] ?? 'N/A']);
+        }
         
         // Create a temporary article object for preview
         $article = new Article();
         
-        // Set attributes directly instead of using fill()
-        $article->id = $data['id'] ?? null;
-        $article->title = $data['title'] ?? 'Article sans titre';
-        $article->slug = $data['slug'] ?? ($data['title'] ? \Str::slug($data['title']) : 'article-sans-titre');
-        $article->excerpt = $data['excerpt'] ?? null;
-        $article->content = $data['content'] ?? '';
-        $article->category = $data['category'] ?? 'témoignage';
-        $article->country_id = $data['country_id'] ?? null;
+        // Set attributes directly with validated data
+        $article->id = $validatedData['id'] ?? null;
+        $article->title = $validatedData['title'];
+        $article->slug = $validatedData['slug'] ?? \Str::slug($validatedData['title']);
+        $article->excerpt = $validatedData['excerpt'] ?? null;
+        $article->content = $validatedData['content'];
+        $article->category = $validatedData['category'] ?? 'témoignage';
+        $article->country_id = $validatedData['country_id'] ?? null;
         $article->author_id = auth()->id();
-        $article->is_featured = isset($data['is_featured']) ? (bool)$data['is_featured'] : false;
-        $article->is_published = isset($data['is_published']) ? (bool)$data['is_published'] : false;
-        $article->published_at = $data['published_at'] ?? now();
-        $article->views = $data['views'] ?? 0;
-        $article->likes = $data['likes'] ?? 0;
-        $article->reading_time = $data['reading_time'] ?? null;
+        $article->is_featured = $validatedData['is_featured'] ?? false;
+        $article->is_published = $validatedData['is_published'] ?? false;
+        $article->published_at = $validatedData['published_at'] ? \Carbon\Carbon::parse($validatedData['published_at']) : now();
+        $article->views = $validatedData['views'] ?? 0;
+        $article->likes = $validatedData['likes'] ?? 0;
+        $article->reading_time = $validatedData['reading_time'] ?? null;
         
-        // Load relationships manually for preview
-        $article->author = auth()->user();
-        if (!empty($data['country_id'])) {
-            $article->country = \App\Models\Country::find($data['country_id']);
+        // Set relationships properly using setRelation
+        $article->setRelation('author', auth()->user());
+        if (!empty($validatedData['country_id'])) {
+            $country = \App\Models\Country::find($validatedData['country_id']);
+            if ($country) {
+                $article->setRelation('country', $country);
+            }
         }
         
         // Generate SEO data for preview
@@ -226,32 +245,51 @@ class AdminController extends Controller
      */
     public function previewNews(Request $request)
     {
-        $data = $request->all();
+        // Validate input data
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'required|string',
+            'category' => 'nullable|string|in:administrative,vie-pratique,culture,economie',
+            'country_id' => 'nullable|exists:countries,id',
+            'is_featured' => 'nullable|boolean',
+            'is_published' => 'nullable|boolean',
+            'published_at' => 'nullable|date',
+            'views' => 'nullable|integer|min:0',
+            'image_url' => 'nullable|url|max:500'
+        ]);
         
-        // Debug: Log received data
-        \Log::info('Preview News Data:', $data);
+        // Debug logging only in development
+        if (config('app.debug')) {
+            \Log::debug('Preview News Data', ['title' => $validatedData['title'], 'category' => $validatedData['category'] ?? 'N/A']);
+        }
         
         // Create a temporary news object for preview
         $news = new News();
         
-        // Set attributes directly instead of using fill()
-        $news->id = $data['id'] ?? null;
-        $news->title = $data['title'] ?? 'Actualité sans titre';
-        $news->slug = $data['slug'] ?? ($data['title'] ? \Str::slug($data['title']) : 'actualite-sans-titre');
-        $news->excerpt = $data['excerpt'] ?? null;
-        $news->content = $data['content'] ?? '';
-        $news->category = $data['category'] ?? 'administrative';
-        $news->country_id = $data['country_id'] ?? null;
+        // Set attributes directly with validated data
+        $news->id = $validatedData['id'] ?? null;
+        $news->title = $validatedData['title'];
+        $news->slug = $validatedData['slug'] ?? \Str::slug($validatedData['title']);
+        $news->excerpt = $validatedData['excerpt'] ?? null;
+        $news->content = $validatedData['content'];
+        $news->category = $validatedData['category'] ?? 'administrative';
+        $news->country_id = $validatedData['country_id'] ?? null;
         $news->author_id = auth()->id();
-        $news->is_featured = isset($data['is_featured']) ? (bool)$data['is_featured'] : false;
-        $news->is_published = isset($data['is_published']) ? (bool)$data['is_published'] : false;
-        $news->published_at = $data['published_at'] ?? now();
-        $news->views = $data['views'] ?? 0;
+        $news->is_featured = $validatedData['is_featured'] ?? false;
+        $news->is_published = $validatedData['is_published'] ?? false;
+        $news->published_at = $validatedData['published_at'] ? \Carbon\Carbon::parse($validatedData['published_at']) : now();
+        $news->views = $validatedData['views'] ?? 0;
+        $news->image_url = $validatedData['image_url'] ?? null;
         
-        // Load relationships manually for preview
-        $news->author = auth()->user();
-        if (!empty($data['country_id'])) {
-            $news->country = \App\Models\Country::find($data['country_id']);
+        // Set relationships properly using setRelation
+        $news->setRelation('author', auth()->user());
+        if (!empty($validatedData['country_id'])) {
+            $country = \App\Models\Country::find($validatedData['country_id']);
+            if ($country) {
+                $news->setRelation('country', $country);
+            }
         }
         
         // Generate SEO data for preview
