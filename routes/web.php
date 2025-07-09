@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+// SEO Routes
+Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/sitemap/clear', [App\Http\Controllers\SitemapController::class, 'clearCache'])->name('sitemap.clear');
+
 // Maintenance status route (for checking if maintenance is enabled)
 Route::get('/maintenance-status', function () {
     return response()->json([
@@ -30,7 +34,10 @@ Route::get('/clear-cache', function () {
 });
 
 Route::get('/about', function () {
-    return view('about');
+    $seoService = new \App\Services\SeoService();
+    $seoData = $seoService->generateSeoData('about');
+    $structuredData = $seoService->generateStructuredData('about');
+    return view('about', compact('seoData', 'structuredData'));
 });
 
 Route::get('/services', function () {
@@ -38,7 +45,10 @@ Route::get('/services', function () {
 });
 
 Route::get('/contact', function () {
-    return view('contact');
+    $seoService = new \App\Services\SeoService();
+    $seoData = $seoService->generateSeoData('contact');
+    $structuredData = $seoService->generateStructuredData('contact');
+    return view('contact', compact('seoData', 'structuredData'));
 })->name('contact');
 
 // Pages légales

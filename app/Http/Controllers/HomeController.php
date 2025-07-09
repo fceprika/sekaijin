@@ -11,6 +11,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Services\CommunityStatsService;
 use App\Services\ContentCacheService;
+use App\Services\SeoService;
 
 class HomeController extends Controller
 {
@@ -39,6 +40,11 @@ class HomeController extends Controller
                     ->get();
             });
             
+            // Generate SEO data for homepage
+            $seoService = new SeoService();
+            $seoData = $seoService->generateSeoData('home');
+            $structuredData = $seoService->generateStructuredData('home');
+            
             return view('home', [
                 'thailand' => $thailandContent['country'],
                 'thailandNews' => $thailandContent['news'],
@@ -47,6 +53,8 @@ class HomeController extends Controller
                 'totalMembers' => $communityStats['totalMembers'],
                 'thailandMembers' => $communityStats['thailandMembers'],
                 'recentMembers' => $recentMembers,
+                'seoData' => $seoData,
+                'structuredData' => $structuredData,
             ]);
             
         } catch (\Exception $e) {
@@ -62,6 +70,11 @@ class HomeController extends Controller
                 'thailandMembers' => 0,
                 'recentMembers' => collect(),
             ];
+            
+            // Add SEO data even for fallback
+            $seoService = new SeoService();
+            $fallbackData['seoData'] = $seoService->generateSeoData('home');
+            $fallbackData['structuredData'] = $seoService->generateStructuredData('home');
             
             return view('home', $fallbackData);
         }

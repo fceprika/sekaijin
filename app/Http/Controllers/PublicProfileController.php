@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use App\Services\SeoService;
 
 class PublicProfileController extends Controller
 {
@@ -44,6 +45,11 @@ class PublicProfileController extends Controller
             ->take(5)
             ->get();
         
-        return view('profile.public', compact('user', 'upcomingEvents', 'pastEvents'));
+        // Generate SEO data for profile page
+        $seoService = new SeoService();
+        $seoData = $seoService->generateSeoData('profile', $user);
+        $structuredData = $seoService->generateStructuredData('profile', $user);
+        
+        return view('profile.public', compact('user', 'upcomingEvents', 'pastEvents', 'seoData', 'structuredData'));
     }
 }
