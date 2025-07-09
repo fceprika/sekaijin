@@ -28,6 +28,11 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
+                <button type="button" onclick="previewArticle()" 
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-eye mr-2"></i>
+                    Prévisualisation
+                </button>
                 @if($article->is_published)
                     <a href="{{ route('country.article.show', [$article->country->slug, $article->slug]) }}" 
                        target="_blank"
@@ -339,6 +344,14 @@
         // Add current content from TinyMCE
         const content = tinymce.get('content').getContent();
         formData.set('content', content);
+        
+        // Ensure title, excerpt and slug are included
+        const title = document.getElementById('title').value;
+        const excerpt = document.getElementById('excerpt').value;
+        const slug = document.getElementById('slug').value;
+        formData.set('title', title);
+        formData.set('excerpt', excerpt);
+        formData.set('slug', slug);
         
         // Open preview in new tab
         const previewWindow = window.open('', '_blank');

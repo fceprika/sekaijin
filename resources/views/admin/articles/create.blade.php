@@ -11,11 +11,18 @@
                 <h1 class="text-3xl font-bold text-gray-800">Créer un Article</h1>
                 <p class="text-gray-600 mt-2">Rédigez un nouvel article pour la communauté</p>
             </div>
-            <a href="{{ route('admin.articles') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Retour à la liste
-            </a>
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="previewArticle()" 
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-eye mr-2"></i>
+                    Prévisualisation
+                </button>
+                <a href="{{ route('admin.articles') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour à la liste
+                </a>
+            </div>
         </div>
     </div>
 
@@ -241,6 +248,14 @@
         // Add current content from TinyMCE
         const content = tinymce.get('content').getContent();
         formData.set('content', content);
+        
+        // Ensure title, excerpt and slug are included
+        const title = document.getElementById('title').value;
+        const excerpt = document.getElementById('excerpt').value;
+        const slug = document.getElementById('slug').value;
+        formData.set('title', title);
+        formData.set('excerpt', excerpt);
+        formData.set('slug', slug);
         
         // Open preview in new tab
         const previewWindow = window.open('', '_blank');
