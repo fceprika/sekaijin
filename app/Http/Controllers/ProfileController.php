@@ -347,7 +347,7 @@ class ProfileController extends Controller
     private function addPrivacyOffset(float $coordinate): float
     {
         // Add small random offset for privacy (approximately 10km radius)
-        $offset = (rand(-500, 500) / 10000); // Random offset between -0.05 and 0.05 degrees
+        $offset = (random_int(-500, 500) / 10000); // Cryptographically secure random offset between -0.05 and 0.05 degrees
         return round($coordinate + $offset, 6);
     }
 }
