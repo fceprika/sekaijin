@@ -906,7 +906,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const countryResidence = document.getElementById('country_residence');
     const cityResidence = document.getElementById('city_residence');
     const cityLoading = document.getElementById('city-loading');
-    const shareLocationCheckbox = document.getElementById('share_location');
     const locationRequirementRegister = document.getElementById('location-requirement-register');
     
     // Fonction pour charger les villes dynamiquement
