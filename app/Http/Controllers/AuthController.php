@@ -154,16 +154,28 @@ class AuthController extends Controller
             }
         }
 
+        // Déterminer si on utilise le mode automatique ou manuel
+        $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
+        
+        $country = $useAutoMode ? $request->country_residence_auto : $request->country_residence;
+        $city = $useAutoMode ? $request->city_residence_auto : $request->city_residence;
+        
         // Mettre à jour les informations du profil
         $updateData = [
             'avatar' => $avatarPath,
-            'country_residence' => $request->country_residence,
-            'city_residence' => $request->city_residence,
+            'country_residence' => $country,
+            'city_residence' => $city,
             'is_visible_on_map' => $request->boolean('share_location', false),
         ];
         
-        // Récupérer les coordonnées de la ville sélectionnée
-        if ($request->filled('city_residence') && $request->filled('country_residence')) {
+        // Récupérer les coordonnées
+        if ($useAutoMode && $request->filled('detected_latitude') && $request->filled('detected_longitude')) {
+            // Mode automatique : utiliser les coordonnées détectées directement
+            $updateData['latitude'] = $request->detected_latitude;
+            $updateData['longitude'] = $request->detected_longitude;
+            $updateData['city_detected'] = $city;
+        } elseif ($request->filled('city_residence') && $request->filled('country_residence')) {
+            // Mode manuel : lookup des coordonnées depuis le JSON
             try {
                 $this->updateLocationCoordinates($updateData, $request->country_residence, $request->city_residence);
             } catch (\Exception $e) {

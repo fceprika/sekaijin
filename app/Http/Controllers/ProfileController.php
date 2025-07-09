@@ -119,6 +119,12 @@ class ProfileController extends Controller
             return back()->withErrors(['avatar' => 'Erreur lors du traitement de l\'image.'])->withInput();
         }
 
+        // Déterminer si on utilise le mode automatique ou manuel
+        $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
+        
+        $country = $useAutoMode ? $request->country_residence_auto : $request->country_residence;
+        $city = $useAutoMode ? $request->city_residence_auto : $request->city_residence;
+        
         // Mettre à jour les informations de l'utilisateur
         $updateData = [
             'name' => $request->name,
@@ -128,9 +134,9 @@ class ProfileController extends Controller
             'last_name' => $request->last_name,
             'birth_date' => $request->birth_date,
             'phone' => $request->phone,
-            'country_residence' => $request->country_residence,
+            'country_residence' => $country,
             'destination_country' => $request->destination_country,
-            'city_residence' => $request->city_residence,
+            'city_residence' => $city,
             'bio' => $request->bio,
             'youtube_username' => $request->youtube_username,
             'instagram_username' => $request->instagram_username,
@@ -142,8 +148,14 @@ class ProfileController extends Controller
             'is_visible_on_map' => $request->boolean('share_location', $request->boolean('share_location_hidden', false)),
         ];
 
-        // Récupérer les coordonnées de la ville sélectionnée
-        if ($request->filled('city_residence') && $request->filled('country_residence')) {
+        // Récupérer les coordonnées
+        if ($useAutoMode && $request->filled('detected_latitude') && $request->filled('detected_longitude')) {
+            // Mode automatique : utiliser les coordonnées détectées directement
+            $updateData['latitude'] = $request->detected_latitude;
+            $updateData['longitude'] = $request->detected_longitude;
+            $updateData['city_detected'] = $city;
+        } elseif ($request->filled('city_residence') && $request->filled('country_residence')) {
+            // Mode manuel : lookup des coordonnées depuis le JSON
             try {
                 $this->updateLocationCoordinates($updateData, $request->country_residence, $request->city_residence);
             } catch (\Exception $e) {
