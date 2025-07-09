@@ -79,6 +79,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/api/map-config', [App\Http\Controllers\Api\MapController::class, 'getMapConfig']);
     Route::get('/api/geocode', [App\Http\Controllers\Api\MapController::class, 'geocode']);
     Route::get('/api/check-username/{username}', [App\Http\Controllers\AuthController::class, 'checkUsername']);
+    Route::post('/api/cities', [App\Http\Controllers\Api\CityController::class, 'getCities']);
 });
 
 Route::middleware(['auth', 'throttle:10,1'])->group(function () {

@@ -193,9 +193,21 @@
                             
                             <div>
                                 <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">Ville de résidence</label>
-                                <input type="text" id="city_residence" name="city_residence" value="{{ old('city_residence', $user->city_residence) }}"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                    placeholder="Paris, Londres, Tokyo...">
+                                <select id="city_residence" name="city_residence" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                    <option value="">Sélectionnez d'abord un pays</option>
+                                    @if(old('city_residence', $user->city_residence))
+                                        <option value="{{ old('city_residence', $user->city_residence) }}" selected>{{ old('city_residence', $user->city_residence) }}</option>
+                                    @endif
+                                </select>
+                                <div id="city-loading" class="hidden mt-2 text-sm text-blue-600 flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Chargement des villes...
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Les villes sont chargées automatiquement selon votre pays. La géolocalisation est approximative (précision ~10km).</p>
                             </div>
                         </div>
                         
@@ -470,10 +482,71 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Écouter les changements
-    countryResidence.addEventListener('change', toggleDestinationCountry);
+    countryResidence.addEventListener('change', function() {
+        toggleDestinationCountry();
+        loadCitiesForCountry(this.value);
+    });
     
     // Vérifier au chargement
     toggleDestinationCountry();
+    
+    // Fonction pour charger les villes dynamiquement
+    function loadCitiesForCountry(countryName) {
+        const citySelect = document.getElementById('city_residence');
+        const cityLoading = document.getElementById('city-loading');
+        
+        // Vider le select et afficher le loading
+        citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
+        cityLoading.classList.remove('hidden');
+        
+        if (!countryName) {
+            citySelect.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
+            cityLoading.classList.add('hidden');
+            return;
+        }
+        
+        // Appel AJAX pour récupérer les villes
+        fetch('/api/cities', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ country: countryName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            cityLoading.classList.add('hidden');
+            citySelect.innerHTML = '<option value="">Choisissez une ville</option>';
+            
+            if (data.success && data.cities && data.cities.length > 0) {
+                data.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+                
+                // Restaurer la valeur sélectionnée si elle existe
+                const currentCity = '{{ old('city_residence', $user->city_residence) }}';
+                if (currentCity) {
+                    citySelect.value = currentCity;
+                }
+            } else {
+                citySelect.innerHTML = '<option value="">Aucune ville trouvée</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des villes:', error);
+            cityLoading.classList.add('hidden');
+            citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+        });
+    }
+    
+    // Charger les villes au chargement initial si un pays est sélectionné
+    if (countryResidence.value) {
+        loadCitiesForCountry(countryResidence.value);
+    }
     
     // Géolocalisation automatique (même logique que l'inscription)
     const geolocateBtn = document.getElementById('geolocate-btn');
