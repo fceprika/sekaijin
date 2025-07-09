@@ -192,10 +192,9 @@ class AdminController extends Controller
         $article->author_id = auth()->id();
         $article->published_at = $data['published_at'] ?? now();
         
-        // Ensure title is not null
-        if (empty($article->title)) {
-            $article->title = 'Article sans titre';
-        }
+        // Ensure title and excerpt are properly set
+        $article->title = $data['title'] ?? 'Article sans titre';
+        $article->excerpt = $data['excerpt'] ?? null;
         
         // Load relationships manually for preview
         $article->author = auth()->user();
@@ -225,10 +224,9 @@ class AdminController extends Controller
         $news->author_id = auth()->id();
         $news->published_at = $data['published_at'] ?? now();
         
-        // Ensure title is not null
-        if (empty($news->title)) {
-            $news->title = 'Actualité sans titre';
-        }
+        // Ensure title and excerpt are properly set
+        $news->title = $data['title'] ?? 'Actualité sans titre';
+        $news->excerpt = $data['excerpt'] ?? null;
         
         // Load relationships manually for preview
         $news->author = auth()->user();
