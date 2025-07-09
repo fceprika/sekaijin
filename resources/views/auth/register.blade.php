@@ -472,9 +472,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             formData.append('_token', csrfToken);
             
-            console.log('Submitting form to:', this.action);
-            console.log('Form data:', Object.fromEntries(formData.entries()));
-            
             const response = await fetch(this.action, {
                 method: 'POST',
                 body: formData,
@@ -483,19 +480,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            console.log('Response status:', response.status);
-            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-            
             const data = await response.json();
-            console.log('Response data:', data);
             
             if (data.success) {
                 // Compte créé avec succès, passer à l'étape 2
-                console.log('Registration successful, showing step 2');
                 showStep2(data.user);
             } else {
                 // Afficher les erreurs
-                console.log('Registration failed:', data);
                 if (data.errors) {
                     showErrors(data.errors);
                 } else {
