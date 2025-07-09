@@ -126,6 +126,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     
     // Upload d'images pour TinyMCE
     Route::post('/upload-image', [App\Http\Controllers\AdminController::class, 'uploadImage'])->name('upload.image');
+    
+    // Preview routes
+    Route::post('/articles/preview', [App\Http\Controllers\AdminController::class, 'previewArticle'])->name('articles.preview');
+    Route::post('/news/preview', [App\Http\Controllers\AdminController::class, 'previewNews'])->name('news.preview');
 });
 
 // Page d'invitation pour les non-membres

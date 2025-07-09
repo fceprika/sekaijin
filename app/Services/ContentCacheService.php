@@ -28,6 +28,7 @@ class ContentCacheService
                 $content[$country->slug] = [
                     'country' => $country,
                     'news' => News::where('country_id', $country->id)
+                        ->where('is_published', true)
                         ->with(['author' => function($query) {
                             $query->select('id', 'name', 'avatar', 'is_verified');
                         }])
@@ -36,6 +37,7 @@ class ContentCacheService
                         ->take(3)
                         ->get(),
                     'articles' => Article::where('country_id', $country->id)
+                        ->where('is_published', true)
                         ->with(['author' => function($query) {
                             $query->select('id', 'name', 'avatar', 'is_verified');
                         }])
@@ -44,6 +46,7 @@ class ContentCacheService
                         ->take(3)
                         ->get(),
                     'events' => Event::where('country_id', $country->id)
+                        ->where('is_published', true)
                         ->with(['organizer' => function($query) {
                             $query->select('id', 'name', 'is_verified');
                         }])

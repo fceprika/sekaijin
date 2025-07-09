@@ -256,6 +256,8 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Category Color Coding**: Dynamic badge colors for content categories (travel=blue, lifestyle=yellow, culture=purple, gastronomy=orange, etc.)
 - **Favicon Integration**: Site favicon properly organized in `/public/images/` directory for better asset management
 - **Clean Console Output**: Removed debug console messages for cleaner production experience
+- **Authentication-based UI**: Registration blocks hidden for logged-in users with `@guest` directive
+- **Admin URL Fixes**: "Voir en ligne" links use slugs instead of IDs for proper routing
 
 ### Recent Bug Fixes & Technical Improvements (July 2025)
 - **Route Generation Fix**: Resolved routing errors by using `.id` instead of `.slug` for content detail pages
@@ -264,6 +266,9 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Content Filtering**: Proper country-specific content filtering at database level for accurate homepage display
 - **Event Date Handling**: Upcoming events properly filtered using `where('start_date', '>=', now())` for relevance
 - **Collection Safety**: Uses Laravel collections with `collect()` fallbacks when no database records exist
+- **SEO Service Robustness**: Added null-safe operators (`?->`) and nullable parameter support throughout `SeoService`
+- **Content Publication Filtering**: Homepage only shows published content with `->where('is_published', true)` in `ContentCacheService`
+- **Admin Preview System**: Complete preview functionality with production-identical templates and fetch API integration
 
 ### Country-Based Site Architecture (July 2025)
 - **Dynamic Country Routing**: Site structured around countries with prefixed routes (`/thailande/*`, `/japon/*`)
@@ -430,6 +435,11 @@ Route::delete('/evenements/{event}', [EventController::class, 'destroy'])->name(
 - **Admin Views**: Complete UI in `resources/views/admin/` with dashboard, articles, news management
 - **Search & Filters**: Advanced filtering by status, country, category, and search terms
 - **Bulk Operations**: Multi-select actions for efficient content management
+- **Preview System**: Real-time content preview functionality with production-identical templates
+  - Routes: `/admin/articles/preview` and `/admin/news/preview` (POST)
+  - Templates: `resources/views/admin/articles/preview.blade.php` and `resources/views/admin/news/preview.blade.php`
+  - JavaScript integration with fetch API for seamless preview experience
+  - New tab opening instead of popup windows for better UX
 
 ### User Location & Geolocation System
 - **Enhanced User Schema**: Additional fields for location sharing

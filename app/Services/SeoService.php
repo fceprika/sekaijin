@@ -100,9 +100,9 @@ class SeoService
             'type' => 'article',
             'article' => [
                 'published_time' => $article->published_at?->toISOString(),
-                'modified_time' => $article->updated_at->toISOString(),
+                'modified_time' => $article->updated_at?->toISOString() ?? now()->toISOString(),
                 'author' => $article->author->name ?? 'Sekaijin',
-                'section' => $this->getCategoryDisplayName($article->category),
+                'section' => $this->getCategoryDisplayName($article->category ?? null),
                 'tag' => [$article->category, $article->country->name_fr ?? '']
             ]
         ];
@@ -121,7 +121,7 @@ class SeoService
             'type' => 'article',
             'article' => [
                 'published_time' => $news->published_at?->toISOString(),
-                'modified_time' => $news->updated_at->toISOString(),
+                'modified_time' => $news->updated_at?->toISOString() ?? now()->toISOString(),
                 'author' => $news->author->name ?? 'Sekaijin',
                 'section' => 'Actualités',
                 'tag' => [$news->category, $news->country->name_fr ?? '']
@@ -209,7 +209,7 @@ class SeoService
     /**
      * Generate keywords from content
      */
-    private function generateKeywords(string $title, string $category, string $country): string
+    private function generateKeywords(?string $title, ?string $category, ?string $country): string
     {
         $keywords = [];
         
@@ -229,12 +229,14 @@ class SeoService
         }
         
         // Add title words (significant ones)
-        $titleWords = str_word_count(strtolower($title), 1, 'àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿ');
-        $significantWords = array_filter($titleWords, function($word) {
-            return strlen($word) > 3 && !in_array($word, ['dans', 'pour', 'avec', 'cette', 'tout', 'tous', 'leur', 'leurs', 'mais', 'plus', 'très', 'bien', 'après', 'avant']);
-        });
-        
-        $keywords = array_merge($keywords, array_slice($significantWords, 0, 3));
+        if ($title) {
+            $titleWords = str_word_count(strtolower($title), 1, 'àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿ');
+            $significantWords = array_filter($titleWords, function($word) {
+                return strlen($word) > 3 && !in_array($word, ['dans', 'pour', 'avec', 'cette', 'tout', 'tous', 'leur', 'leurs', 'mais', 'plus', 'très', 'bien', 'après', 'avant']);
+            });
+            
+            $keywords = array_merge($keywords, array_slice($significantWords, 0, 3));
+        }
         
         return implode(', ', array_unique($keywords));
     }
@@ -242,7 +244,7 @@ class SeoService
     /**
      * Get category display name
      */
-    private function getCategoryDisplayName(string $category): string
+    private function getCategoryDisplayName(?string $category): string
     {
         $categories = [
             'témoignage' => 'Témoignages',
@@ -255,6 +257,10 @@ class SeoService
             'culture' => 'Culture',
             'economie' => 'Économie'
         ];
+        
+        if (!$category) {
+            return 'Général';
+        }
         
         return $categories[$category] ?? ucfirst($category);
     }
@@ -315,7 +321,7 @@ class SeoService
                 ]
             ],
             'datePublished' => $article->published_at?->toISOString(),
-            'dateModified' => $article->updated_at->toISOString(),
+            'dateModified' => $article->updated_at?->toISOString() ?? now()->toISOString(),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
                 '@id' => URL::to("/article/{$article->id}")
@@ -347,7 +353,7 @@ class SeoService
                 ]
             ],
             'datePublished' => $news->published_at?->toISOString(),
-            'dateModified' => $news->updated_at->toISOString(),
+            'dateModified' => $news->updated_at?->toISOString() ?? now()->toISOString(),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
                 '@id' => URL::to("/news/{$news->id}")
