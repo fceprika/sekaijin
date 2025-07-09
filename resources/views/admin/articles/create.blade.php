@@ -242,6 +242,12 @@
         const content = tinymce.get('content').getContent();
         formData.set('content', content);
         
+        // Ensure title and excerpt are included
+        const title = document.getElementById('title').value;
+        const excerpt = document.getElementById('excerpt').value;
+        formData.set('title', title);
+        formData.set('excerpt', excerpt);
+        
         // Open preview in new tab
         const previewWindow = window.open('', '_blank');
         previewWindow.document.write('<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">Chargement de la prévisualisation...</div>');
