@@ -185,16 +185,27 @@ class AdminController extends Controller
     {
         $data = $request->all();
         
+        // Debug: Log received data
+        \Log::info('Preview Article Data:', $data);
+        
         // Create a temporary article object for preview
         $article = new Article();
-        $article->fill($data);
-        $article->id = $data['id'] ?? null;
-        $article->author_id = auth()->id();
-        $article->published_at = $data['published_at'] ?? now();
         
-        // Ensure title and excerpt are properly set
+        // Set attributes directly instead of using fill()
+        $article->id = $data['id'] ?? null;
         $article->title = $data['title'] ?? 'Article sans titre';
+        $article->slug = $data['slug'] ?? 'article-sans-titre';
         $article->excerpt = $data['excerpt'] ?? null;
+        $article->content = $data['content'] ?? '';
+        $article->category = $data['category'] ?? 'témoignage';
+        $article->country_id = $data['country_id'] ?? null;
+        $article->author_id = auth()->id();
+        $article->is_featured = isset($data['is_featured']) ? (bool)$data['is_featured'] : false;
+        $article->is_published = isset($data['is_published']) ? (bool)$data['is_published'] : false;
+        $article->published_at = $data['published_at'] ?? now();
+        $article->views = $data['views'] ?? 0;
+        $article->likes = $data['likes'] ?? 0;
+        $article->reading_time = $data['reading_time'] ?? null;
         
         // Load relationships manually for preview
         $article->author = auth()->user();
@@ -217,16 +228,25 @@ class AdminController extends Controller
     {
         $data = $request->all();
         
+        // Debug: Log received data
+        \Log::info('Preview News Data:', $data);
+        
         // Create a temporary news object for preview
         $news = new News();
-        $news->fill($data);
-        $news->id = $data['id'] ?? null;
-        $news->author_id = auth()->id();
-        $news->published_at = $data['published_at'] ?? now();
         
-        // Ensure title and excerpt are properly set
+        // Set attributes directly instead of using fill()
+        $news->id = $data['id'] ?? null;
         $news->title = $data['title'] ?? 'Actualité sans titre';
+        $news->slug = $data['slug'] ?? 'actualite-sans-titre';
         $news->excerpt = $data['excerpt'] ?? null;
+        $news->content = $data['content'] ?? '';
+        $news->category = $data['category'] ?? 'administrative';
+        $news->country_id = $data['country_id'] ?? null;
+        $news->author_id = auth()->id();
+        $news->is_featured = isset($data['is_featured']) ? (bool)$data['is_featured'] : false;
+        $news->is_published = isset($data['is_published']) ? (bool)$data['is_published'] : false;
+        $news->published_at = $data['published_at'] ?? now();
+        $news->views = $data['views'] ?? 0;
         
         // Load relationships manually for preview
         $news->author = auth()->user();
