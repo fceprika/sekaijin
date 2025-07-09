@@ -70,6 +70,7 @@ class ProfileController extends Controller
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/',
             ],
             'share_location' => 'nullable|boolean',
+            'share_location_hidden' => 'nullable|boolean',
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
@@ -138,7 +139,7 @@ class ProfileController extends Controller
             'twitter_username' => $request->twitter_username,
             'facebook_username' => $request->facebook_username,
             'telegram_username' => $request->telegram_username,
-            'is_visible_on_map' => $request->boolean('share_location', false),
+            'is_visible_on_map' => $request->boolean('share_location', $request->boolean('share_location_hidden', false)),
         ];
 
         // Ajouter le nouveau mot de passe s'il est fourni

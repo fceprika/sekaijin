@@ -240,6 +240,8 @@
                                            {{ old('share_location', $user->is_visible_on_map) ? 'checked' : '' }}
                                            disabled
                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <!-- Champ caché pour s'assurer que la valeur est soumise même quand la checkbox est désactivée -->
+                                    <input type="hidden" id="share_location_hidden" name="share_location_hidden" value="{{ old('share_location', $user->is_visible_on_map) ? '1' : '0' }}">
                                 </div>
                                 <div class="ml-3">
                                     <label for="share_location" class="text-sm font-medium text-blue-800">
@@ -559,6 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateLocationSharingState() {
         const citySelect = document.getElementById('city_residence');
         const shareLocationCheckbox = document.getElementById('share_location');
+        const shareLocationHidden = document.getElementById('share_location_hidden');
         const locationRequirement = document.getElementById('location-requirement');
         
         // Activer la checkbox seulement si une ville est sélectionnée
@@ -567,10 +570,18 @@ document.addEventListener('DOMContentLoaded', function() {
             locationRequirement.classList.add('hidden');
         } else {
             shareLocationCheckbox.disabled = true;
-            shareLocationCheckbox.checked = false;
             locationRequirement.classList.remove('hidden');
         }
+        
+        // Synchroniser le champ caché avec la checkbox
+        shareLocationHidden.value = shareLocationCheckbox.checked ? '1' : '0';
     }
+    
+    // Écouter les changements sur la checkbox pour synchroniser le champ caché
+    document.getElementById('share_location').addEventListener('change', function() {
+        const shareLocationHidden = document.getElementById('share_location_hidden');
+        shareLocationHidden.value = this.checked ? '1' : '0';
+    });
     
     // Écouter les changements sur le select de ville
     document.getElementById('city_residence').addEventListener('change', updateLocationSharingState);
