@@ -79,6 +79,8 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/api/map-config', [App\Http\Controllers\Api\MapController::class, 'getMapConfig']);
     Route::get('/api/geocode', [App\Http\Controllers\Api\MapController::class, 'geocode']);
     Route::get('/api/check-username/{username}', [App\Http\Controllers\AuthController::class, 'checkUsername']);
+    Route::post('/api/cities', [App\Http\Controllers\Api\CityController::class, 'getCities']);
+    Route::post('/api/city-coordinates', [App\Http\Controllers\Api\CityController::class, 'getCityCoordinates']);
 });
 
 Route::middleware(['auth', 'throttle:10,1'])->group(function () {
@@ -99,6 +101,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/clear-location', [App\Http\Controllers\ProfileController::class, 'clearLocation'])->name('profile.clear-location');
 });
 
 // Routes d'administration (protection par rôle admin)

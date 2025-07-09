@@ -154,13 +154,41 @@ class AuthController extends Controller
             }
         }
 
+        // Déterminer si on utilise le mode automatique ou manuel
+        $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
+        
+        $country = $useAutoMode ? $request->country_residence_auto : $request->country_residence;
+        $city = $useAutoMode ? $request->city_residence_auto : $request->city_residence;
+        
         // Mettre à jour les informations du profil
-        $user->update([
+        $updateData = [
             'avatar' => $avatarPath,
-            'country_residence' => $request->country_residence,
-            'city_residence' => $request->city_residence,
+            'country_residence' => $country,
+            'city_residence' => $city,
             'is_visible_on_map' => $request->boolean('share_location', false),
-        ]);
+        ];
+        
+        // Récupérer les coordonnées
+        if ($useAutoMode && $request->filled('detected_latitude') && $request->filled('detected_longitude')) {
+            // Mode automatique : utiliser les coordonnées détectées directement
+            $updateData['latitude'] = $request->detected_latitude;
+            $updateData['longitude'] = $request->detected_longitude;
+            $updateData['city_detected'] = $city;
+        } elseif ($request->filled('city_residence') && $request->filled('country_residence')) {
+            // Mode manuel : lookup des coordonnées depuis le JSON
+            try {
+                $this->updateLocationCoordinates($updateData, $request->country_residence, $request->city_residence);
+            } catch (\Exception $e) {
+                // Log l'erreur mais ne pas faire échouer la mise à jour du profil
+                \Log::warning('Failed to update location coordinates during profile enrichment', [
+                    'country' => $request->country_residence,
+                    'city' => $request->city_residence,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        $user->update($updateData);
 
         // Gérer la géolocalisation si demandée
         if ($request->filled('initial_latitude') && $request->filled('initial_longitude') && $user->is_visible_on_map) {
@@ -508,5 +536,57 @@ class AuthController extends Controller
         if (!$isValidHeader) {
             throw new \InvalidArgumentException('Fichier image corrompu ou invalide.');
         }
+    }
+    
+    /**
+     * Update location coordinates based on city and country selection
+     */
+    private function updateLocationCoordinates(array &$updateData, string $country, string $city): void
+    {
+        // Load local cities data from JSON file
+        $jsonPath = database_path('data/cities_data.json');
+        
+        if (!file_exists($jsonPath)) {
+            throw new \Exception('Cities data file not found');
+        }
+        
+        $jsonContent = file_get_contents($jsonPath);
+        $citiesData = json_decode($jsonContent, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('Failed to decode cities JSON: ' . json_last_error_msg());
+        }
+        
+        // Check if country exists in our data
+        if (!isset($citiesData[$country])) {
+            throw new \Exception("Country '{$country}' not found in cities data");
+        }
+        
+        // Find the city
+        $cityFound = false;
+        foreach ($citiesData[$country] as $cityData) {
+            if ($cityData['name'] === $city) {
+                // Add coordinates to update data with privacy protection
+                $updateData['latitude'] = $this->addPrivacyOffset($cityData['lat']);
+                $updateData['longitude'] = $this->addPrivacyOffset($cityData['lng']);
+                $updateData['city_detected'] = $city;
+                $cityFound = true;
+                break;
+            }
+        }
+        
+        if (!$cityFound) {
+            throw new \Exception("City '{$city}' not found in country '{$country}'");
+        }
+    }
+    
+    /**
+     * Add privacy offset to coordinates (similar to User model's randomizeCoordinates)
+     */
+    private function addPrivacyOffset(float $coordinate): float
+    {
+        // Add small random offset for privacy (approximately 10km radius)
+        $offset = (rand(-500, 500) / 10000); // Random offset between -0.05 and 0.05 degrees
+        return round($coordinate + $offset, 6);
     }
 }

@@ -70,6 +70,7 @@ class ProfileController extends Controller
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&\-_]+$/',
             ],
             'share_location' => 'nullable|boolean',
+            'share_location_hidden' => 'nullable|boolean',
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
@@ -118,6 +119,12 @@ class ProfileController extends Controller
             return back()->withErrors(['avatar' => 'Erreur lors du traitement de l\'image.'])->withInput();
         }
 
+        // Déterminer si on utilise le mode automatique ou manuel
+        $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
+        
+        $country = $useAutoMode ? $request->country_residence_auto : $request->country_residence;
+        $city = $useAutoMode ? $request->city_residence_auto : $request->city_residence;
+        
         // Mettre à jour les informations de l'utilisateur
         $updateData = [
             'name' => $request->name,
@@ -127,9 +134,9 @@ class ProfileController extends Controller
             'last_name' => $request->last_name,
             'birth_date' => $request->birth_date,
             'phone' => $request->phone,
-            'country_residence' => $request->country_residence,
+            'country_residence' => $country,
             'destination_country' => $request->destination_country,
-            'city_residence' => $request->city_residence,
+            'city_residence' => $city,
             'bio' => $request->bio,
             'youtube_username' => $request->youtube_username,
             'instagram_username' => $request->instagram_username,
@@ -138,8 +145,28 @@ class ProfileController extends Controller
             'twitter_username' => $request->twitter_username,
             'facebook_username' => $request->facebook_username,
             'telegram_username' => $request->telegram_username,
-            'is_visible_on_map' => $request->boolean('share_location', false),
+            'is_visible_on_map' => $request->boolean('share_location', $request->boolean('share_location_hidden', false)),
         ];
+
+        // Récupérer les coordonnées
+        if ($useAutoMode && $request->filled('detected_latitude') && $request->filled('detected_longitude')) {
+            // Mode automatique : utiliser les coordonnées détectées directement
+            $updateData['latitude'] = $request->detected_latitude;
+            $updateData['longitude'] = $request->detected_longitude;
+            $updateData['city_detected'] = $city;
+        } elseif ($request->filled('city_residence') && $request->filled('country_residence')) {
+            // Mode manuel : lookup des coordonnées depuis le JSON
+            try {
+                $this->updateLocationCoordinates($updateData, $request->country_residence, $request->city_residence);
+            } catch (\Exception $e) {
+                // Log l'erreur mais ne pas faire échouer la mise à jour du profil
+                \Log::warning('Failed to update location coordinates', [
+                    'country' => $request->country_residence,
+                    'city' => $request->city_residence,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         // Ajouter le nouveau mot de passe s'il est fourni
         if ($request->filled('new_password')) {
@@ -149,6 +176,41 @@ class ProfileController extends Controller
         $user->update($updateData);
 
         return back()->with('success', 'Votre profil a été mis à jour avec succès !');
+    }
+
+    /**
+     * Clear user location data
+     */
+    public function clearLocation(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Vider les données de localisation
+            $user->update([
+                'latitude' => null,
+                'longitude' => null,
+                'city_residence' => null,
+                'city_detected' => null,
+                'is_visible_on_map' => false,
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Données de localisation supprimées avec succès.'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to clear location data', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression des données de localisation.'
+            ], 500);
+        }
     }
 
     /**
@@ -235,5 +297,57 @@ class ProfileController extends Controller
         if ($realPath && $avatarsDir && strpos($realPath, $avatarsDir) === 0 && file_exists($realPath)) {
             unlink($realPath);
         }
+    }
+    
+    /**
+     * Update location coordinates based on city and country selection
+     */
+    private function updateLocationCoordinates(array &$updateData, string $country, string $city): void
+    {
+        // Load local cities data from JSON file
+        $jsonPath = database_path('data/cities_data.json');
+        
+        if (!file_exists($jsonPath)) {
+            throw new \Exception('Cities data file not found');
+        }
+        
+        $jsonContent = file_get_contents($jsonPath);
+        $citiesData = json_decode($jsonContent, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('Failed to decode cities JSON: ' . json_last_error_msg());
+        }
+        
+        // Check if country exists in our data
+        if (!isset($citiesData[$country])) {
+            throw new \Exception("Country '{$country}' not found in cities data");
+        }
+        
+        // Find the city
+        $cityFound = false;
+        foreach ($citiesData[$country] as $cityData) {
+            if ($cityData['name'] === $city) {
+                // Add coordinates to update data with privacy protection
+                $updateData['latitude'] = $this->addPrivacyOffset($cityData['lat']);
+                $updateData['longitude'] = $this->addPrivacyOffset($cityData['lng']);
+                $updateData['city_detected'] = $city;
+                $cityFound = true;
+                break;
+            }
+        }
+        
+        if (!$cityFound) {
+            throw new \Exception("City '{$city}' not found in country '{$country}'");
+        }
+    }
+    
+    /**
+     * Add privacy offset to coordinates (similar to User model's randomizeCoordinates)
+     */
+    private function addPrivacyOffset(float $coordinate): float
+    {
+        // Add small random offset for privacy (approximately 10km radius)
+        $offset = (random_int(-500, 500) / 10000); // Cryptographically secure random offset between -0.05 and 0.05 degrees
+        return round($coordinate + $offset, 6);
     }
 }

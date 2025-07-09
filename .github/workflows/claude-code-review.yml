@@ -51,14 +51,15 @@ jobs:
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          pr_number: ${{ steps.pr-number.outputs.PR_NUMBER }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          trigger_phrase: '/claude-review'
           
-          # Optional: Specify model (defaults to Claude Sonnet 4, uncomment for Claude Opus 4)
-          # model: "claude-opus-4-20250514"
+          # Optional: Specify model (defaults to Claude Sonnet 4)
+          model: "claude-sonnet-4-20250514"
           
-          # Direct prompt for manual review
-          direct_prompt: |
-            Please review this pull request (PR #${{ steps.pr-number.outputs.PR_NUMBER }}) and provide feedback on:
+          # Custom instructions for the review
+          custom_instructions: |
+            Please review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations

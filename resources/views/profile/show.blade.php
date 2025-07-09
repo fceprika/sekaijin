@@ -172,30 +172,87 @@
                             </div>
                         </div>
 
-                        <!-- Bouton géolocalisation -->
+                        <!-- Choix du mode de saisie -->
                         <div class="mb-6">
-                            <button type="button" id="geolocate-btn" 
-                                class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 transition duration-200 flex items-center justify-center">
-                                <span id="geolocate-icon" class="mr-2">🌍</span>
-                                <span id="geolocate-text">Détecter automatiquement ma position</span>
-                            </button>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button type="button" id="auto-location-btn" 
+                                    class="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transition duration-200 flex items-center justify-center shadow-md">
+                                    <span id="auto-location-icon" class="mr-2">🌍</span>
+                                    <span id="auto-location-text">Détecter automatiquement</span>
+                                </button>
+                                
+                                <button type="button" id="manual-location-btn" 
+                                    class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition duration-200 flex items-center justify-center shadow-md">
+                                    <span class="mr-2">✏️</span>
+                                    <span>Saisir manuellement</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
-                                <select id="country_residence" name="country_residence" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                    <option value="">Sélectionnez un pays</option>
-                                    @include('partials.countries', ['selected' => old('country_residence', $user->country_residence)])
-                                </select>
+                        <!-- Mode Manuel (masqué par défaut) -->
+                        <div id="manual-location-section" class="hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
+                                    <select id="country_residence" name="country_residence" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                        <option value="">Sélectionnez un pays</option>
+                                        @include('partials.countries', ['selected' => old('country_residence', $user->country_residence), 'filter' => 'europe_asia'])
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">🌍 Actuellement disponible pour l'Europe et l'Asie uniquement</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">Ville de résidence</label>
+                                    <select id="city_residence" name="city_residence" disabled
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                        <option value="">Sélectionnez d'abord un pays</option>
+                                        @if(old('city_residence', $user->city_residence))
+                                            <option value="{{ old('city_residence', $user->city_residence) }}" selected>{{ old('city_residence', $user->city_residence) }}</option>
+                                        @endif
+                                    </select>
+                                    <div id="city-loading" class="hidden mt-2 text-sm text-blue-600 flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Chargement des villes...
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">💡 Les villes sont chargées automatiquement selon votre pays. La géolocalisation est approximative (précision ~10km).</p>
+                                </div>
                             </div>
-                            
-                            <div>
-                                <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">Ville de résidence</label>
-                                <input type="text" id="city_residence" name="city_residence" value="{{ old('city_residence', $user->city_residence) }}"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                    placeholder="Paris, Londres, Tokyo...">
+                        </div>
+                        
+                        <!-- Mode Automatique (masqué par défaut) -->
+                        <div id="auto-location-section" class="hidden">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-green-800 font-medium">📍 Localisation détectée automatiquement</span>
+                                    <button type="button" id="edit-manual-location" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        ✏️ Modifier manuellement
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">🗺️ Pays détecté</label>
+                                        <input type="text" id="detected-country-display" readonly 
+                                            class="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-not-allowed">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">🏙️ Ville détectée</label>
+                                        <input type="text" id="detected-city-display" readonly 
+                                            class="w-full px-4 py-3 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg cursor-not-allowed">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    🛡️ Position approximative (précision ~10km) pour votre sécurité
+                                </p>
+                                
+                                <!-- Champs cachés pour soumission -->
+                                <input type="hidden" id="detected-country-value" name="country_residence_auto">
+                                <input type="hidden" id="detected-city-value" name="city_residence_auto">
+                                <input type="hidden" id="detected-latitude" name="detected_latitude">
+                                <input type="hidden" id="detected-longitude" name="detected_longitude">
                             </div>
                         </div>
                         
@@ -225,7 +282,10 @@
                                 <div class="flex items-center h-5">
                                     <input id="share_location" name="share_location" type="checkbox" value="1" 
                                            {{ old('share_location', $user->is_visible_on_map) ? 'checked' : '' }}
-                                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                           disabled
+                                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <!-- Champ caché pour s'assurer que la valeur est soumise même quand la checkbox est désactivée -->
+                                    <input type="hidden" id="share_location_hidden" name="share_location_hidden" value="{{ old('share_location', $user->is_visible_on_map) ? '1' : '0' }}">
                                 </div>
                                 <div class="ml-3">
                                     <label for="share_location" class="text-sm font-medium text-blue-800">
@@ -235,17 +295,29 @@
                                         Permettez aux autres membres de vous localiser de manière approximative sur la carte interactive. 
                                         Votre position exacte ne sera jamais partagée (rayon d'environ 10 km pour protéger votre vie privée).
                                     </p>
+                                    <p id="location-requirement" class="text-xs text-orange-600 mt-1 font-medium">
+                                        ⚠️ Vous devez sélectionner une ville ou utiliser la géolocalisation automatique pour activer cette option.
+                                    </p>
                                 </div>
                             </div>
                             
                             <!-- Informations de localisation actuelle -->
                             @if($user->hasLocationSharing())
                                 <div id="current-location-info" class="mt-4 p-4 bg-white rounded-lg border border-blue-200">
-                                    <div class="flex items-center text-green-600">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        <span class="font-medium">Localisation active</span>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center text-green-600">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            <span class="font-medium">Localisation active</span>
+                                        </div>
+                                        <button type="button" id="clear-location-btn" 
+                                            class="inline-flex items-center px-3 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 hover:border-red-400 transition duration-200">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Supprimer
+                                        </button>
                                     </div>
                                     <p class="text-sm text-gray-600 mt-1">
                                         Position: {{ $user->getDisplayLocation() }}
@@ -470,28 +542,176 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Écouter les changements
-    countryResidence.addEventListener('change', toggleDestinationCountry);
+    countryResidence.addEventListener('change', function() {
+        toggleDestinationCountry();
+        loadCitiesForCountry(this.value);
+    });
     
     // Vérifier au chargement
     toggleDestinationCountry();
     
-    // Géolocalisation automatique (même logique que l'inscription)
-    const geolocateBtn = document.getElementById('geolocate-btn');
-    const geolocationMessage = document.getElementById('geolocation-message');
-    const detectedLocation = document.getElementById('detected-location');
-    const geolocateIcon = document.getElementById('geolocate-icon');
-    const geolocateText = document.getElementById('geolocate-text');
+    // Fonction pour charger les villes dynamiquement
+    function loadCitiesForCountry(countryName) {
+        const citySelect = document.getElementById('city_residence');
+        const cityLoading = document.getElementById('city-loading');
+        
+        if (!countryName) {
+            citySelect.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
+            citySelect.disabled = true;
+            cityLoading.classList.add('hidden');
+            updateLocationSharingState();
+            return;
+        }
+        
+        // Activer le champ ville et afficher le loading
+        citySelect.disabled = false;
+        citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
+        cityLoading.classList.remove('hidden');
+        
+        // Appel AJAX pour récupérer les villes
+        fetch('/api/cities', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ country: countryName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            cityLoading.classList.add('hidden');
+            citySelect.innerHTML = '<option value="">Choisissez une ville</option>';
+            
+            if (data.success && data.cities && data.cities.length > 0) {
+                data.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+                
+                // Restaurer la valeur sélectionnée si elle existe
+                const currentCity = '{{ old('city_residence', $user->city_residence) }}';
+                if (currentCity) {
+                    citySelect.value = currentCity;
+                }
+            } else {
+                citySelect.innerHTML = '<option value="">Aucune ville trouvée</option>';
+            }
+            
+            // Vérifier l'état de la checkbox après chargement
+            updateLocationSharingState();
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des villes:', error);
+            cityLoading.classList.add('hidden');
+            citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+            updateLocationSharingState();
+        });
+    }
     
-    if (geolocateBtn) {
-        geolocateBtn.addEventListener('click', async function() {
+    // Initialiser les villes au chargement si l'utilisateur a déjà un pays de résidence
+    if (countryResidence.value) {
+        loadCitiesForCountry(countryResidence.value);
+    }
+    
+    // Fonction pour mettre à jour l'état de la checkbox de partage de localisation
+    function updateLocationSharingState() {
+        const citySelect = document.getElementById('city_residence');
+        const shareLocationCheckbox = document.getElementById('share_location');
+        const shareLocationHidden = document.getElementById('share_location_hidden');
+        const locationRequirement = document.getElementById('location-requirement');
+        
+        // Vérifier si on est en mode automatique
+        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
+        const hasDetectedLocation = document.getElementById('detected-city-value').value !== '';
+        
+        // Vérifier si des coordonnées sont disponibles
+        const hasDetectedCoordinates = document.getElementById('detected-latitude') && document.getElementById('detected-latitude').value !== '';
+        const hasManualCity = citySelect && citySelect.value && citySelect.value !== '';
+        
+        // Vérifier si l'utilisateur a déjà des données de localisation existantes (depuis la base de données)
+        const hasExistingLocation = {{ ($user->latitude && $user->longitude) ? 'true' : 'false' }};
+        
+        // Activer la checkbox si : ville sélectionnée OU mode automatique avec coordonnées détectées OU données existantes
+        const shouldActivateCheckbox = hasManualCity || (isAutoMode && (hasDetectedLocation || hasDetectedCoordinates)) || hasExistingLocation;
+        
+        if (shouldActivateCheckbox) {
+            shareLocationCheckbox.disabled = false;
+            locationRequirement.classList.add('hidden');
+            
+            // Auto-cocher la checkbox seulement si :
+            // 1. On vient de détecter des coordonnées (pas de données existantes)
+            // 2. OU on a sélectionné une ville manuellement
+            // 3. ET la checkbox n'est pas déjà cochée
+            // 4. ET on n'a pas de préférence utilisateur sauvegardée
+            const isFirstTimeDetection = (hasDetectedCoordinates || hasManualCity) && !hasExistingLocation;
+            if (isFirstTimeDetection && !shareLocationCheckbox.checked) {
+                shareLocationCheckbox.checked = true;
+            }
+        } else {
+            shareLocationCheckbox.disabled = true;
+            locationRequirement.classList.remove('hidden');
+        }
+        
+        // Synchroniser le champ caché avec la checkbox
+        shareLocationHidden.value = shareLocationCheckbox.checked ? '1' : '0';
+    }
+    
+    // Écouter les changements sur la checkbox pour synchroniser le champ caché
+    document.getElementById('share_location').addEventListener('change', function() {
+        const shareLocationHidden = document.getElementById('share_location_hidden');
+        shareLocationHidden.value = this.checked ? '1' : '0';
+    });
+    
+    // Écouter les changements sur le select de ville
+    document.getElementById('city_residence').addEventListener('change', updateLocationSharingState);
+    
+    // Charger les villes au chargement initial si un pays est sélectionné
+    if (countryResidence.value) {
+        loadCitiesForCountry(countryResidence.value);
+    } else {
+        // Si aucun pays n'est sélectionné, s'assurer que la checkbox est désactivée
+        updateLocationSharingState();
+    }
+    
+    // Logique des nouveaux boutons de mode
+    const autoLocationBtn = document.getElementById('auto-location-btn');
+    const manualLocationBtn = document.getElementById('manual-location-btn');
+    const autoLocationIcon = document.getElementById('auto-location-icon');
+    const autoLocationText = document.getElementById('auto-location-text');
+    
+    // Fonction pour mettre à jour l'état visuel des boutons
+    function updateButtonStates() {
+        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
+        const isManualMode = !document.getElementById('manual-location-section').classList.contains('hidden');
+        
+        if (isAutoMode) {
+            // Mode automatique actif - couleur vive + ring
+            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-green-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-blue-300';
+            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-400 to-red-400 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
+        } else if (isManualMode) {
+            // Mode manuel actif - couleur vive + ring
+            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-400 to-green-400 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-500 hover:to-green-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
+            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-red-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-orange-300';
+        } else {
+            // Aucun mode actif (état initial) - couleurs attractives par défaut
+            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transition duration-200 flex items-center justify-center shadow-md';
+            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition duration-200 flex items-center justify-center shadow-md';
+        }
+    }
+    
+    // Géolocalisation automatique
+    if (autoLocationBtn) {
+        autoLocationBtn.addEventListener('click', async function() {
             if (!navigator.geolocation) {
                 alert('La géolocalisation n\'est pas supportée par votre navigateur.');
                 return;
             }
 
-            geolocateIcon.textContent = '⏳';
-            geolocateText.textContent = 'Localisation en cours...';
-            geolocateBtn.disabled = true;
+            autoLocationIcon.textContent = '⏳';
+            autoLocationText.textContent = 'Localisation en cours...';
+            autoLocationBtn.disabled = true;
 
             try {
                 // Use the same geolocation logic as the registration page
@@ -526,30 +746,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 const city = data.city;
                 const countryDisplayName = data.countryName;
                 
-                // Find and select the corresponding country option
-                const countryOption = Array.from(countryResidence.options).find(option => 
-                    option.textContent.includes(countryDisplayName) || option.value === countryDisplayName
-                );
+                // Basculer vers le mode automatique avec les données détectées
+                switchToAutoMode(countryDisplayName, city, lat, lng);
+
+                autoLocationIcon.textContent = '✅';
+                autoLocationText.textContent = 'Position détectée';
+                autoLocationBtn.disabled = false;
                 
-                if (countryOption) {
-                    countryResidence.value = countryOption.value;
-                    // Trigger change event to update destination country visibility
-                    toggleDestinationCountry();
-                }
-
-                document.getElementById('city_residence').value = city;
-                detectedLocation.textContent = `${countryDisplayName}, ${city}`;
-                geolocationMessage.classList.remove('hidden');
-
-                geolocateIcon.textContent = '✅';
-                geolocateText.textContent = 'Localisation détectée';
-                geolocateBtn.style.display = 'none';
+                // Mettre à jour l'état visuel des boutons
+                updateButtonStates();
 
             } catch (error) {
                 console.warn('Erreur de géolocalisation:', error);
-                geolocateIcon.textContent = '❌';
-                geolocateText.textContent = 'Erreur de localisation';
-                geolocateBtn.disabled = false;
+                autoLocationIcon.textContent = '❌';
+                autoLocationText.textContent = 'Erreur de localisation';
+                autoLocationBtn.disabled = false;
                 
                 // Show user-friendly error message
                 let errorMessage = 'Erreur de localisation';
@@ -560,8 +771,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (error.code === 3) {
                     errorMessage = 'Délai dépassé';
                 }
-                geolocateText.textContent = errorMessage;
+                autoLocationText.textContent = errorMessage;
             }
+        });
+    }
+    
+    // Saisie manuelle
+    if (manualLocationBtn) {
+        manualLocationBtn.addEventListener('click', function() {
+            switchToManualMode();
+            updateButtonStates();
         });
     }
     
@@ -747,6 +966,144 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+    
+    // Fonctions de basculement entre modes manuel/automatique
+    function switchToAutoMode(country, city, lat, lng) {
+        // Masquer mode manuel
+        document.getElementById('manual-location-section').classList.add('hidden');
+        
+        // Afficher mode auto avec données
+        document.getElementById('auto-location-section').classList.remove('hidden');
+        document.getElementById('detected-country-display').value = country;
+        document.getElementById('detected-city-display').value = city;
+        
+        // Remplir champs cachés
+        document.getElementById('detected-country-value').value = country;
+        document.getElementById('detected-city-value').value = city;
+        document.getElementById('detected-latitude').value = lat;
+        document.getElementById('detected-longitude').value = lng;
+        
+        // Activer checkbox localisation
+        updateLocationSharingState();
+        
+        // Mettre à jour l'état visuel des boutons
+        updateButtonStates();
+    }
+
+    function switchToManualMode() {
+        // Afficher mode manuel
+        document.getElementById('manual-location-section').classList.remove('hidden');
+        
+        // Masquer mode auto
+        document.getElementById('auto-location-section').classList.add('hidden');
+        
+        // Vider champs cachés
+        document.getElementById('detected-country-value').value = '';
+        document.getElementById('detected-city-value').value = '';
+        document.getElementById('detected-latitude').value = '';
+        document.getElementById('detected-longitude').value = '';
+        
+        // Réinitialiser les dropdowns manuels seulement si pas de valeur existante
+        if (!countryResidence.value) {
+            countryResidence.value = '';
+            cityResidence.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
+            cityResidence.disabled = true;
+        } else {
+            // Si un pays est déjà sélectionné, charger les villes correspondantes
+            loadCitiesForCountry(countryResidence.value);
+        }
+        
+        // Réinitialiser checkbox
+        updateLocationSharingState();
+        
+        // Mettre à jour l'état visuel des boutons
+        updateButtonStates();
+    }
+    
+    // Event listener pour le bouton "Modifier manuellement"
+    const editManualLocationBtn = document.getElementById('edit-manual-location');
+    if (editManualLocationBtn) {
+        editManualLocationBtn.addEventListener('click', switchToManualMode);
+    }
+    
+    // Gestion du bouton de suppression de la localisation
+    const clearLocationBtn = document.getElementById('clear-location-btn');
+    if (clearLocationBtn) {
+        clearLocationBtn.addEventListener('click', function() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer toutes vos données de localisation ? Cette action ne peut pas être annulée.')) {
+                clearLocationData();
+            }
+        });
+    }
+    
+    // Fonction pour supprimer les données de localisation
+    async function clearLocationData() {
+        try {
+            // Désactiver le bouton pendant la requête
+            if (clearLocationBtn) {
+                clearLocationBtn.disabled = true;
+                clearLocationBtn.innerHTML = '<svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Suppression...';
+            }
+            
+            const response = await fetch('/profile/clear-location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Masquer la section "Localisation active"
+                const currentLocationInfo = document.getElementById('current-location-info');
+                if (currentLocationInfo) {
+                    currentLocationInfo.style.display = 'none';
+                }
+                
+                // Réinitialiser la checkbox
+                const shareLocationCheckbox = document.getElementById('share_location');
+                if (shareLocationCheckbox) {
+                    shareLocationCheckbox.checked = false;
+                    shareLocationCheckbox.disabled = true;
+                }
+                
+                // Réinitialiser les modes
+                document.getElementById('auto-location-section').classList.add('hidden');
+                document.getElementById('manual-location-section').classList.add('hidden');
+                
+                // Vider les champs
+                document.getElementById('detected-country-value').value = '';
+                document.getElementById('detected-city-value').value = '';
+                document.getElementById('detected-latitude').value = '';
+                document.getElementById('detected-longitude').value = '';
+                
+                // Réinitialiser l'état des boutons
+                updateButtonStates();
+                updateLocationSharingState();
+                
+                // Afficher un message de succès
+                alert('Vos données de localisation ont été supprimées avec succès.');
+                
+            } else {
+                throw new Error(data.message || 'Erreur lors de la suppression');
+            }
+            
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            alert('Une erreur est survenue lors de la suppression. Veuillez réessayer.');
+        } finally {
+            // Réactiver le bouton
+            if (clearLocationBtn) {
+                clearLocationBtn.disabled = false;
+                clearLocationBtn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>Supprimer';
+            }
+        }
+    }
+    
+    // Initialiser l'état visuel des boutons au chargement
+    updateButtonStates();
 });
 </script>
 
