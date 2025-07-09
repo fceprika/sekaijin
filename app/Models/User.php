@@ -150,6 +150,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Get articles authored by this user
+     */
+    public function articles()
+    {
+        return $this->hasMany(Article::class, 'author_id');
+    }
+
+    /**
+     * Get news authored by this user
+     */
+    public function news()
+    {
+        return $this->hasMany(News::class, 'author_id');
+    }
+
+    /**
+     * Get events organized by this user
+     */
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'organizer_id');
+    }
+
+    /**
      * Check if user has enabled location sharing
      */
     public function hasLocationSharing(): bool

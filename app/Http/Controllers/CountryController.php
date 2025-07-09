@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\News;
 use App\Models\Article;
 use App\Models\Event;
+use App\Services\SeoService;
 
 class CountryController extends Controller
 {
@@ -47,7 +48,12 @@ class CountryController extends Controller
             ->take(3)
             ->get();
         
-        return view('country.index', compact('countryModel', 'communityMembers', 'featuredNews', 'featuredArticles', 'upcomingEvents'));
+        // Generate SEO data for country page
+        $seoService = new SeoService();
+        $seoData = $seoService->generateSeoData('country', $countryModel);
+        $structuredData = $seoService->generateStructuredData('country', $countryModel);
+        
+        return view('country.index', compact('countryModel', 'communityMembers', 'featuredNews', 'featuredArticles', 'upcomingEvents', 'seoData', 'structuredData'));
     }
 
     /**
@@ -212,7 +218,12 @@ class CountryController extends Controller
                 ->take(3)
                 ->get();
             
-            return view('country.article-show', compact('countryModel', 'article', 'relatedArticles'));
+            // Generate SEO data for article page
+            $seoService = new SeoService();
+            $seoData = $seoService->generateSeoData('article', $article);
+            $structuredData = $seoService->generateStructuredData('article', $article);
+            
+            return view('country.article-show', compact('countryModel', 'article', 'relatedArticles', 'seoData', 'structuredData'));
             
         } catch (\Exception $e) {
             \Log::error('Error displaying article: ' . $e->getMessage(), [
@@ -260,7 +271,12 @@ class CountryController extends Controller
                 ->take(3)
                 ->get();
             
-            return view('country.news-show', compact('countryModel', 'news', 'relatedNews'));
+            // Generate SEO data for news page
+            $seoService = new SeoService();
+            $seoData = $seoService->generateSeoData('news', $news);
+            $structuredData = $seoService->generateStructuredData('news', $news);
+            
+            return view('country.news-show', compact('countryModel', 'news', 'relatedNews', 'seoData', 'structuredData'));
             
         } catch (\Exception $e) {
             \Log::error('Error displaying news: ' . $e->getMessage(), [
@@ -306,7 +322,12 @@ class CountryController extends Controller
                 ->take(3)
                 ->get();
             
-            return view('country.event-show', compact('countryModel', 'event', 'relatedEvents'));
+            // Generate SEO data for event page
+            $seoService = new SeoService();
+            $seoData = $seoService->generateSeoData('event', $event);
+            $structuredData = $seoService->generateStructuredData('event', $event);
+            
+            return view('country.event-show', compact('countryModel', 'event', 'relatedEvents', 'seoData', 'structuredData'));
             
         } catch (\Exception $e) {
             \Log::error('Error displaying event: ' . $e->getMessage(), [

@@ -4,7 +4,58 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Sekaijin - Communauté des expatriés français')</title>
+    
+    @php
+        $seoData = $seoData ?? app(\App\Services\SeoService::class)->generateSeoData('home');
+    @endphp
+    
+    <!-- Title -->
+    <title>{{ $seoData['title'] }}</title>
+    
+    <!-- Basic Meta Tags -->
+    <meta name="description" content="{{ $seoData['description'] }}">
+    <meta name="keywords" content="{{ $seoData['keywords'] ?? '' }}">
+    <meta name="author" content="Sekaijin">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ $seoData['canonical'] }}">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="{{ $seoData['title'] }}">
+    <meta property="og:description" content="{{ $seoData['description'] }}">
+    <meta property="og:url" content="{{ $seoData['canonical'] }}">
+    <meta property="og:type" content="{{ $seoData['type'] ?? 'website' }}">
+    <meta property="og:image" content="{{ $seoData['image'] ?? asset('/images/sekaijin_logo.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="{{ $seoData['locale'] ?? 'fr_FR' }}">
+    <meta property="og:site_name" content="{{ $seoData['site_name'] ?? 'Sekaijin' }}">
+    
+    @if(isset($seoData['article']))
+        <meta property="article:published_time" content="{{ $seoData['article']['published_time'] }}">
+        <meta property="article:modified_time" content="{{ $seoData['article']['modified_time'] }}">
+        <meta property="article:author" content="{{ $seoData['article']['author'] }}">
+        <meta property="article:section" content="{{ $seoData['article']['section'] }}">
+        @foreach($seoData['article']['tag'] as $tag)
+            <meta property="article:tag" content="{{ $tag }}">
+        @endforeach
+    @endif
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoData['title'] }}">
+    <meta name="twitter:description" content="{{ $seoData['description'] }}">
+    <meta name="twitter:image" content="{{ $seoData['image'] ?? asset('/images/sekaijin_logo.png') }}">
+    <meta name="twitter:site" content="@sekaijin">
+    <meta name="twitter:creator" content="@sekaijin">
+    
+    <!-- Structured Data -->
+    @if(isset($structuredData))
+        <script type="application/ld+json">
+            {!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+        </script>
+    @endif
     
     @if(config('services.google_analytics.id') && app()->environment('production'))
     <!-- Google tag (gtag.js) -->

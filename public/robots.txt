@@ -1,2 +1,33 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /api/
+Disallow: /clear-cache
+Disallow: /maintenance-status
+Disallow: /sitemap/clear
+Disallow: /storage/
+Disallow: /vendor/
+Disallow: /inscription
+Disallow: /connexion
+Disallow: /deconnexion
+Disallow: /profil
+Disallow: /evenements/create
+Disallow: /evenements/*/edit
+
+# Allow important sections
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /*/actualites
+Allow: /*/blog
+Allow: /*/communaute
+Allow: /*/evenements
+Allow: /article/
+Allow: /news/
+Allow: /event/
+Allow: /membre/
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://sekaijin.com/sitemap.xml

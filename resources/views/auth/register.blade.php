@@ -387,17 +387,53 @@ document.addEventListener('DOMContentLoaded', function() {
     function showErrors(errors) {
         // Supprimer les anciennes erreurs
         document.querySelectorAll('.error-message').forEach(el => el.remove());
+        document.querySelectorAll('.error-alert').forEach(el => el.remove());
         
-        // Afficher les nouvelles erreurs
+        // Créer une alerte générale d'erreur
+        const errorAlert = document.createElement('div');
+        errorAlert.className = 'error-alert bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6';
+        errorAlert.innerHTML = `
+            <div class="flex items-center">
+                <span class="text-red-500 mr-2">⚠️</span>
+                <strong>Erreur de validation :</strong>
+            </div>
+            <ul class="list-disc list-inside mt-2 space-y-1">
+                ${Object.values(errors).map(error => `<li>${error[0]}</li>`).join('')}
+            </ul>
+        `;
+        
+        // Insérer l'alerte au début du formulaire
+        const form = document.getElementById('step1');
+        form.insertBefore(errorAlert, form.firstChild);
+        
+        // Afficher aussi les erreurs spécifiques à chaque champ
         Object.keys(errors).forEach(field => {
             const input = document.getElementById(field);
             if (input) {
+                // Ajouter une bordure rouge au champ
+                input.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                
                 const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message mt-1 text-sm text-red-500';
+                errorDiv.className = 'error-message mt-1 text-sm text-red-500 font-medium';
                 errorDiv.textContent = errors[field][0];
                 input.parentNode.appendChild(errorDiv);
             }
         });
+        
+        // Faire défiler vers le haut pour voir les erreurs
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // Fonction pour nettoyer les erreurs d'un champ
+    function clearFieldErrors(field) {
+        const input = document.getElementById(field);
+        if (input) {
+            input.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+            const errorMsg = input.parentNode.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+        }
     }
     
     // Soumission du formulaire étape 1 (création de compte)
@@ -541,6 +577,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const strengthBar = document.getElementById('password-strength-bar-step1');
         const strengthText = document.getElementById('password-strength-text-step1');
         
+        // Nettoyer les erreurs du champ mot de passe
+        clearFieldErrors('password');
+        
         let strength = 0;
         if (password.length >= 12) strength += 25;
         if (/[a-z]/.test(password)) strength += 25;
@@ -601,7 +640,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    passwordConfirmInput.addEventListener('input', checkPasswordMatch);
+    passwordConfirmInput.addEventListener('input', function() {
+        clearFieldErrors('password_confirmation');
+        checkPasswordMatch();
+    });
+    
+    // Nettoyer les erreurs quand l'utilisateur tape dans les champs
+    nameInput.addEventListener('input', function() {
+        clearFieldErrors('name');
+    });
+    
+    emailInput.addEventListener('input', function() {
+        clearFieldErrors('email');
+    });
     
     // Toggle visibilité mot de passe
     document.getElementById('toggle-password-step1').addEventListener('click', function() {
