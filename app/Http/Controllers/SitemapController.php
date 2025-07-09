@@ -169,13 +169,16 @@ class SitemapController extends Controller
     {
         $articles = Article::select('id', 'slug', 'updated_at', 'published_at')
             ->where('is_published', true)
+            ->with('country')
             ->orderBy('published_at', 'desc')
             ->get();
 
         $xml = '';
         foreach ($articles as $article) {
+            // Use country-based URL structure with slug
+            $countrySlug = $article->country ? $article->country->slug : 'global';
             $xml .= $this->createUrlEntry([
-                'url' => url("/article/{$article->id}"),
+                'url' => url("/{$countrySlug}/blog/{$article->slug}"),
                 'lastmod' => $article->updated_at->toISOString(),
                 'changefreq' => 'monthly',
                 'priority' => '0.7'
@@ -192,13 +195,16 @@ class SitemapController extends Controller
     {
         $news = News::select('id', 'slug', 'updated_at', 'published_at')
             ->where('is_published', true)
+            ->with('country')
             ->orderBy('published_at', 'desc')
             ->get();
 
         $xml = '';
         foreach ($news as $newsItem) {
+            // Use country-based URL structure with slug
+            $countrySlug = $newsItem->country ? $newsItem->country->slug : 'global';
             $xml .= $this->createUrlEntry([
-                'url' => url("/news/{$newsItem->id}"),
+                'url' => url("/{$countrySlug}/actualites/{$newsItem->slug}"),
                 'lastmod' => $newsItem->updated_at->toISOString(),
                 'changefreq' => 'monthly',
                 'priority' => '0.7'
@@ -216,13 +222,16 @@ class SitemapController extends Controller
         $events = Event::select('id', 'slug', 'updated_at', 'start_date')
             ->where('is_published', true)
             ->where('start_date', '>=', now())
+            ->with('country')
             ->orderBy('start_date', 'asc')
             ->get();
 
         $xml = '';
         foreach ($events as $event) {
+            // Use country-based URL structure with slug
+            $countrySlug = $event->country ? $event->country->slug : 'global';
             $xml .= $this->createUrlEntry([
-                'url' => url("/event/{$event->id}"),
+                'url' => url("/{$countrySlug}/evenements/{$event->slug}"),
                 'lastmod' => $event->updated_at->toISOString(),
                 'changefreq' => 'weekly',
                 'priority' => '0.6'
