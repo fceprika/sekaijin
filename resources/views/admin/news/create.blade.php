@@ -11,11 +11,18 @@
                 <h1 class="text-3xl font-bold text-gray-800">Créer une Actualité</h1>
                 <p class="text-gray-600 mt-2">Rédigez une nouvelle actualité pour la communauté</p>
             </div>
-            <a href="{{ route('admin.news') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Retour à la liste
-            </a>
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="previewNews()" 
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-eye mr-2"></i>
+                    Prévisualisation
+                </button>
+                <a href="{{ route('admin.news') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour à la liste
+                </a>
+            </div>
         </div>
     </div>
 
@@ -37,6 +44,17 @@
                         <input type="text" id="title" name="title" value="{{ old('title') }}" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
                                placeholder="Saisissez le titre de votre actualité...">
+                    </div>
+
+                    <!-- Slug -->
+                    <div>
+                        <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">
+                            Slug URL *
+                        </label>
+                        <input type="text" id="slug" name="slug" value="{{ old('slug') }}" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                               placeholder="auto-généré depuis le titre">
+                        <p class="text-xs text-gray-500 mt-1">Utilisé dans l'URL de l'actualité</p>
                     </div>
 
                     <!-- Pays -->
@@ -182,6 +200,21 @@
 
 <script nonce="{{ $csp_nonce ?? '' }}">
     document.addEventListener('DOMContentLoaded', function() {
+        // Auto-generate slug from title
+        const titleInput = document.getElementById('title');
+        const slugInput = document.getElementById('slug');
+        
+        titleInput.addEventListener('input', function() {
+            const slug = this.value
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-');
+            slugInput.value = slug;
+        });
+
         // Show/hide publish date based on checkbox
         const isPublishedCheckbox = document.getElementById('is_published');
         const publishDateContainer = document.getElementById('publish-date-container');
@@ -203,11 +236,13 @@
         const content = tinymce.get('content').getContent();
         formData.set('content', content);
         
-        // Ensure title and excerpt are included
+        // Ensure title, excerpt and slug are included
         const title = document.getElementById('title').value;
         const excerpt = document.getElementById('excerpt').value;
+        const slug = document.getElementById('slug').value;
         formData.set('title', title);
         formData.set('excerpt', excerpt);
+        formData.set('slug', slug);
         
         // Open preview in new tab
         const previewWindow = window.open('', '_blank');

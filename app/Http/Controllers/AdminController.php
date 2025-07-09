@@ -194,7 +194,7 @@ class AdminController extends Controller
         // Set attributes directly instead of using fill()
         $article->id = $data['id'] ?? null;
         $article->title = $data['title'] ?? 'Article sans titre';
-        $article->slug = $data['slug'] ?? 'article-sans-titre';
+        $article->slug = $data['slug'] ?? ($data['title'] ? \Str::slug($data['title']) : 'article-sans-titre');
         $article->excerpt = $data['excerpt'] ?? null;
         $article->content = $data['content'] ?? '';
         $article->category = $data['category'] ?? 'témoignage';
@@ -237,7 +237,7 @@ class AdminController extends Controller
         // Set attributes directly instead of using fill()
         $news->id = $data['id'] ?? null;
         $news->title = $data['title'] ?? 'Actualité sans titre';
-        $news->slug = $data['slug'] ?? 'actualite-sans-titre';
+        $news->slug = $data['slug'] ?? ($data['title'] ? \Str::slug($data['title']) : 'actualite-sans-titre');
         $news->excerpt = $data['excerpt'] ?? null;
         $news->content = $data['content'] ?? '';
         $news->category = $data['category'] ?? 'administrative';
