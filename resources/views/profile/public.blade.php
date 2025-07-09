@@ -396,6 +396,7 @@
                 </div>
                 
                 <!-- Call to Action -->
+                @guest
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
                     <h3 class="text-lg font-bold text-gray-800 mb-2">Rejoignez la communauté</h3>
                     <p class="text-gray-600 text-sm mb-4">Connectez-vous avec des expatriés français du monde entier.</p>
@@ -406,6 +407,7 @@
                         S'inscrire
                     </a>
                 </div>
+                @endguest
             </div>
         </div>
     </div>

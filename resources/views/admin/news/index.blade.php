@@ -190,7 +190,7 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         @if($newsItem->is_published)
-                                            <a href="{{ route('country.news.show', [$newsItem->country->slug, $newsItem->id]) }}" 
+                                            <a href="{{ route('country.news.show', [$newsItem->country->slug, $newsItem->slug]) }}" 
                                                target="_blank"
                                                class="text-green-600 hover:text-green-900 transition duration-200" 
                                                title="Voir">

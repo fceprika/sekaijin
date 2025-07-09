@@ -179,6 +179,72 @@ class AdminController extends Controller
     }
 
     /**
+     * Preview article
+     */
+    public function previewArticle(Request $request)
+    {
+        $data = $request->all();
+        
+        // Create a temporary article object for preview
+        $article = new Article();
+        $article->fill($data);
+        $article->id = $data['id'] ?? null;
+        $article->author_id = auth()->id();
+        $article->published_at = $data['published_at'] ?? now();
+        
+        // Ensure title is not null
+        if (empty($article->title)) {
+            $article->title = 'Article sans titre';
+        }
+        
+        // Load relationships manually for preview
+        $article->author = auth()->user();
+        if (!empty($data['country_id'])) {
+            $article->country = \App\Models\Country::find($data['country_id']);
+        }
+        
+        // Generate SEO data for preview
+        $seoService = new \App\Services\SeoService();
+        $seoData = $seoService->generateSeoData('article', $article);
+        $structuredData = $seoService->generateStructuredData('article', $article);
+        
+        return view('admin.articles.preview', compact('article', 'seoData', 'structuredData'));
+    }
+
+    /**
+     * Preview news
+     */
+    public function previewNews(Request $request)
+    {
+        $data = $request->all();
+        
+        // Create a temporary news object for preview
+        $news = new News();
+        $news->fill($data);
+        $news->id = $data['id'] ?? null;
+        $news->author_id = auth()->id();
+        $news->published_at = $data['published_at'] ?? now();
+        
+        // Ensure title is not null
+        if (empty($news->title)) {
+            $news->title = 'Actualité sans titre';
+        }
+        
+        // Load relationships manually for preview
+        $news->author = auth()->user();
+        if (!empty($data['country_id'])) {
+            $news->country = \App\Models\Country::find($data['country_id']);
+        }
+        
+        // Generate SEO data for preview
+        $seoService = new \App\Services\SeoService();
+        $seoData = $seoService->generateSeoData('news', $news);
+        $structuredData = $seoService->generateStructuredData('news', $news);
+        
+        return view('admin.news.preview', compact('news', 'seoData', 'structuredData'));
+    }
+
+    /**
      * News management
      */
     public function news(Request $request)

@@ -199,8 +199,34 @@
         const form = document.querySelector('form');
         const formData = new FormData(form);
         
-        // TODO: Implement preview functionality
-        alert('Fonctionnalité de prévisualisation à implémenter');
+        // Add current content from TinyMCE
+        const content = tinymce.get('content').getContent();
+        formData.set('content', content);
+        
+        // Open preview in new tab
+        const previewWindow = window.open('', '_blank');
+        previewWindow.document.write('<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">Chargement de la prévisualisation...</div>');
+        
+        // Submit form to preview route
+        fetch('{{ route("admin.news.preview") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            previewWindow.document.open();
+            previewWindow.document.write(html);
+            previewWindow.document.close();
+        })
+        .catch(error => {
+            console.error('Erreur lors de la prévisualisation:', error);
+            previewWindow.document.open();
+            previewWindow.document.write('<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif; color: red;">Erreur lors du chargement de la prévisualisation</div>');
+            previewWindow.document.close();
+        });
     }
 </script>
 @endsection
