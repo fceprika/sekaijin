@@ -179,6 +179,41 @@ class ProfileController extends Controller
     }
 
     /**
+     * Clear user location data
+     */
+    public function clearLocation(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Vider les données de localisation
+            $user->update([
+                'latitude' => null,
+                'longitude' => null,
+                'city_residence' => null,
+                'city_detected' => null,
+                'is_visible_on_map' => false,
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Données de localisation supprimées avec succès.'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to clear location data', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression des données de localisation.'
+            ], 500);
+        }
+    }
+
+    /**
      * Upload and optimize avatar image
      */
     private function uploadAvatar($file): string

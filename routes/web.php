@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/clear-location', [App\Http\Controllers\ProfileController::class, 'clearLocation'])->name('profile.clear-location');
 });
 
 // Routes d'administration (protection par rôle admin)

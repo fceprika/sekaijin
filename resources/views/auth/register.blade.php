@@ -243,17 +243,24 @@
                                         </div>
                                     </div>
 
-                                    <!-- Bouton géolocalisation -->
+                                    <!-- Boutons de choix de mode -->
                                     <div class="mb-4">
-                                        <button type="button" id="geolocate-btn" 
-                                            class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 transition duration-200 flex items-center justify-center">
-                                            <span id="geolocate-icon" class="mr-2">🌍</span>
-                                            <span id="geolocate-text">Détecter automatiquement ma position</span>
-                                        </button>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <button type="button" id="auto-location-btn" 
+                                                class="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transition duration-200 flex items-center justify-center shadow-md">
+                                                <span class="mr-2">🌍</span>
+                                                <span>Détecter automatiquement</span>
+                                            </button>
+                                            <button type="button" id="manual-location-btn" 
+                                                class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition duration-200 flex items-center justify-center shadow-md">
+                                                <span class="mr-2">✏️</span>
+                                                <span>Saisir manuellement</span>
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <!-- Mode Manuel (par défaut) -->
-                                    <div id="manual-location-section" class="block">
+                                    <!-- Mode Manuel (masqué par défaut) -->
+                                    <div id="manual-location-section" class="hidden">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">
@@ -717,26 +724,48 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('eye-icon-step1').textContent = type === 'password' ? '👁️' : '🙈';
     });
     
-    // Géolocalisation
-    const geolocateBtn = document.getElementById('geolocate-btn');
+    // Géolocalisation et gestion des modes
+    const autoLocationBtn = document.getElementById('auto-location-btn');
+    const manualLocationBtn = document.getElementById('manual-location-btn');
     const geolocationMessage = document.getElementById('geolocation-message');
     const detectedLocation = document.getElementById('detected-location');
-    const geolocateIcon = document.getElementById('geolocate-icon');
-    const geolocateText = document.getElementById('geolocate-text');
     const countrySelect = document.getElementById('country_residence');
     const cityInput = document.getElementById('city_residence');
     
+    // Fonction pour mettre à jour l'état visuel des boutons
+    function updateButtonStates() {
+        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
+        const isManualMode = !document.getElementById('manual-location-section').classList.contains('hidden');
+        
+        if (isAutoMode) {
+            // Mode automatique actif - couleur vive + ring
+            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-green-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-blue-300';
+            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-400 to-red-400 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
+        } else if (isManualMode) {
+            // Mode manuel actif - couleur vive + ring
+            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-400 to-green-400 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-500 hover:to-green-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
+            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-red-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-orange-300';
+        } else {
+            // Aucun mode actif (état initial) - couleurs attractives par défaut
+            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transition duration-200 flex items-center justify-center shadow-md';
+            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition duration-200 flex items-center justify-center shadow-md';
+        }
+    }
     
-    geolocateBtn.addEventListener('click', async function() {
+    // Initialiser l'état des boutons
+    updateButtonStates();
+    
+    // Géolocalisation automatique
+    autoLocationBtn.addEventListener('click', async function() {
         if (!navigator.geolocation) {
             alert('La géolocalisation n\'est pas supportée par votre navigateur.');
             return;
         }
 
-        geolocateIcon.textContent = '⏳';
-        geolocateText.textContent = 'Localisation en cours...';
-        geolocateBtn.disabled = true;
-
+        const originalHtml = this.innerHTML;
+        this.innerHTML = '<span class="mr-2">⏳</span><span>Détection en cours...</span>';
+        this.disabled = true;
+        
         try {
             // Use the same geolocation logic as the profile page
             const position = await new Promise((resolve, reject) => {
@@ -772,16 +801,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Basculer vers le mode automatique avec les données détectées
             switchToAutoMode(countryDisplayName, city, lat, lng);
-
-            geolocateIcon.textContent = '✅';
-            geolocateText.textContent = 'Localisation détectée';
-            geolocateBtn.style.display = 'none';
+            
+            // Mettre à jour l'état visuel des boutons
+            updateButtonStates();
+            
+            this.innerHTML = '<span class="mr-2">✅</span><span>Position détectée</span>';
 
         } catch (error) {
             console.warn('Erreur de géolocalisation:', error);
-            geolocateIcon.textContent = '❌';
-            geolocateText.textContent = 'Erreur de localisation';
-            geolocateBtn.disabled = false;
+            this.innerHTML = '<span class="mr-2">❌</span><span>Erreur de localisation</span>';
             
             // Show user-friendly error message
             let errorMessage = 'Erreur de localisation';
@@ -792,8 +820,16 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (error.code === 3) {
                 errorMessage = 'Délai dépassé';
             }
-            geolocateText.textContent = errorMessage;
+            this.innerHTML = `<span class="mr-2">❌</span><span>${errorMessage}</span>`;
+        } finally {
+            this.disabled = false;
         }
+    });
+    
+    // Bouton mode manuel
+    manualLocationBtn.addEventListener('click', function() {
+        switchToManualMode();
+        updateButtonStates();
     });
     
     // Variables globales pour la géolocalisation
@@ -977,10 +1013,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Fonction pour mettre à jour l'état de la checkbox de partage de localisation
     function updateLocationSharingStateRegister() {
-        // Activer la checkbox seulement si une ville est sélectionnée ou si géolocalisation détectée
-        if ((cityResidence.value && cityResidence.value !== '') || userGeolocation) {
+        // Vérifier si on est en mode automatique
+        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
+        const hasDetectedLocation = document.getElementById('detected-city-value').value !== '';
+        
+        // Vérifier si des coordonnées sont disponibles
+        const hasDetectedCoordinates = document.getElementById('detected-latitude') && document.getElementById('detected-latitude').value !== '';
+        const hasManualCity = cityResidence && cityResidence.value && cityResidence.value !== '';
+        
+        // Activer la checkbox si : ville sélectionnée OU mode automatique avec coordonnées détectées
+        const shouldActivateCheckbox = hasManualCity || (isAutoMode && (hasDetectedLocation || hasDetectedCoordinates));
+        
+        if (shouldActivateCheckbox) {
             shareLocationCheckbox.disabled = false;
             locationRequirementRegister.classList.add('hidden');
+            
+            // Auto-cocher la checkbox seulement lors de la première détection
+            // (pas de données existantes en inscription, donc plus simple)
+            if ((hasDetectedCoordinates || hasManualCity) && !shareLocationCheckbox.checked) {
+                shareLocationCheckbox.checked = true;
+            }
         } else {
             shareLocationCheckbox.disabled = true;
             locationRequirementRegister.classList.remove('hidden');
@@ -1036,10 +1088,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('detected-latitude').value = '';
         document.getElementById('detected-longitude').value = '';
         
-        // Réinitialiser les dropdowns manuels
-        countryResidence.value = '';
-        cityResidence.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
-        cityResidence.disabled = true;
+        // Réinitialiser les dropdowns manuels seulement si pas de valeur existante
+        if (!countryResidence.value) {
+            countryResidence.value = '';
+            cityResidence.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
+            cityResidence.disabled = true;
+        } else {
+            // Si un pays est déjà sélectionné, charger les villes correspondantes
+            loadCitiesForCountryRegister(countryResidence.value);
+        }
+        
+        // Réinitialiser le bouton automatique
+        autoLocationBtn.innerHTML = '<span class="mr-2">🌍</span><span>Détecter automatiquement</span>';
+        autoLocationBtn.disabled = false;
         
         // Réinitialiser checkbox
         updateLocationSharingStateRegister();
@@ -1048,7 +1109,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener pour le bouton "Modifier manuellement"
     const editManualLocationBtn = document.getElementById('edit-manual-location');
     if (editManualLocationBtn) {
-        editManualLocationBtn.addEventListener('click', switchToManualMode);
+        editManualLocationBtn.addEventListener('click', function() {
+            switchToManualMode();
+            updateButtonStates();
+        });
     }
 });
 </script>
