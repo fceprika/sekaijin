@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
 class CityController extends Controller
 {
     /**
-     * Get cities for a given country using CountriesNow API
+     * Get cities for a given country using local data
      * 
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -23,30 +22,24 @@ class CityController extends Controller
         
         $country = $request->input('country');
         
-        // Cache the cities for 24 hours to avoid too many API calls
+        // Cache the cities for 24 hours 
         $cacheKey = 'cities_' . str_replace(' ', '_', strtolower($country));
         
         $cities = Cache::remember($cacheKey, 24 * 60 * 60, function () use ($country) {
             try {
-                // Call CountriesNow API
-                $response = Http::timeout(10)->post('https://countriesnow.space/api/v0.1/countries/cities', [
-                    'country' => $country
-                ]);
+                // Load local cities data
+                $citiesData = require database_path('data/cities_data.php');
                 
-                if ($response->successful()) {
-                    $data = $response->json();
-                    
-                    if (isset($data['data']) && is_array($data['data'])) {
-                        // Sort cities alphabetically
-                        $cities = $data['data'];
-                        sort($cities, SORT_STRING | SORT_FLAG_CASE);
-                        return $cities;
-                    }
+                // Check if country exists in our data
+                if (isset($citiesData[$country])) {
+                    $cities = $citiesData[$country];
+                    // Cities are already sorted in the data file
+                    return $cities;
                 }
                 
                 return [];
             } catch (\Exception $e) {
-                \Log::warning('Failed to fetch cities for country: ' . $country, [
+                \Log::warning('Failed to load cities for country: ' . $country, [
                     'error' => $e->getMessage()
                 ]);
                 return [];
@@ -57,6 +50,36 @@ class CityController extends Controller
             'success' => true,
             'country' => $country,
             'cities' => $cities
+        ]);
+    }
+    
+    /**
+     * Get list of supported countries (Europe and Asia only)
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSupportedCountries()
+    {
+        $cacheKey = 'supported_countries';
+        
+        $countries = Cache::remember($cacheKey, 24 * 60 * 60, function () {
+            try {
+                // Load local cities data
+                $citiesData = require database_path('data/cities_data.php');
+                
+                // Return only the country names (keys of the array)
+                return array_keys($citiesData);
+            } catch (\Exception $e) {
+                \Log::warning('Failed to load supported countries', [
+                    'error' => $e->getMessage()
+                ]);
+                return [];
+            }
+        });
+        
+        return response()->json([
+            'success' => true,
+            'countries' => $countries
         ]);
     }
 }

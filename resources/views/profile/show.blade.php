@@ -187,14 +187,15 @@
                                 <select id="country_residence" name="country_residence" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                     <option value="">Sélectionnez un pays</option>
-                                    @include('partials.countries', ['selected' => old('country_residence', $user->country_residence)])
+                                    @include('partials.countries', ['selected' => old('country_residence', $user->country_residence), 'filter' => 'europe_asia'])
                                 </select>
+                                <p class="text-xs text-gray-500 mt-1">🌍 Actuellement disponible pour l'Europe et l'Asie uniquement</p>
                             </div>
                             
                             <div>
                                 <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">Ville de résidence</label>
-                                <select id="city_residence" name="city_residence" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                <select id="city_residence" name="city_residence" disabled
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
                                     <option value="">Sélectionnez d'abord un pays</option>
                                     @if(old('city_residence', $user->city_residence))
                                         <option value="{{ old('city_residence', $user->city_residence) }}" selected>{{ old('city_residence', $user->city_residence) }}</option>
@@ -237,7 +238,8 @@
                                 <div class="flex items-center h-5">
                                     <input id="share_location" name="share_location" type="checkbox" value="1" 
                                            {{ old('share_location', $user->is_visible_on_map) ? 'checked' : '' }}
-                                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                           disabled
+                                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 </div>
                                 <div class="ml-3">
                                     <label for="share_location" class="text-sm font-medium text-blue-800">
@@ -246,6 +248,9 @@
                                     <p class="text-xs text-blue-600 mt-1">
                                         Permettez aux autres membres de vous localiser de manière approximative sur la carte interactive. 
                                         Votre position exacte ne sera jamais partagée (rayon d'environ 10 km pour protéger votre vie privée).
+                                    </p>
+                                    <p id="location-requirement" class="text-xs text-orange-600 mt-1 font-medium">
+                                        ⚠️ Vous devez sélectionner une ville ou utiliser la géolocalisation automatique pour activer cette option.
                                     </p>
                                 </div>
                             </div>
@@ -495,15 +500,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const citySelect = document.getElementById('city_residence');
         const cityLoading = document.getElementById('city-loading');
         
-        // Vider le select et afficher le loading
-        citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
-        cityLoading.classList.remove('hidden');
-        
         if (!countryName) {
             citySelect.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
+            citySelect.disabled = true;
             cityLoading.classList.add('hidden');
+            updateLocationSharingState();
             return;
         }
+        
+        // Activer le champ ville et afficher le loading
+        citySelect.disabled = false;
+        citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
+        cityLoading.classList.remove('hidden');
         
         // Appel AJAX pour récupérer les villes
         fetch('/api/cities', {
@@ -535,17 +543,44 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 citySelect.innerHTML = '<option value="">Aucune ville trouvée</option>';
             }
+            
+            // Vérifier l'état de la checkbox après chargement
+            updateLocationSharingState();
         })
         .catch(error => {
             console.error('Erreur lors du chargement des villes:', error);
             cityLoading.classList.add('hidden');
             citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+            updateLocationSharingState();
         });
     }
+    
+    // Fonction pour mettre à jour l'état de la checkbox de partage de localisation
+    function updateLocationSharingState() {
+        const citySelect = document.getElementById('city_residence');
+        const shareLocationCheckbox = document.getElementById('share_location');
+        const locationRequirement = document.getElementById('location-requirement');
+        
+        // Activer la checkbox seulement si une ville est sélectionnée
+        if (citySelect.value && citySelect.value !== '') {
+            shareLocationCheckbox.disabled = false;
+            locationRequirement.classList.add('hidden');
+        } else {
+            shareLocationCheckbox.disabled = true;
+            shareLocationCheckbox.checked = false;
+            locationRequirement.classList.remove('hidden');
+        }
+    }
+    
+    // Écouter les changements sur le select de ville
+    document.getElementById('city_residence').addEventListener('change', updateLocationSharingState);
     
     // Charger les villes au chargement initial si un pays est sélectionné
     if (countryResidence.value) {
         loadCitiesForCountry(countryResidence.value);
+    } else {
+        // Si aucun pays n'est sélectionné, s'assurer que la checkbox est désactivée
+        updateLocationSharingState();
     }
     
     // Géolocalisation automatique (même logique que l'inscription)
@@ -617,6 +652,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 geolocateIcon.textContent = '✅';
                 geolocateText.textContent = 'Localisation détectée';
                 geolocateBtn.style.display = 'none';
+                
+                // Activer la checkbox de partage de localisation après géolocalisation
+                updateLocationSharingState();
 
             } catch (error) {
                 console.warn('Erreur de géolocalisation:', error);
