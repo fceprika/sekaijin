@@ -24,6 +24,12 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Log pour débogage
+        \Log::info('Registration request received', [
+            'request_data' => $request->all(),
+            'is_ajax' => $request->ajax()
+        ]);
+        
         // Validation pour l'étape 1 : création de compte
         $validator = Validator::make($request->all(), [
             'name' => [
@@ -62,6 +68,12 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Log validation errors
+            \Log::warning('Registration validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->all()
+            ]);
+            
             // Check if request is AJAX
             if (request()->ajax()) {
                 return response()->json([
