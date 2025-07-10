@@ -49,6 +49,32 @@ class AdminController extends Controller
     }
 
     /**
+     * Show drafts articles awaiting approval
+     */
+    public function drafts()
+    {
+        $drafts = Article::where('is_published', false)
+            ->with(['author', 'country'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.articles.drafts', compact('drafts'));
+    }
+
+    /**
+     * Publish an article
+     */
+    public function publishArticle(Article $article)
+    {
+        $article->update([
+            'is_published' => true,
+            'published_at' => now()
+        ]);
+
+        return redirect()->back()->with('success', 'Article publié avec succès !');
+    }
+
+    /**
      * Article management
      */
     public function articles(Request $request)
