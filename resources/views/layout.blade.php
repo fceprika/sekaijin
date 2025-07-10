@@ -144,6 +144,9 @@
                             <a href="{{ route('profile.show') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
                                 Mon profil
                             </a>
+                            <a href="{{ route('articles.my-articles') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
+                                Mes articles
+                            </a>
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
                                 <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition duration-300">

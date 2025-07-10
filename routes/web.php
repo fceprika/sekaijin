@@ -102,6 +102,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/clear-location', [App\Http\Controllers\ProfileController::class, 'clearLocation'])->name('profile.clear-location');
+    
+    // Articles management routes
+    Route::get('/mes-articles', [App\Http\Controllers\ArticleController::class, 'myArticles'])->name('articles.my-articles');
+    Route::get('/articles/create', [App\Http\Controllers\ArticleController::class, 'create'])->name('articles.create');
+    Route::post('/articles', [App\Http\Controllers\ArticleController::class, 'store'])->name('articles.store');
+    Route::get('/articles/{article}/edit', [App\Http\Controllers\ArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('/articles/{article}', [App\Http\Controllers\ArticleController::class, 'update'])->name('articles.update');
+    Route::get('/articles/{article}/preview', [App\Http\Controllers\ArticleController::class, 'preview'])->name('articles.preview');
+    Route::delete('/articles/{article}', [App\Http\Controllers\ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
 // Routes d'administration (protection par rôle admin)
@@ -115,6 +124,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::post('/articles', [App\Http\Controllers\AdminController::class, 'storeArticle'])->name('articles.store');
     Route::get('/articles/{article:id}/edit', [App\Http\Controllers\AdminController::class, 'editArticle'])->name('articles.edit');
     Route::put('/articles/{article:id}', [App\Http\Controllers\AdminController::class, 'updateArticle'])->name('articles.update');
+    Route::patch('/articles/{article}/publish', [App\Http\Controllers\AdminController::class, 'publishArticle'])->name('articles.publish');
+    Route::get('/articles/drafts', [App\Http\Controllers\AdminController::class, 'drafts'])->name('articles.drafts');
     Route::delete('/articles/{article:id}', [App\Http\Controllers\AdminController::class, 'destroyArticle'])->name('articles.destroy');
     Route::post('/articles/bulk', [App\Http\Controllers\AdminController::class, 'bulkArticleAction'])->name('articles.bulk');
     

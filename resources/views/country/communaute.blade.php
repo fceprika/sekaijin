@@ -15,19 +15,22 @@
                     <p class="text-gray-600 mt-1">{{ $communityMembers->total() }} français expatriés connectés</p>
                 </div>
                 <div class="flex space-x-3">
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-200">
-                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"></path>
-                        </svg>
-                        Filtres
-                    </button>
                     @auth
-                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition duration-200">
-                            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Organiser un événement
-                        </button>
+                        @if(auth()->user()->isAmbassador() || auth()->user()->isAdmin())
+                            <button onclick="window.location.href='{{ route('events.create') }}'" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition duration-200">
+                                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Organiser un événement
+                            </button>
+                        @else
+                            <button onclick="showEventPermissionModal()" class="bg-gray-400 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-500 transition duration-200 cursor-pointer">
+                                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Organiser un événement
+                            </button>
+                        @endif
                     @endauth
                 </div>
             </div>
@@ -130,20 +133,11 @@
                                     @endif
                                     
                                     <!-- Action Buttons -->
-                                    <div class="flex space-x-2">
+                                    <div class="flex">
                                         <a href="{{ $member->getPublicProfileUrl() }}" 
-                                           class="flex-1 bg-blue-600 text-white text-center py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200">
+                                           class="w-full bg-blue-600 text-white text-center py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200">
                                             Voir profil
                                         </a>
-                                        @auth
-                                            @if(auth()->user()->id !== $member->id)
-                                                <button class="bg-gray-200 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-300 transition duration-200">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                                    </svg>
-                                                </button>
-                                            @endif
-                                        @endauth
                                     </div>
                                 </div>
                             </div>
@@ -270,4 +264,53 @@
         </div>
     </div>
 </div>
+<!-- Modal for Event Permission -->
+<div id="eventPermissionModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
+                <svg class="h-10 w-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Fonctionnalité réservée 🎉</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-gray-600 mb-4">
+                    L'organisation d'événements est actuellement réservée aux <span class="font-semibold text-purple-600">ambassadeurs</span> et <span class="font-semibold text-red-600">administrateurs</span> de la communauté.
+                </p>
+                <p class="text-sm text-gray-500 mb-4">
+                    Cette limitation nous permet de garantir la qualité et la pertinence des événements proposés à notre communauté.
+                </p>
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-semibold">💡 Envie de devenir ambassadeur ?</span><br>
+                        Contactez-nous via le formulaire de contact pour nous parler de votre projet !
+                    </p>
+                </div>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button onclick="closeEventPermissionModal()" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-base font-medium rounded-lg w-full hover:from-blue-700 hover:to-purple-700 transition duration-200">
+                    J'ai compris !
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showEventPermissionModal() {
+    document.getElementById('eventPermissionModal').classList.remove('hidden');
+}
+
+function closeEventPermissionModal() {
+    document.getElementById('eventPermissionModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('eventPermissionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeEventPermissionModal();
+    }
+});
+</script>
 @endsection
