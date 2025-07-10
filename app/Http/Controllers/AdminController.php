@@ -83,10 +83,10 @@ class AdminController extends Controller
 
         // Filters
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = $request->input('search');
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('excerpt', 'like', "%{$search}%");
+                $q->where('title', 'like', '%' . addcslashes($search, '%_\\') . '%')
+                  ->orWhere('excerpt', 'like', '%' . addcslashes($search, '%_\\') . '%');
             });
         }
 
@@ -111,7 +111,7 @@ class AdminController extends Controller
     public function createArticle()
     {
         $countries = Country::all();
-        $categories = ['témoignage', 'guide-pratique', 'travail', 'lifestyle', 'cuisine'];
+        $categories = array_keys(config('content.article_categories'));
         
         return view('admin.articles.create', compact('countries', 'categories'));
     }
@@ -155,7 +155,7 @@ class AdminController extends Controller
         $this->authorize('update', $article);
         
         $countries = Country::all();
-        $categories = ['témoignage', 'guide-pratique', 'travail', 'lifestyle', 'cuisine'];
+        $categories = array_keys(config('content.article_categories'));
         
         return view('admin.articles.edit', compact('article', 'countries', 'categories'));
     }
@@ -215,7 +215,7 @@ class AdminController extends Controller
             'slug' => 'nullable|string|max:255',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
-            'category' => 'nullable|string|in:témoignage,guide-pratique,travail,lifestyle,cuisine',
+            'category' => 'nullable|string|in:' . implode(',', array_keys(config('content.article_categories'))),
             'country_id' => 'nullable|exists:countries,id',
             'is_featured' => 'nullable|boolean',
             'is_published' => 'nullable|boolean',
@@ -233,8 +233,7 @@ class AdminController extends Controller
         // Create a temporary article object for preview
         $article = new Article();
         
-        // Set attributes directly with validated data
-        $article->id = $validatedData['id'] ?? null;
+        // Set attributes directly with validated data (ID not needed for preview)
         $article->title = $validatedData['title'];
         $article->slug = $validatedData['slug'] ?? \Str::slug($validatedData['title']);
         $article->excerpt = $validatedData['excerpt'] ?? null;
@@ -279,7 +278,7 @@ class AdminController extends Controller
             'slug' => 'nullable|string|max:255',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
-            'category' => 'nullable|string|in:administrative,vie-pratique,culture,economie',
+            'category' => 'nullable|string|in:' . implode(',', array_keys(config('content.news_categories'))),
             'country_id' => 'nullable|exists:countries,id',
             'is_featured' => 'nullable|boolean',
             'is_published' => 'nullable|boolean',
@@ -296,8 +295,7 @@ class AdminController extends Controller
         // Create a temporary news object for preview
         $news = new News();
         
-        // Set attributes directly with validated data
-        $news->id = $validatedData['id'] ?? null;
+        // Set attributes directly with validated data (ID not needed for preview)
         $news->title = $validatedData['title'];
         $news->slug = $validatedData['slug'] ?? \Str::slug($validatedData['title']);
         $news->excerpt = $validatedData['excerpt'] ?? null;
@@ -339,10 +337,10 @@ class AdminController extends Controller
 
         // Filters
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = $request->input('search');
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('excerpt', 'like', "%{$search}%");
+                $q->where('title', 'like', '%' . addcslashes($search, '%_\\') . '%')
+                  ->orWhere('excerpt', 'like', '%' . addcslashes($search, '%_\\') . '%');
             });
         }
 
@@ -367,7 +365,7 @@ class AdminController extends Controller
     public function createNews()
     {
         $countries = Country::all();
-        $categories = ['administrative', 'vie-pratique', 'culture', 'economie'];
+        $categories = array_keys(config('content.news_categories'));
         
         return view('admin.news.create', compact('countries', 'categories'));
     }
@@ -400,7 +398,7 @@ class AdminController extends Controller
         $this->authorize('update', $news);
         
         $countries = Country::all();
-        $categories = ['administrative', 'vie-pratique', 'culture', 'economie'];
+        $categories = array_keys(config('content.news_categories'));
         
         return view('admin.news.edit', compact('news', 'countries', 'categories'));
     }
@@ -450,35 +448,47 @@ class AdminController extends Controller
         ]);
 
         $articles = Article::whereIn('id', $request->articles)->get();
+        $successfulActions = 0;
 
         foreach ($articles as $article) {
-            switch ($request->action) {
-                case 'publish':
-                    if ($this->authorize('publish', $article)) {
+            try {
+                switch ($request->action) {
+                    case 'publish':
+                        $this->authorize('publish', $article);
                         $article->update([
                             'is_published' => true,
                             'published_at' => $article->published_at ?? now()
                         ]);
-                    }
-                    break;
-                case 'unpublish':
-                    if ($this->authorize('publish', $article)) {
+                        $successfulActions++;
+                        break;
+                    case 'unpublish':
+                        $this->authorize('publish', $article);
                         $article->update(['is_published' => false]);
-                    }
-                    break;
-                case 'delete':
-                    if ($this->authorize('delete', $article)) {
+                        $successfulActions++;
+                        break;
+                    case 'delete':
+                        $this->authorize('delete', $article);
                         $article->delete();
-                    }
-                    break;
+                        $successfulActions++;
+                        break;
+                }
+            } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+                // Log authorization failures for audit purposes
+                \Log::warning('Bulk action authorization failed', [
+                    'user_id' => auth()->id(),
+                    'action' => $request->action,
+                    'article_id' => $article->id,
+                    'article_title' => $article->title
+                ]);
+                continue;
             }
         }
 
-        $count = count($request->articles);
+        $totalRequested = count($request->articles);
         $message = match($request->action) {
-            'publish' => "{$count} article(s) publié(s) avec succès !",
-            'unpublish' => "{$count} article(s) dépublié(s) avec succès !",
-            'delete' => "{$count} article(s) supprimé(s) avec succès !",
+            'publish' => "{$successfulActions}/{$totalRequested} article(s) publié(s) avec succès !",
+            'unpublish' => "{$successfulActions}/{$totalRequested} article(s) dépublié(s) avec succès !",
+            'delete' => "{$successfulActions}/{$totalRequested} article(s) supprimé(s) avec succès !",
         };
 
         return redirect()->route('admin.articles')->with('success', $message);
@@ -493,35 +503,47 @@ class AdminController extends Controller
         ]);
 
         $newsItems = News::whereIn('id', $request->news)->get();
+        $successfulActions = 0;
 
         foreach ($newsItems as $news) {
-            switch ($request->action) {
-                case 'publish':
-                    if ($this->authorize('publish', $news)) {
+            try {
+                switch ($request->action) {
+                    case 'publish':
+                        $this->authorize('publish', $news);
                         $news->update([
                             'is_published' => true,
                             'published_at' => $news->published_at ?? now()
                         ]);
-                    }
-                    break;
-                case 'unpublish':
-                    if ($this->authorize('publish', $news)) {
+                        $successfulActions++;
+                        break;
+                    case 'unpublish':
+                        $this->authorize('publish', $news);
                         $news->update(['is_published' => false]);
-                    }
-                    break;
-                case 'delete':
-                    if ($this->authorize('delete', $news)) {
+                        $successfulActions++;
+                        break;
+                    case 'delete':
+                        $this->authorize('delete', $news);
                         $news->delete();
-                    }
-                    break;
+                        $successfulActions++;
+                        break;
+                }
+            } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+                // Log authorization failures for audit purposes
+                \Log::warning('Bulk action authorization failed', [
+                    'user_id' => auth()->id(),
+                    'action' => $request->action,
+                    'news_id' => $news->id,
+                    'news_title' => $news->title
+                ]);
+                continue;
             }
         }
 
-        $count = count($request->news);
+        $totalRequested = count($request->news);
         $message = match($request->action) {
-            'publish' => "{$count} actualité(s) publiée(s) avec succès !",
-            'unpublish' => "{$count} actualité(s) dépubliée(s) avec succès !",
-            'delete' => "{$count} actualité(s) supprimée(s) avec succès !",
+            'publish' => "{$successfulActions}/{$totalRequested} actualité(s) publiée(s) avec succès !",
+            'unpublish' => "{$successfulActions}/{$totalRequested} actualité(s) dépubliée(s) avec succès !",
+            'delete' => "{$successfulActions}/{$totalRequested} actualité(s) supprimée(s) avec succès !",
         };
 
         return redirect()->route('admin.news')->with('success', $message);
