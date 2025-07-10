@@ -7,7 +7,7 @@ on:
         description: 'PR number to review'
         required: true
         type: string
-      
+        
   # Manual trigger from PR comments
   issue_comment:
     types: [created]
@@ -17,20 +17,21 @@ jobs:
     # Only run on manual workflow dispatch or when comment contains "/claude-review"
     if: |
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issue_comment' && 
-       github.event.issue.pull_request && 
-       contains(github.event.comment.body, '/claude-review') &&
-       (github.event.comment.author_association == 'OWNER' || 
-        github.event.comment.author_association == 'COLLABORATOR' ||
-        github.event.comment.author_association == 'MEMBER'))
-    
+      (github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        contains(github.event.comment.body, '/claude-review') &&
+        (github.event.comment.author_association == 'OWNER' ||
+         github.event.comment.author_association == 'COLLABORATOR' ||
+         github.event.comment.author_association == 'MEMBER'))
+        
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
-    
+      pull-requests: write
+      issues: write
+      actions: read
+      statuses: write
+        
     steps:
       - name: Get PR number
         id: pr-number
@@ -40,54 +41,123 @@ jobs:
           else
             echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
           fi
-      
+          
+      - name: Debug PR info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "PR number: ${{ steps.pr-number.outputs.PR_NUMBER }}"
+          echo "Repository: ${{ github.repository }}"
+            
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-
+          fetch-depth: 0
+          
+      - name: Setup GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          
+      - name: Get PR details and diff
+        id: pr-details
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.pr-number.outputs.PR_NUMBER }}"
+          
+          # Get PR info
+          gh pr view $PR_NUMBER --json title,body,author,baseRefName,headRefName > pr-info.json
+          
+          # Get the diff
+          gh pr diff $PR_NUMBER > pr-diff.txt
+          
+          # Get changed files
+          gh pr view $PR_NUMBER --json files --jq '.files[].path' > changed-files.txt
+          
+          echo "Diff size: $(wc -l pr-diff.txt)"
+          echo "Changed files: $(cat changed-files.txt)"
+          
       - name: Run Claude Code Review
         id: claude-review
-        uses: anthropics/claude-code-action@beta
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          trigger_phrase: '/claude-review'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Create the review using Claude API directly
+          PR_NUMBER="${{ steps.pr-number.outputs.PR_NUMBER }}"
           
-          # Optional: Specify model (defaults to Claude Sonnet 4)
-          model: "claude-sonnet-4-20250514"
+          # Prepare the prompt
+          cat > prompt.txt << 'EOF'
+          Please review this pull request and provide feedback on:
+          - Code quality and best practices
+          - Potential bugs or issues
+          - Performance considerations
+          - Security concerns
           
-          # Custom instructions for the review
-          custom_instructions: |
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
-            - Laravel/PHP specific best practices
-            
-            Be constructive and helpful in your feedback.
-            Focus on PHP/Laravel patterns and potential improvements.
+          Be constructive and helpful in your feedback.
+          Focus on PHP/Laravel patterns and potential improvements.
           
-          # Optional: Customize review based on file types
-          # direct_prompt: |
-          #   Review this PR focusing on:
-          #   - For TypeScript files: Type safety and proper interface usage
-          #   - For API endpoints: Security, input validation, and error handling
-          #   - For React components: Performance, accessibility, and best practices
-          #   - For tests: Coverage, edge cases, and test quality
+          PR Info:
+          $(cat pr-info.json)
           
-          # Optional: Different prompts for different authors
-          # direct_prompt: |
-          #   ${{ github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' && 
-          #   'Welcome! Please review this PR from a first-time contributor. Be encouraging and provide detailed explanations for any suggestions.' ||
-          #   'Please provide a thorough code review focusing on our coding standards and best practices.' }}
+          Changed files:
+          $(cat changed-files.txt)
           
-          # Optional: Add specific tools for running tests or linting
-          # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
+          Diff:
+          $(cat pr-diff.txt | head -5000)
+          EOF
           
-          # Optional: Skip review for certain conditions
-          # if: |
-          #   !contains(github.event.pull_request.title, '[skip-review]') &&
-          #   !contains(github.event.pull_request.title, '[WIP]')
+          # Call Claude API
+          REVIEW_RESPONSE=$(curl -X POST https://api.anthropic.com/v1/messages \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -d @- << EOF
+          {
+            "model": "claude-3-opus-20240229",
+            "max_tokens": 4000,
+            "messages": [{
+              "role": "user",
+              "content": "$(cat prompt.txt | jq -Rs .)"
+            }]
+          }
+          EOF
+          )
+          
+          # Extract the review content
+          echo "$REVIEW_RESPONSE" | jq -r '.content[0].text' > review-comment.md
+          
+      - name: Post review comment
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.pr-number.outputs.PR_NUMBER }}"
+          
+          # Create comment header
+          cat > final-comment.md << 'EOF'
+          ## 🤖 Claude Code Review
+          
+          EOF
+          
+          # Add the review
+          cat review-comment.md >> final-comment.md
+          
+          # Add footer
+          cat >> final-comment.md << 'EOF'
+          
+          ---
+          *This review was generated by Claude AI. Take it as suggestions and use your judgment.*
+          EOF
+          
+          # Post the comment
+          gh pr comment $PR_NUMBER --body-file final-comment.md
+          
+      - name: Add reaction to trigger comment
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions" \
+            -f content='+1'
