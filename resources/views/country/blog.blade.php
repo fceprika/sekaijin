@@ -15,12 +15,12 @@
                     <p class="text-gray-600 mt-1">Témoignages et conseils de la communauté française</p>
                 </div>
                 @auth
-                    <button class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition duration-200">
-                        <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('articles.create') }}" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition duration-200 inline-flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         Écrire un article
-                    </button>
+                    </a>
                 @endauth
             </div>
         </div>
@@ -225,9 +225,9 @@
                     <h3 class="text-lg font-bold text-gray-800 mb-2">Partagez votre expérience</h3>
                     <p class="text-gray-600 text-sm mb-4">Votre histoire peut aider d'autres expatriés. Rejoignez notre communauté de rédacteurs !</p>
                     @auth
-                        <button class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition duration-200">
+                        <a href="{{ route('articles.create') }}" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition duration-200 inline-flex items-center justify-center">
                             Écrire un article
-                        </button>
+                        </a>
                     @else
                         <a href="{{ route('register') }}" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition duration-200">
                             Rejoindre la communauté

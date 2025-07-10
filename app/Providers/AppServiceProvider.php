@@ -56,5 +56,6 @@ class AppServiceProvider extends ServiceProvider
 
         // Register view composers for performance optimization
         View::composer(['layout', 'country.*'], \App\Http\View\Composers\CountryComposer::class);
+        View::composer(['layout', 'home', 'auth.*', 'emails.*'], \App\Http\View\Composers\StatsComposer::class);
     }
 }

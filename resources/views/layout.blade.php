@@ -184,6 +184,13 @@
                             <!-- User Dropdown Menu -->
                             <div id="user-menu" class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
                                 <div class="py-2">
+                                    @if(Auth::user()->isAdmin())
+                                        <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition duration-200">
+                                            <i class="fas fa-shield-alt mr-3 w-4"></i>
+                                            Administration
+                                        </a>
+                                        <hr class="my-2">
+                                    @endif
                                     <a href="{{ Auth::user()->getPublicProfileUrl() }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
                                         <i class="fas fa-eye mr-3 w-4"></i>
                                         Voir mon profil

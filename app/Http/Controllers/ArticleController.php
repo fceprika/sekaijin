@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Country;
+use App\Http\Requests\StoreUserArticleRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -16,13 +17,9 @@ class ArticleController extends Controller
     public function create()
     {
         $countries = Country::orderBy('name_fr')->get();
-        $categories = [
-            'témoignage' => 'Témoignage',
-            'guide-pratique' => 'Guide pratique',
-            'travail' => 'Travail',
-            'lifestyle' => 'Lifestyle',
-            'cuisine' => 'Cuisine',
-        ];
+        $categories = collect(config('content.article_categories'))->mapWithKeys(function ($category, $key) {
+            return [$key => $category['label']];
+        })->all();
         
         return view('articles.create', compact('countries', 'categories'));
     }
@@ -30,16 +27,8 @@ class ArticleController extends Controller
     /**
      * Store a newly created article in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserArticleRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'excerpt' => 'required|string|max:500',
-            'content' => 'required|string',
-            'category' => 'required|string|in:témoignage,guide-pratique,travail,lifestyle,cuisine',
-            'country_id' => 'required|exists:countries,id',
-            'reading_time' => 'nullable|integer|min:1|max:60',
-        ]);
 
         $article = Article::create([
             'title' => $request->title,
@@ -69,13 +58,9 @@ class ArticleController extends Controller
         }
 
         $countries = Country::orderBy('name_fr')->get();
-        $categories = [
-            'témoignage' => 'Témoignage',
-            'guide-pratique' => 'Guide pratique',
-            'travail' => 'Travail',
-            'lifestyle' => 'Lifestyle',
-            'cuisine' => 'Cuisine',
-        ];
+        $categories = collect(config('content.article_categories'))->mapWithKeys(function ($category, $key) {
+            return [$key => $category['label']];
+        })->all();
 
         return view('articles.edit', compact('article', 'countries', 'categories'));
     }
@@ -83,21 +68,12 @@ class ArticleController extends Controller
     /**
      * Update the specified article in storage.
      */
-    public function update(Request $request, Article $article)
+    public function update(StoreUserArticleRequest $request, Article $article)
     {
         // Vérifier que l'utilisateur est l'auteur ou un admin
         if ($article->author_id !== Auth::id() && !Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à modifier cet article.');
         }
-
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'excerpt' => 'required|string|max:500',
-            'content' => 'required|string',
-            'category' => 'required|string|in:témoignage,guide-pratique,travail,lifestyle,cuisine',
-            'country_id' => 'required|exists:countries,id',
-            'reading_time' => 'nullable|integer|min:1|max:60',
-        ]);
 
         $article->update([
             'title' => $request->title,
