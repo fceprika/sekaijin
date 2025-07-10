@@ -244,7 +244,9 @@ class AdminController extends Controller
         $article->author_id = auth()->id();
         $article->is_featured = $validatedData['is_featured'] ?? false;
         $article->is_published = $validatedData['is_published'] ?? false;
-        $article->published_at = $validatedData['published_at'] ? \Carbon\Carbon::parse($validatedData['published_at']) : now();
+        $article->published_at = isset($validatedData['published_at']) && $validatedData['published_at'] 
+            ? \Carbon\Carbon::parse($validatedData['published_at']) 
+            : now();
         $article->views = $validatedData['views'] ?? 0;
         $article->likes = $validatedData['likes'] ?? 0;
         $article->reading_time = $validatedData['reading_time'] ?? null;
@@ -305,7 +307,9 @@ class AdminController extends Controller
         $news->author_id = auth()->id();
         $news->is_featured = $validatedData['is_featured'] ?? false;
         $news->is_published = $validatedData['is_published'] ?? false;
-        $news->published_at = $validatedData['published_at'] ? \Carbon\Carbon::parse($validatedData['published_at']) : now();
+        $news->published_at = isset($validatedData['published_at']) && $validatedData['published_at'] 
+            ? \Carbon\Carbon::parse($validatedData['published_at']) 
+            : now();
         $news->views = $validatedData['views'] ?? 0;
         $news->image_url = $validatedData['image_url'] ?? null;
         
