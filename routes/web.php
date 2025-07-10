@@ -102,6 +102,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/clear-location', [App\Http\Controllers\ProfileController::class, 'clearLocation'])->name('profile.clear-location');
+    
+    // Routes pour la gestion d'articles par les utilisateurs
+    Route::get('/articles/create', [App\Http\Controllers\ArticleController::class, 'create'])->name('articles.create');
+    Route::post('/articles', [App\Http\Controllers\ArticleController::class, 'store'])->name('articles.store');
+    Route::get('/articles/mes-articles', [App\Http\Controllers\ArticleController::class, 'myArticles'])->name('articles.my-articles');
+    Route::get('/articles/{article}/edit', [App\Http\Controllers\ArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('/articles/{article}', [App\Http\Controllers\ArticleController::class, 'update'])->name('articles.update');
+    Route::get('/articles/{article}/preview', [App\Http\Controllers\ArticleController::class, 'preview'])->name('articles.preview');
+    Route::delete('/articles/{article}', [App\Http\Controllers\ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
 // Routes d'administration (protection par rôle admin)
