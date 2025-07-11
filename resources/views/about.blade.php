@@ -77,8 +77,7 @@
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Notre communauté aujourd'hui</h2>
                     <p class="text-gray-600 mb-4 leading-relaxed">
                         Ce qui n'était au départ qu'une idée dans un coin de ma tête est devenu une réalité : 
-                        Sekaijin rassemble aujourd'hui des dizaines de Français installés en Thaïlande, au Japon 
-                        et en Indonésie, avec un même objectif — ne plus être seuls à l'étranger.
+                        Sekaijin rassemble aujourd'hui des dizaines de Français installés en Thaïlande avec un même objectif — ne plus être seuls à l'étranger.
                     </p>
                     <p class="text-gray-600 mb-4 leading-relaxed">
                         Notre communauté évolue chaque jour. Des profils variés nous rejoignent : des entrepreneurs, 
@@ -166,7 +165,7 @@
                                 permettre aux Français du monde entier de ne plus se sentir seuls à l'étranger.
                             </p>
                             <p class="text-gray-700 mb-4 leading-relaxed">
-                                Fort de son expérience personnelle d'expatriation en Thaïlande, il comprend les défis 
+                                Fort de son expérience personnelle d'expatriation au Japon et en Thaïlande, il comprend les défis 
                                 uniques auxquels font face les Français à l'étranger et s'engage à construire une 
                                 communauté bienveillante et solidaire.
                             </p>
