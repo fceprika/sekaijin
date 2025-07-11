@@ -32,36 +32,6 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-12">
-        <!-- Quick Navigation -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <a href="{{ route('country.actualites', $countryModel->slug) }}" 
-               class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition duration-300 group">
-                <div class="text-3xl mb-3">📰</div>
-                <h3 class="font-bold text-gray-800 group-hover:text-blue-600">Actualités</h3>
-                <p class="text-sm text-gray-600">Les dernières nouvelles</p>
-            </a>
-            
-            <a href="{{ route('country.blog', $countryModel->slug) }}" 
-               class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition duration-300 group">
-                <div class="text-3xl mb-3">✍️</div>
-                <h3 class="font-bold text-gray-800 group-hover:text-blue-600">Blog</h3>
-                <p class="text-sm text-gray-600">Articles de la communauté</p>
-            </a>
-            
-            <a href="{{ route('country.communaute', $countryModel->slug) }}" 
-               class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition duration-300 group">
-                <div class="text-3xl mb-3">👥</div>
-                <h3 class="font-bold text-gray-800 group-hover:text-blue-600">Communauté</h3>
-                <p class="text-sm text-gray-600">{{ $memberCount ?? $communityMembers->count() }} membres</p>
-            </a>
-            
-            <a href="{{ route('country.evenements', $countryModel->slug) }}" 
-               class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition duration-300 group">
-                <div class="text-3xl mb-3">📅</div>
-                <h3 class="font-bold text-gray-800 group-hover:text-blue-600">Événements</h3>
-                <p class="text-sm text-gray-600">Prochains rendez-vous</p>
-            </a>
-        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Main Content Column -->
