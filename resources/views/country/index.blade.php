@@ -52,7 +52,7 @@
                class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition duration-300 group">
                 <div class="text-3xl mb-3">👥</div>
                 <h3 class="font-bold text-gray-800 group-hover:text-blue-600">Communauté</h3>
-                <p class="text-sm text-gray-600">{{ $communityMembers->count() }} membres</p>
+                <p class="text-sm text-gray-600">{{ $memberCount ?? $communityMembers->count() }} membres</p>
             </a>
             
             <a href="{{ route('country.evenements', $countryModel->slug) }}" 
@@ -78,13 +78,13 @@
                         </a>
                     </div>
                     
-                    @if($featuredNews->count() > 0)
+                    @if($featuredNews->isNotEmpty())
                         <div class="space-y-4">
                             @foreach($featuredNews->take(3) as $news)
                                 <div class="border-l-4 border-blue-500 pl-4 py-2">
                                     <h3 class="font-semibold text-gray-800">{{ $news->title }}</h3>
                                     <p class="text-gray-600 text-sm">{{ $news->excerpt }}</p>
-                                    <span class="text-xs text-gray-500">{{ $news->published_at->diffForHumans() }}</span>
+                                    <span class="text-xs text-gray-500">{{ $news->published_at?->diffForHumans() ?? 'Date inconnue' }}</span>
                                 </div>
                             @endforeach
                         </div>
@@ -113,7 +113,7 @@
                         </a>
                     </div>
                     
-                    @if($featuredArticles->count() > 0)
+                    @if($featuredArticles->isNotEmpty())
                         <div class="space-y-6">
                             @foreach($featuredArticles->take(3) as $article)
                                 <article class="{{ !$loop->last ? 'border-b border-gray-200 pb-4' : '' }}">
@@ -122,7 +122,7 @@
                                     <div class="flex items-center text-xs text-gray-500">
                                         <span>Par {{ $article->author->name }}</span>
                                         <span class="mx-2">•</span>
-                                        <span>{{ $article->published_at->diffForHumans() }}</span>
+                                        <span>{{ $article->published_at?->diffForHumans() ?? 'Date inconnue' }}</span>
                                     </div>
                                 </article>
                             @endforeach
@@ -155,7 +155,7 @@
                         </a>
                     </div>
                     
-                    @if($communityMembers->count() > 0)
+                    @if($communityMembers->isNotEmpty())
                         <div class="space-y-3">
                             @foreach($communityMembers->take(4) as $member)
                                 <div class="flex items-center space-x-3">
@@ -175,10 +175,11 @@
                             @endforeach
                         </div>
                         
+                        @php $memberCount = $communityMembers->count() @endphp
                         <div class="mt-4 pt-4 border-t border-gray-200">
                             <p class="text-sm text-gray-600 text-center">
-                                <span class="font-semibold">{{ $communityMembers->count() }}</span> 
-                                membre{{ $communityMembers->count() > 1 ? 's' : '' }} en {{ $countryModel->name_fr }}
+                                <span class="font-semibold">{{ $memberCount }}</span> 
+                                membre{{ $memberCount > 1 ? 's' : '' }} en {{ $countryModel->name_fr }}
                             </p>
                         </div>
                     @else
@@ -206,12 +207,12 @@
                         </a>
                     </div>
                     
-                    @if($upcomingEvents->count() > 0)
+                    @if($upcomingEvents->isNotEmpty())
                         <div class="space-y-3">
                             @foreach($upcomingEvents->take(3) as $event)
                                 <div class="border border-gray-200 rounded-lg p-3">
                                     <h4 class="font-medium text-gray-800 text-sm">{{ $event->title }}</h4>
-                                    <p class="text-xs text-gray-600">{{ $event->start_date->format('d/m/Y H:i') }}</p>
+                                    <p class="text-xs text-gray-600">{{ $event->start_date?->format('d/m/Y H:i') ?? 'Date à confirmer' }}</p>
                                     <p class="text-xs text-gray-500">
                                         @if($event->is_online)
                                             En ligne
@@ -242,12 +243,12 @@
                             <h3 class="text-lg font-bold text-gray-800 mb-2">Gestion {{ $countryModel->name_fr }}</h3>
                             <p class="text-gray-600 text-sm mb-4">Contribuez au contenu de cette page.</p>
                             <div class="space-y-2">
-                                <button class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-200 text-sm">
+                                <a href="{{ route('admin.news.create') }}" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-200 text-sm inline-block text-center">
                                     Ajouter une actualité
-                                </button>
-                                <button class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition duration-200 text-sm">
+                                </a>
+                                <a href="{{ route('events.create') }}" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition duration-200 text-sm inline-block text-center">
                                     Créer un événement
-                                </button>
+                                </a>
                             </div>
                         </div>
                     @endif
@@ -255,7 +256,7 @@
                     <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
                         <h3 class="text-lg font-bold text-gray-800 mb-2">Rejoignez-nous</h3>
                         <p class="text-gray-600 text-sm mb-4">Connectez-vous avec la communauté française en {{ $countryModel->name_fr }}.</p>
-                        <a href="/inscription" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition duration-200">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                             </svg>
