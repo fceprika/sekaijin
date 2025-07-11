@@ -127,18 +127,6 @@
                                                     <span class="text-xl mr-3">{{ $country->emoji }}</span>
                                                     <div>
                                                         <span class="font-medium">{{ $country->name_fr }}</span>
-                                                        @php
-                                                            // Simuler le nombre de contenus (à remplacer par de vraies données)
-                                                            $memberCount = match($country->slug) {
-                                                                'thailande' => '127',
-                                                                'japon' => '89',
-                                                                'vietnam' => '45',
-                                                                default => '0'
-                                                            };
-                                                        @endphp
-                                                        @if($memberCount > 0)
-                                                            <span class="text-xs text-gray-500 block">{{ $memberCount }} membres</span>
-                                                        @endif
                                                     </div>
                                                 </div>
                                                 @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
@@ -147,13 +135,6 @@
                                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                                         </svg>
                                                     </span>
-                                                @else
-                                                    @if($country->slug === 'thailande')
-                                                        <span class="flex items-center text-xs text-green-600 font-medium">
-                                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
-                                                            +12 nouveaux
-                                                        </span>
-                                                    @endif
                                                 @endif
                                             </a>
                                         @endforeach
