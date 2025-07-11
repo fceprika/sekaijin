@@ -52,10 +52,10 @@
                             $images = [];
                         }
                         
-                        // S'assurer que chaque élément du tableau est une chaîne
-                        $images = array_filter($images, function($image) {
-                            return is_string($image) || (is_array($image) && isset($image['path']));
-                        });
+                        // Filtrer les éléments vides et réindexer
+                        $images = array_values(array_filter($images, function($image) {
+                            return !empty($image) && (is_string($image) || (is_array($image) && isset($image['path'])));
+                        }));
                     @endphp
                     @if($images && count($images) > 0)
                         <div class="relative">
@@ -209,8 +209,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach($similarAnnouncements as $similar)
                                 <a href="{{ route('country.announcement.show', [$countryModel->slug, $similar]) }}" class="flex bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                                    @if($similar->images && count($similar->images) > 0)
-                                        <img src="{{ Storage::url($similar->images[0]) }}" alt="{{ $similar->title }}" class="w-32 h-32 object-cover rounded-l-lg">
+                                    @php
+                                        $similarImages = is_array($similar->images) ? array_values(array_filter($similar->images)) : [];
+                                    @endphp
+                                    @if($similarImages && count($similarImages) > 0)
+                                        <img src="{{ Storage::url($similarImages[0]) }}" alt="{{ $similar->title }}" class="w-32 h-32 object-cover rounded-l-lg">
                                     @else
                                         <div class="w-32 h-32 bg-gray-200 rounded-l-lg flex items-center justify-center flex-shrink-0">
                                             <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

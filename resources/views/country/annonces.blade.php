@@ -151,8 +151,11 @@
                     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach($announcements as $announcement)
                             <a href="{{ route('country.announcement.show', [$countryModel->slug, $announcement]) }}" class="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                                @if($announcement->images && count($announcement->images) > 0)
-                                    <img src="{{ Storage::url($announcement->images[0]) }}" alt="{{ $announcement->title }}" class="w-full h-48 object-cover rounded-t-lg">
+                                @php
+                                    $images = is_array($announcement->images) ? array_values(array_filter($announcement->images)) : [];
+                                @endphp
+                                @if($images && count($images) > 0)
+                                    <img src="{{ Storage::url($images[0]) }}" alt="{{ $announcement->title }}" class="w-full h-48 object-cover rounded-t-lg">
                                 @else
                                     <div class="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
                                         <svg class="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

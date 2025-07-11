@@ -59,11 +59,14 @@
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow-sm">
                     <!-- Images -->
-                    @if($announcement->images && count($announcement->images) > 0)
+                    @php
+                        $images = is_array($announcement->images) ? array_values(array_filter($announcement->images)) : [];
+                    @endphp
+                    @if($images && count($images) > 0)
                         <div class="p-6 border-b">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Images ({{ count($announcement->images) }})</h3>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Images ({{ count($images) }})</h3>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                @foreach($announcement->images as $image)
+                                @foreach($images as $image)
                                     <img src="{{ Storage::url($image) }}" alt="Image de l'annonce" class="w-full h-32 object-cover rounded-lg">
                                 @endforeach
                             </div>

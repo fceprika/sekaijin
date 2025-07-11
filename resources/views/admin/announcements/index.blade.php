@@ -185,8 +185,11 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center">
-                                            @if($announcement->images && count($announcement->images) > 0)
-                                                <img src="{{ Storage::url($announcement->images[0]) }}" alt="{{ $announcement->title }}" class="h-10 w-10 rounded object-cover">
+                                            @php
+                                                $images = is_array($announcement->images) ? array_values(array_filter($announcement->images)) : [];
+                                            @endphp
+                                            @if($images && count($images) > 0)
+                                                <img src="{{ Storage::url($images[0]) }}" alt="{{ $announcement->title }}" class="h-10 w-10 rounded object-cover">
                                             @else
                                                 <div class="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
                                                     <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
