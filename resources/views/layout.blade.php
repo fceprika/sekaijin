@@ -564,7 +564,7 @@
                 <!-- À propos de Sekaijin -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center mb-4">
-                        <img src="/images/sekaijin_logo.png" alt="Sekaijin" class="h-10 w-auto">
+                        <img src="/images/sekaijin_logo.png" alt="Sekaijin" class="h-10 w-auto brightness-0 invert">
                     </div>
                     <p class="text-gray-300 mb-4 leading-relaxed">
                         La communauté qui connecte les expatriés français du monde entier. 
