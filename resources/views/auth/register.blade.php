@@ -31,12 +31,12 @@
                     <!-- Indicateur d'étapes -->
                     <div class="flex items-center justify-center space-x-8">
                         <div class="flex items-center">
-                            <div id="step1-indicator" class="w-8 h-8 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold mr-3">1</div>
+                            <div id="step1-indicator" class="w-8 h-8 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold mr-3 flex-shrink-0 aspect-square">1</div>
                             <span id="step1-text" class="font-medium">Création de compte</span>
                         </div>
                         <div class="flex-1 h-1 bg-blue-400 rounded-full mx-4"></div>
                         <div class="flex items-center">
-                            <div id="step2-indicator" class="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center font-bold mr-3">2</div>
+                            <div id="step2-indicator" class="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center font-bold mr-3 flex-shrink-0 aspect-square">2</div>
                             <span id="step2-text" class="font-medium opacity-60">Compléter le profil</span>
                         </div>
                     </div>
@@ -340,13 +340,9 @@
                                                 <p id="location-requirement-register" class="text-xs text-orange-600 mt-1 font-medium">
                                                     ⚠️ Vous devez sélectionner une ville ou utiliser la géolocalisation automatique pour activer cette option.
                                                 </p>
-                                                <div class="mt-2 flex items-start space-x-2">
-                                                    <span class="text-green-600">🛡️</span>
-                                                    <p class="text-xs text-gray-600">
-                                                        <strong>Nous ne partageons jamais votre position exacte.</strong><br>
-                                                        Zone de 10 km, modifiable à tout moment.
-                                                    </p>
-                                                </div>
+                                                <p class="text-xs text-gray-600 mt-2">
+                                                    <span class="text-green-600">🛡️</span> <strong>Nous ne partageons jamais votre position exacte.</strong> Zone de 10 km, modifiable à tout moment.
+                                                </p>
                                             </div>
                                         </label>
                                     </div>
@@ -429,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
         step1Text.classList.add('opacity-60');
         
         step2Indicator.classList.remove('bg-blue-400');
-        step2Indicator.classList.add('bg-white', 'text-blue-600');
+        step2Indicator.classList.add('bg-green-500', 'text-white');
         step2Text.classList.remove('opacity-60');
         
         // Mettre à jour le message de bienvenue
