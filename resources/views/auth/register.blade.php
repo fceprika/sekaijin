@@ -31,12 +31,12 @@
                     <!-- Indicateur d'étapes -->
                     <div class="flex items-center justify-center space-x-8">
                         <div class="flex items-center">
-                            <div id="step1-indicator" class="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold mr-3">1</div>
+                            <div id="step1-indicator" class="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold mr-3 flex-shrink-0 aspect-square">1</div>
                             <span id="step1-text" class="font-medium">Création de compte</span>
                         </div>
                         <div class="flex-1 h-1 bg-blue-400 rounded-full mx-4"></div>
                         <div class="flex items-center">
-                            <div id="step2-indicator" class="w-10 h-10 rounded-full bg-blue-400 text-white flex items-center justify-center font-bold mr-3">2</div>
+                            <div id="step2-indicator" class="w-10 h-10 rounded-full bg-blue-400 text-white flex items-center justify-center font-bold mr-3 flex-shrink-0 aspect-square">2</div>
                             <span id="step2-text" class="font-medium opacity-60">Compléter le profil</span>
                         </div>
                     </div>
