@@ -87,50 +87,66 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex space-x-7">
-                    <div>
+                    <div class="flex items-center">
                         <a href="/" class="flex items-center py-4 px-2">
                             <img src="/images/sekaijin_logo.png" alt="Sekaijin" class="h-8 w-auto">
-                            @if(isset($currentCountry))
-                                <span class="ml-3 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                                    {{ $currentCountry->name_fr }}
-                                </span>
-                            @endif
                         </a>
+                        
+                        <!-- Unified Country Selector -->
+                        <div class="relative ml-4">
+                            <button id="countries-dropdown-btn" class="relative flex items-center space-x-2 py-2 px-4 rounded-lg transition-all duration-300 {{ isset($currentCountry) ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg animate-pulse' }}">
+                                @if(isset($currentCountry))
+                                    <span class="text-lg">{{ $currentCountry->emoji }}</span>
+                                    <span class="font-medium">{{ $currentCountry->name_fr }}</span>
+                                @else
+                                    <span class="text-lg">🌍</span>
+                                    <span class="font-medium">Choisir un pays</span>
+                                @endif
+                                <svg class="w-4 h-4 transition-transform duration-200 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                                @if(!isset($currentCountry))
+                                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                                    </span>
+                                @endif
+                            </button>
+                        
+                            <!-- Dropdown Menu -->
+                            <div id="countries-dropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
+                                <div class="p-3">
+                                    <div class="mb-3">
+                                        <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold px-3">Sélectionnez votre destination</p>
+                                    </div>
+                                    <div class="space-y-1">
+                                        @foreach($allCountries as $country)
+                                            <a href="{{ route('country.index', $country->slug) }}" 
+                                               class="flex items-center justify-between px-3 py-2 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                                                <div class="flex items-center">
+                                                    <span class="text-xl mr-3">{{ $country->emoji }}</span>
+                                                    <div>
+                                                        <span class="font-medium">{{ $country->name_fr }}</span>
+                                                    </div>
+                                                </div>
+                                                @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
+                                                    <span class="text-blue-600">
+                                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </span>
+                                                @endif
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-6">
-                    <!-- Countries Dropdown -->
-                    <div class="relative">
-                        <button id="countries-dropdown-btn" class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-                            <span class="mr-2">🌍</span>
-                            Pays
-                            <svg class="ml-2 w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <!-- Dropdown Menu -->
-                        <div id="countries-dropdown" class="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
-                            <div class="py-2">
-                                @foreach($allCountries as $country)
-                                    <a href="{{ route('country.index', $country->slug) }}" 
-                                       class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600 font-medium' : '' }}">
-                                        <span class="text-lg mr-3">{{ $country->emoji }}</span>
-                                        {{ $country->name_fr }}
-                                        @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
-                                            <span class="ml-auto text-blue-600">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                                </svg>
-                                            </span>
-                                        @endif
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Main Navigation Links -->
                     @if(isset($currentCountry))
@@ -287,14 +303,35 @@
                         </div>
                     @endauth
 
+                    <!-- Country selection prompt -->
+                    @if(!isset($currentCountry))
+                        <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
+                            <p class="text-sm font-medium text-gray-700 mb-2">🌍 Sélectionnez votre destination</p>
+                            <p class="text-xs text-gray-600">Choisissez un pays pour accéder au contenu spécifique</p>
+                        </div>
+                    @endif
+
                     <!-- Country navigation -->
                     <div class="p-4">
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Pays</h3>
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                            @if(isset($currentCountry))
+                                Changer de pays
+                            @else
+                                Pays disponibles
+                            @endif
+                        </h3>
                         @foreach($allCountries as $country)
                             <a href="{{ route('country.index', $country->slug) }}" 
-                               class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-100 text-blue-600' : '' }}">
-                                <span class="text-lg mr-2">{{ $country->emoji }}</span>
-                                {{ $country->name_fr }}
+                               class="flex items-center py-3 px-2 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
+                                <span class="text-xl mr-3">{{ $country->emoji }}</span>
+                                <span>{{ $country->name_fr }}</span>
+                                @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
+                                    <span class="ml-auto text-blue-600">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </span>
+                                @endif
                             </a>
                         @endforeach
                     </div>
