@@ -183,6 +183,9 @@
                 invalid_elements: 'script,object,embed,iframe,form,input,button,meta,link,style,base,applet,audio,video,canvas,svg',
                 forced_root_block: 'p',
                 convert_urls: false,
+                encoding: 'html',
+                entity_encoding: 'named',
+                urlconverter_callback: false,
                 
                 setup: function (editor) {
                     editor.on('change', function () {
@@ -192,6 +195,22 @@
                     // Auto-save when editor loses focus
                     editor.on('blur', function () {
                         editor.save();
+                    });
+                    
+                    // Process content to prevent URL encoding
+                    editor.on('BeforeSetContent', function (e) {
+                        // Decode any URL-encoded content that might have been pasted
+                        if (e.content && typeof e.content === 'string') {
+                            try {
+                                // Check if content looks URL-encoded and decode it
+                                if (e.content.includes('%20') || e.content.includes('%2C') || e.content.includes('%3D')) {
+                                    e.content = decodeURIComponent(e.content);
+                                }
+                            } catch (error) {
+                                // If decoding fails, use original content
+                                console.warn('Could not decode content:', error);
+                            }
+                        }
                     });
                 }
             });
