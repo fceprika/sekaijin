@@ -110,7 +110,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         @foreach($articles as $article)
                             @if(!($featuredArticles->count() > 0 && $article->id === $featuredArticles->first()->id))
-                                <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                                <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
                                     @php
                                         $gradientClass = match($article->category) {
                                             'témoignage' => 'from-purple-400 to-purple-600',
@@ -129,8 +129,9 @@
                                             default => 'gray',
                                         };
                                     @endphp
-                                    <div class="h-48 bg-gradient-to-r {{ $gradientClass }}"></div>
-                                    <div class="p-5">
+                                    <a href="{{ route('country.article.show', [$countryModel->slug, $article->slug]) }}" class="block">
+                                        <div class="h-48 bg-gradient-to-r {{ $gradientClass }}"></div>
+                                        <div class="p-5">
                                         <div class="flex items-center text-sm text-gray-500 mb-2">
                                             <span class="bg-{{ $categoryColor }}-100 text-{{ $categoryColor }}-800 px-2 py-1 rounded-full text-xs font-medium">
                                                 {{ ucfirst($article->category) }}
@@ -138,10 +139,8 @@
                                             <span class="mx-2">•</span>
                                             <span>{{ $article->published_at->diffForHumans() }}</span>
                                         </div>
-                                        <h3 class="text-lg font-bold text-gray-800 mb-2">
-                                            <a href="{{ route('country.article.show', [$countryModel->slug, $article->slug]) }}" class="hover:text-blue-600">
-                                                {{ $article->title }}
-                                            </a>
+                                        <h3 class="text-lg font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                                            {{ $article->title }}
                                         </h3>
                                         <p class="text-gray-600 text-sm mb-3 line-clamp-2">
                                             {{ $article->excerpt }}
@@ -167,6 +166,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    </a>
                                 </article>
                             @endif
                         @endforeach

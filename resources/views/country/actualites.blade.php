@@ -77,7 +77,8 @@
                     <div class="space-y-6">
                         @foreach($news as $newsItem)
                             @if(!($featuredNews->count() > 0 && $newsItem->id === $featuredNews->first()->id))
-                                <article class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                                <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+                                    <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->slug]) }}" class="block p-6">
                                     <div class="flex items-center text-sm text-gray-500 mb-2">
                                         @php
                                             $categoryColor = match($newsItem->category) {
@@ -98,10 +99,8 @@
                                             <i class="fas fa-star text-yellow-500 text-xs"></i>
                                         @endif
                                     </div>
-                                    <h3 class="text-xl font-bold text-gray-800 mb-3">
-                                        <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->slug]) }}" class="hover:text-blue-600">
-                                            {{ $newsItem->title }}
-                                        </a>
+                                    <h3 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">
+                                        {{ $newsItem->title }}
                                     </h3>
                                     <p class="text-gray-600 mb-4">
                                         {{ $newsItem->excerpt }}
@@ -120,18 +119,19 @@
                                             <div class="w-8 h-8 {{ $avatarColor }} rounded-full flex items-center justify-center text-white font-bold text-xs">
                                                 {{ strtoupper(substr($newsItem->author->name, 0, 1)) }}
                                             </div>
-                                            <a href="{{ $newsItem->author->getPublicProfileUrl() }}" class="text-sm text-gray-700 font-medium hover:text-blue-600">
+                                            <span class="text-sm text-gray-700 font-medium">
                                                 {{ $newsItem->author->name }}
                                                 @if($newsItem->author->is_verified)
                                                     <i class="fas fa-check-circle text-blue-500 ml-1"></i>
                                                 @endif
-                                            </a>
+                                            </span>
                                         </div>
                                         <div class="flex items-center space-x-4">
                                             <span class="text-xs text-gray-500">{{ $newsItem->views }} vues</span>
-                                            <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->slug]) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lire la suite →</a>
+                                            <span class="text-blue-600 group-hover:text-blue-800 font-medium transition-colors">Lire la suite →</span>
                                         </div>
                                     </div>
+                                    </a>
                                 </article>
                             @endif
                         @endforeach
