@@ -577,7 +577,7 @@
                         </div>
                         <div class="flex items-center">
                             <span class="text-blue-400 mr-2">🌏</span>
-                            <span>{{ $totalCountries ?? '150+' }} pays</span>
+                            <span>{{ $allCountries->count() }} pays</span>
                         </div>
                     </div>
                 </div>
