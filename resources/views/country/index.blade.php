@@ -81,11 +81,12 @@
                     @if($featuredNews->isNotEmpty())
                         <div class="space-y-4">
                             @foreach($featuredNews->take(3) as $news)
-                                <div class="border-l-4 border-blue-500 pl-4 py-2">
-                                    <h3 class="font-semibold text-gray-800">{{ $news->title }}</h3>
+                                <a href="{{ route('country.news.show', [$countryModel->slug, $news->slug]) }}" 
+                                   class="block border-l-4 border-blue-500 pl-4 py-2 hover:bg-gray-50 transition duration-200 cursor-pointer">
+                                    <h3 class="font-semibold text-gray-800 hover:text-blue-600">{{ $news->title }}</h3>
                                     <p class="text-gray-600 text-sm">{{ $news->excerpt }}</p>
                                     <span class="text-xs text-gray-500">{{ $news->published_at?->diffForHumans() ?? 'Date inconnue' }}</span>
-                                </div>
+                                </a>
                             @endforeach
                         </div>
                     @else
@@ -116,15 +117,16 @@
                     @if($featuredArticles->isNotEmpty())
                         <div class="space-y-6">
                             @foreach($featuredArticles->take(3) as $article)
-                                <article class="{{ !$loop->last ? 'border-b border-gray-200 pb-4' : '' }}">
-                                    <h3 class="font-semibold text-gray-800 mb-2">{{ $article->title }}</h3>
+                                <a href="{{ route('country.article.show', [$countryModel->slug, $article->slug]) }}" 
+                                   class="block {{ !$loop->last ? 'border-b border-gray-200 pb-4' : '' }} hover:bg-gray-50 transition duration-200 cursor-pointer p-2 -m-2 rounded">
+                                    <h3 class="font-semibold text-gray-800 mb-2 hover:text-blue-600">{{ $article->title }}</h3>
                                     <p class="text-gray-600 text-sm mb-2">{{ $article->excerpt }}</p>
                                     <div class="flex items-center text-xs text-gray-500">
                                         <span>Par {{ $article->author->name }}</span>
                                         <span class="mx-2">•</span>
                                         <span>{{ $article->published_at?->diffForHumans() ?? 'Date inconnue' }}</span>
                                     </div>
-                                </article>
+                                </a>
                             @endforeach
                         </div>
                     @else
