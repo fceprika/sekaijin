@@ -93,40 +93,41 @@
                         </a>
                         
                         <!-- Unified Country Selector -->
-                        <div class="relative ml-4">
-                            <button id="countries-dropdown-btn" class="relative flex items-center space-x-2 py-2 px-4 rounded-lg transition-all duration-300 {{ isset($currentCountry) ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg animate-pulse' }}">
+                        <div class="relative ml-2 md:ml-4">
+                            <button id="countries-dropdown-btn" class="relative flex items-center space-x-1 md:space-x-2 py-1.5 md:py-2 px-2 md:px-4 rounded-lg transition-all duration-300 text-sm md:text-base {{ isset($currentCountry) ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md' : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg animate-pulse' }}">
                                 @if(isset($currentCountry))
-                                    <span class="text-lg">{{ $currentCountry->emoji }}</span>
-                                    <span class="font-medium">{{ $currentCountry->name_fr }}</span>
+                                    <span class="text-base md:text-lg">{{ $currentCountry->emoji }}</span>
+                                    <span class="font-medium hidden sm:inline">{{ $currentCountry->name_fr }}</span>
                                 @else
-                                    <span class="text-lg">🌍</span>
-                                    <span class="font-medium">Choisir un pays</span>
+                                    <span class="text-base md:text-lg">🌍</span>
+                                    <span class="font-medium hidden sm:inline">Choisir un pays</span>
+                                    <span class="font-medium sm:hidden">Pays</span>
                                 @endif
-                                <svg class="w-4 h-4 transition-transform duration-200 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-3 h-3 md:w-4 md:h-4 transition-transform duration-200 ml-0.5 md:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                                 @if(!isset($currentCountry))
-                                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                                    <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5 md:h-3 md:w-3">
                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 md:h-3 md:w-3 bg-purple-500"></span>
                                     </span>
                                 @endif
                             </button>
                         
                             <!-- Dropdown Menu -->
-                            <div id="countries-dropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
+                            <div id="countries-dropdown" class="absolute left-0 mt-2 w-48 md:w-64 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
                                 <div class="p-3">
                                     <div class="mb-3">
-                                        <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold px-3">Sélectionnez votre destination</p>
+                                        <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold px-2 md:px-3">Sélectionnez votre destination</p>
                                     </div>
                                     <div class="space-y-1">
                                         @foreach($allCountries as $country)
                                             <a href="{{ route('country.index', $country->slug) }}" 
-                                               class="flex items-center justify-between px-3 py-2 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                                               class="flex items-center justify-between px-2 md:px-3 py-2 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}">
                                                 <div class="flex items-center">
-                                                    <span class="text-xl mr-3">{{ $country->emoji }}</span>
+                                                    <span class="text-lg md:text-xl mr-2 md:mr-3">{{ $country->emoji }}</span>
                                                     <div>
-                                                        <span class="font-medium">{{ $country->name_fr }}</span>
+                                                        <span class="font-medium text-sm md:text-base">{{ $country->name_fr }}</span>
                                                     </div>
                                                 </div>
                                                 @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
