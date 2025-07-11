@@ -78,19 +78,27 @@
                         </a>
                     </div>
                     
-                    <!-- Placeholder news items -->
-                    <div class="space-y-4">
-                        <div class="border-l-4 border-blue-500 pl-4 py-2">
-                            <h3 class="font-semibold text-gray-800">Nouvelle réglementation visa pour {{ $countryModel->name_fr }}</h3>
-                            <p class="text-gray-600 text-sm">Les dernières mises à jour concernant les visas long séjour...</p>
-                            <span class="text-xs text-gray-500">Il y a 2 heures</span>
+                    @if($featuredNews->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($featuredNews->take(3) as $news)
+                                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                    <h3 class="font-semibold text-gray-800">{{ $news->title }}</h3>
+                                    <p class="text-gray-600 text-sm">{{ $news->excerpt }}</p>
+                                    <span class="text-xs text-gray-500">{{ $news->published_at->diffForHumans() }}</span>
+                                </div>
+                            @endforeach
                         </div>
-                        <div class="border-l-4 border-green-500 pl-4 py-2">
-                            <h3 class="font-semibold text-gray-800">Nouveau consulat français ouvert</h3>
-                            <p class="text-gray-600 text-sm">Faciliter les démarches administratives pour les expatriés...</p>
-                            <span class="text-xs text-gray-500">Il y a 1 jour</span>
+                    @else
+                        <div class="text-center py-8">
+                            <div class="text-gray-400 mb-3">
+                                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2m-4-3v.01M17 16v.01"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-gray-600 font-medium">Aucune actualité publiée</h4>
+                            <p class="text-gray-500 text-sm">Les actualités pour {{ $countryModel->name_fr }} arriveront bientôt !</p>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 <!-- Latest Blog Posts -->
@@ -105,27 +113,31 @@
                         </a>
                     </div>
                     
-                    <!-- Placeholder blog posts -->
-                    <div class="space-y-6">
-                        <article class="border-b border-gray-200 pb-4">
-                            <h3 class="font-semibold text-gray-800 mb-2">Guide complet pour s'installer en {{ $countryModel->name_fr }}</h3>
-                            <p class="text-gray-600 text-sm mb-2">Tous les conseils pratiques pour réussir votre expatriation...</p>
-                            <div class="flex items-center text-xs text-gray-500">
-                                <span>Par Marie Dupont</span>
-                                <span class="mx-2">•</span>
-                                <span>Il y a 3 jours</span>
+                    @if($featuredArticles->count() > 0)
+                        <div class="space-y-6">
+                            @foreach($featuredArticles->take(3) as $article)
+                                <article class="{{ !$loop->last ? 'border-b border-gray-200 pb-4' : '' }}">
+                                    <h3 class="font-semibold text-gray-800 mb-2">{{ $article->title }}</h3>
+                                    <p class="text-gray-600 text-sm mb-2">{{ $article->excerpt }}</p>
+                                    <div class="flex items-center text-xs text-gray-500">
+                                        <span>Par {{ $article->author->name }}</span>
+                                        <span class="mx-2">•</span>
+                                        <span>{{ $article->published_at->diffForHumans() }}</span>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <div class="text-gray-400 mb-3">
+                                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
                             </div>
-                        </article>
-                        <article>
-                            <h3 class="font-semibold text-gray-800 mb-2">Les meilleures applications pour expatriés</h3>
-                            <p class="text-gray-600 text-sm mb-2">Notre sélection d'apps indispensables pour la vie quotidienne...</p>
-                            <div class="flex items-center text-xs text-gray-500">
-                                <span>Par Jean Martin</span>
-                                <span class="mx-2">•</span>
-                                <span>Il y a 1 semaine</span>
-                            </div>
-                        </article>
-                    </div>
+                            <h4 class="text-gray-600 font-medium">Aucun article publié</h4>
+                            <p class="text-gray-500 text-sm">Les articles pour {{ $countryModel->name_fr }} arriveront bientôt !</p>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -194,19 +206,33 @@
                         </a>
                     </div>
                     
-                    <!-- Placeholder events -->
-                    <div class="space-y-3">
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <h4 class="font-medium text-gray-800 text-sm">Apéro Français</h4>
-                            <p class="text-xs text-gray-600">Demain 19h00</p>
-                            <p class="text-xs text-gray-500">Centre-ville</p>
+                    @if($upcomingEvents->count() > 0)
+                        <div class="space-y-3">
+                            @foreach($upcomingEvents->take(3) as $event)
+                                <div class="border border-gray-200 rounded-lg p-3">
+                                    <h4 class="font-medium text-gray-800 text-sm">{{ $event->title }}</h4>
+                                    <p class="text-xs text-gray-600">{{ $event->start_date->format('d/m/Y H:i') }}</p>
+                                    <p class="text-xs text-gray-500">
+                                        @if($event->is_online)
+                                            En ligne
+                                        @else
+                                            {{ $event->location ?? 'Lieu à confirmer' }}
+                                        @endif
+                                    </p>
+                                </div>
+                            @endforeach
                         </div>
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <h4 class="font-medium text-gray-800 text-sm">Conférence Expatriation</h4>
-                            <p class="text-xs text-gray-600">Samedi 14h00</p>
-                            <p class="text-xs text-gray-500">En ligne</p>
+                    @else
+                        <div class="text-center py-6">
+                            <div class="text-gray-400 mb-2">
+                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0h6m-6 0v4a2 2 0 002 2h2m-4-6v4a2 2 0 002 2h2m-4-6h4m0-4v4m0 0v4a2 2 0 002 2h2m-4-6h4"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-gray-600 font-medium">Aucun événement à venir</h4>
+                            <p class="text-gray-500 text-sm">Les événements arriveront bientôt !</p>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 <!-- Call to Action -->
