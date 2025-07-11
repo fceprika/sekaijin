@@ -222,7 +222,7 @@ class AdminController extends Controller
             'published_at' => 'nullable|date',
             'views' => 'nullable|integer|min:0',
             'likes' => 'nullable|integer|min:0',
-            'reading_time' => 'nullable|string|max:50'
+            'reading_time' => 'nullable|integer|min:1|max:120'
         ]);
         
         // Debug logging only in development
