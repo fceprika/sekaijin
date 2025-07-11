@@ -100,65 +100,129 @@
                 </div>
 
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-3">
-                    <!-- Direct Country Links -->
-                    @foreach($allCountries as $country)
-                        <a href="{{ route('country.index', $country->slug) }}" 
-                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'text-blue-600' : '' }}">
-                            {{ $country->emoji }} {{ $country->name_fr }}
-                        </a>
-                    @endforeach
-                    
-                    <!-- Country-specific navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Countries Dropdown -->
+                    <div class="relative">
+                        <button id="countries-dropdown-btn" class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+                            <span class="mr-2">🌍</span>
+                            Pays
+                            <svg class="ml-2 w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="countries-dropdown" class="absolute left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
+                            <div class="py-2">
+                                @foreach($allCountries as $country)
+                                    <a href="{{ route('country.index', $country->slug) }}" 
+                                       class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600 font-medium' : '' }}">
+                                        <span class="text-lg mr-3">{{ $country->emoji }}</span>
+                                        {{ $country->name_fr }}
+                                        @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
+                                            <span class="ml-auto text-blue-600">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                            </span>
+                                        @endif
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Navigation Links -->
                     @if(isset($currentCountry))
                         <a href="{{ route('country.actualites', $currentCountry->slug) }}" 
-                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.actualites') ? 'text-blue-600' : '' }}">
+                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.actualites') ? 'text-blue-600' : '' }}">
+                            <span class="mr-2">📰</span>
                             Actualités
                         </a>
                         <a href="{{ route('country.blog', $currentCountry->slug) }}" 
-                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.blog') ? 'text-blue-600' : '' }}">
+                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.blog') ? 'text-blue-600' : '' }}">
+                            <span class="mr-2">📝</span>
                             Blog
                         </a>
                         <a href="{{ route('country.communaute', $currentCountry->slug) }}" 
-                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.communaute') ? 'text-blue-600' : '' }}">
+                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.communaute') ? 'text-blue-600' : '' }}">
+                            <span class="mr-2">👥</span>
                             Communauté
                         </a>
                         <a href="{{ route('country.evenements', $currentCountry->slug) }}" 
-                           class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300 {{ request()->routeIs('country.evenements') ? 'text-blue-600' : '' }}">
+                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.evenements') ? 'text-blue-600' : '' }}">
+                            <span class="mr-2">📅</span>
                             Événements
                         </a>
                     @else
-                        <a href="/about" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">À propos</a>
-                        <a href="/contact" class="py-4 px-2 text-gray-500 hover:text-blue-600 transition duration-300">Contact</a>
+                        <a href="/about" class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+                            <span class="mr-2">ℹ️</span>
+                            À propos
+                        </a>
+                        <a href="/contact" class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
+                            <span class="mr-2">✉️</span>
+                            Contact
+                        </a>
                     @endif
-                    
+
+                    <!-- User Menu or Auth Links -->
                     @auth
-                        <div class="relative ml-4 flex items-center space-x-3">
-                            @if(Auth::user()->isAdmin())
-                                <a href="{{ route('admin.dashboard') }}" class="text-red-600 font-medium hover:text-red-800 transition duration-300">
-                                    <i class="fas fa-shield-alt mr-1"></i>
-                                    Administration
-                                </a>
-                            @endif
-                            <a href="{{ Auth::user()->getPublicProfileUrl() }}" class="text-blue-600 font-medium hover:text-blue-800 transition duration-300">{{ Auth::user()->name }}</a>
-                            <a href="{{ route('profile.show') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
-                                Mon profil
-                            </a>
-                            <a href="{{ route('articles.my-articles') }}" class="text-gray-500 hover:text-blue-600 transition duration-300">
-                                Mes articles
-                            </a>
-                            <form method="POST" action="{{ route('logout') }}" class="inline">
-                                @csrf
-                                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition duration-300">
-                                    Déconnexion
-                                </button>
-                            </form>
+                        <div class="relative ml-4">
+                            <!-- User Menu Button -->
+                            <button id="user-menu-btn" class="flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition duration-300">
+                                <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-600">
+                                    <img src="{{ Auth::user()->getAvatarUrl() }}" 
+                                         alt="Avatar de {{ Auth::user()->name }}"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <span class="text-gray-700 font-medium">{{ Auth::user()->name }}</span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- User Dropdown Menu -->
+                            <div id="user-menu" class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transform scale-95 transition-all duration-200 ease-out z-50">
+                                <div class="py-2">
+                                    @if(Auth::user()->isAdmin())
+                                        <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition duration-200">
+                                            <i class="fas fa-shield-alt mr-3 w-4"></i>
+                                            Administration
+                                        </a>
+                                        <hr class="my-2">
+                                    @endif
+                                    <a href="{{ Auth::user()->getPublicProfileUrl() }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                        <i class="fas fa-eye mr-3 w-4"></i>
+                                        Voir mon profil
+                                    </a>
+                                    <a href="{{ route('profile.show') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                        <i class="fas fa-edit mr-3 w-4"></i>
+                                        Éditer mes infos
+                                    </a>
+                                    <a href="{{ route('articles.my-articles') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                        <i class="fas fa-file-alt mr-3 w-4"></i>
+                                        Mes articles
+                                    </a>
+                                    <hr class="my-2">
+                                    <form method="POST" action="{{ route('logout') }}" class="block">
+                                        @csrf
+                                        <button type="submit" class="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200 text-left">
+                                            <i class="fas fa-sign-out-alt mr-3 w-4"></i>
+                                            Se déconnecter
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="py-4 px-2 text-blue-600 hover:text-blue-800 transition duration-300 font-medium">Connexion</a>
-                        <a href="{{ route('register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">
-                            Inscription
-                        </a>
+                        <div class="flex items-center space-x-3 ml-6">
+                            <a href="{{ route('login') }}" class="py-2 px-4 text-blue-600 hover:text-blue-800 transition duration-300 font-medium">
+                                Connexion
+                            </a>
+                            <a href="{{ route('register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 font-medium shadow-sm">
+                                Inscription
+                            </a>
+                        </div>
                     @endauth
                 </div>
 
@@ -294,33 +358,141 @@
     </nav>
 
     <script nonce="{{ $csp_nonce ?? '' }}">
-        // Mobile menu functionality
+        // Navigation functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu functionality
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-            const closeMobileMenu = document.getElementById('close-mobile-menu');
+            const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
 
-            function openMenu() {
+            function openMobileMenu() {
                 mobileMenuOverlay.classList.remove('hidden');
                 mobileMenu.classList.remove('translate-x-full');
                 document.body.style.overflow = 'hidden';
             }
 
-            function closeMenu() {
+            function closeMobileMenu() {
                 mobileMenu.classList.add('translate-x-full');
                 mobileMenuOverlay.classList.add('hidden');
                 document.body.style.overflow = '';
             }
 
-            mobileMenuButton.addEventListener('click', openMenu);
-            closeMobileMenu.addEventListener('click', closeMenu);
-            mobileMenuOverlay.addEventListener('click', closeMenu);
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', openMobileMenu);
+            }
+            if (closeMobileMenuBtn) {
+                closeMobileMenuBtn.addEventListener('click', closeMobileMenu);
+            }
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+            }
 
-            // Close menu when clicking on navigation links
-            mobileMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', closeMenu);
+            // Close mobile menu when clicking on navigation links
+            if (mobileMenu) {
+                mobileMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', closeMobileMenu);
+                });
+            }
+
+            // Countries Dropdown functionality
+            const countriesDropdownBtn = document.getElementById('countries-dropdown-btn');
+            const countriesDropdown = document.getElementById('countries-dropdown');
+
+            function toggleCountriesDropdown() {
+                const isVisible = !countriesDropdown.classList.contains('opacity-0');
+                
+                if (isVisible) {
+                    // Close dropdown
+                    countriesDropdown.classList.add('opacity-0', 'invisible', 'scale-95');
+                    countriesDropdown.classList.remove('opacity-100', 'visible', 'scale-100');
+                    countriesDropdownBtn.querySelector('svg').classList.remove('rotate-180');
+                } else {
+                    // Close other dropdowns first
+                    closeAllDropdowns();
+                    // Open dropdown
+                    countriesDropdown.classList.remove('opacity-0', 'invisible', 'scale-95');
+                    countriesDropdown.classList.add('opacity-100', 'visible', 'scale-100');
+                    countriesDropdownBtn.querySelector('svg').classList.add('rotate-180');
+                }
+            }
+
+            // User Menu Dropdown functionality
+            const userMenuBtn = document.getElementById('user-menu-btn');
+            const userMenu = document.getElementById('user-menu');
+
+            function toggleUserMenu() {
+                const isVisible = userMenu && !userMenu.classList.contains('opacity-0');
+                
+                if (isVisible) {
+                    // Close dropdown
+                    userMenu.classList.add('opacity-0', 'invisible', 'scale-95');
+                    userMenu.classList.remove('opacity-100', 'visible', 'scale-100');
+                    userMenuBtn.querySelector('svg').classList.remove('rotate-180');
+                } else {
+                    // Close other dropdowns first
+                    closeAllDropdowns();
+                    // Open dropdown
+                    userMenu.classList.remove('opacity-0', 'invisible', 'scale-95');
+                    userMenu.classList.add('opacity-100', 'visible', 'scale-100');
+                    userMenuBtn.querySelector('svg').classList.add('rotate-180');
+                }
+            }
+
+            // Close all dropdowns
+            function closeAllDropdowns() {
+                if (countriesDropdown) {
+                    countriesDropdown.classList.add('opacity-0', 'invisible', 'scale-95');
+                    countriesDropdown.classList.remove('opacity-100', 'visible', 'scale-100');
+                    countriesDropdownBtn.querySelector('svg').classList.remove('rotate-180');
+                }
+                
+                if (userMenu) {
+                    userMenu.classList.add('opacity-0', 'invisible', 'scale-95');
+                    userMenu.classList.remove('opacity-100', 'visible', 'scale-100');
+                    userMenuBtn.querySelector('svg').classList.remove('rotate-180');
+                }
+            }
+
+            // Event listeners for dropdown buttons
+            if (countriesDropdownBtn) {
+                countriesDropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleCountriesDropdown();
+                });
+            }
+
+            if (userMenuBtn) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleUserMenu();
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!countriesDropdownBtn?.contains(e.target) && !countriesDropdown?.contains(e.target) &&
+                    !userMenuBtn?.contains(e.target) && !userMenu?.contains(e.target)) {
+                    closeAllDropdowns();
+                }
             });
+
+            // Close dropdowns on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAllDropdowns();
+                }
+            });
+
+            // Prevent dropdown links from closing the dropdown immediately
+            if (countriesDropdown) {
+                countriesDropdown.addEventListener('click', function(e) {
+                    // Allow navigation but add small delay for visual feedback
+                    if (e.target.tagName === 'A') {
+                        setTimeout(closeAllDropdowns, 100);
+                    }
+                });
+            }
         });
     </script>
 
