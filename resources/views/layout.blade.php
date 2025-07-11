@@ -120,18 +120,11 @@
                                         <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold px-3">Sélectionnez votre destination</p>
                                     </div>
                                     <div class="space-y-1">
-                                        @if(!isset($currentCountry))
-                                            <a href="/" class="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
-                                                <span class="text-lg mr-3">🏠</span>
-                                                <span>Page d'accueil</span>
-                                            </a>
-                                            <div class="border-t border-gray-100 my-2"></div>
-                                        @endif
                                         @foreach($allCountries as $country)
                                             <a href="{{ route('country.index', $country->slug) }}" 
-                                               class="flex items-center justify-between px-3 py-2 rounded-lg transition duration-200 group {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}">
+                                               class="flex items-center justify-between px-3 py-2 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50' }}">
                                                 <div class="flex items-center">
-                                                    <span class="text-xl mr-3 group-hover:scale-110 transition-transform">{{ $country->emoji }}</span>
+                                                    <span class="text-xl mr-3">{{ $country->emoji }}</span>
                                                     <div>
                                                         <span class="font-medium">{{ $country->name_fr }}</span>
                                                         @php
@@ -348,7 +341,7 @@
                         </h3>
                         @foreach($allCountries as $country)
                             <a href="{{ route('country.index', $country->slug) }}" 
-                               class="flex items-center py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-100 text-blue-600 font-medium' : '' }}">
+                               class="flex items-center py-3 px-2 rounded-lg transition duration-200 {{ isset($currentCountry) && $currentCountry->slug === $country->slug ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' }}">
                                 <span class="text-xl mr-3">{{ $country->emoji }}</span>
                                 <span>{{ $country->name_fr }}</span>
                                 @if(isset($currentCountry) && $currentCountry->slug === $country->slug)
