@@ -340,13 +340,9 @@
                                                 <p id="location-requirement-register" class="text-xs text-orange-600 mt-1 font-medium">
                                                     ⚠️ Vous devez sélectionner une ville ou utiliser la géolocalisation automatique pour activer cette option.
                                                 </p>
-                                                <div class="mt-2 flex items-start space-x-2">
-                                                    <span class="text-green-600">🛡️</span>
-                                                    <p class="text-xs text-gray-600">
-                                                        <strong>Nous ne partageons jamais votre position exacte.</strong><br>
-                                                        Zone de 10 km, modifiable à tout moment.
-                                                    </p>
-                                                </div>
+                                                <p class="text-xs text-gray-600 mt-2">
+                                                    <span class="text-green-600">🛡️</span> <strong>Nous ne partageons jamais votre position exacte.</strong> Zone de 10 km, modifiable à tout moment.
+                                                </p>
                                             </div>
                                         </label>
                                     </div>
@@ -429,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
         step1Text.classList.add('opacity-60');
         
         step2Indicator.classList.remove('bg-blue-400');
-        step2Indicator.classList.add('bg-white', 'text-blue-600');
+        step2Indicator.classList.add('bg-green-500', 'text-white');
         step2Text.classList.remove('opacity-60');
         
         // Mettre à jour le message de bienvenue
