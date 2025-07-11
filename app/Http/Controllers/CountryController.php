@@ -26,17 +26,15 @@ class CountryController extends Controller
             ->take(6)
             ->get();
             
-        // Get featured content for homepage
+        // Get latest content for homepage (not just featured)
         $featuredNews = News::forCountry($countryModel->id)
             ->published()
-            ->featured()
             ->latest()
             ->take(3)
             ->get();
             
         $featuredArticles = Article::forCountry($countryModel->id)
             ->published()
-            ->featured()
             ->latest()
             ->take(3)
             ->get();
