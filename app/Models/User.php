@@ -174,6 +174,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get announcements created by this user
+     */
+    public function announcements()
+    {
+        return $this->hasMany(Announcement::class);
+    }
+
+    /**
      * Check if user has enabled location sharing
      */
     public function hasLocationSharing(): bool

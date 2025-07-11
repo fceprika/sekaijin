@@ -39,7 +39,9 @@
       "Bash(php:*)",
       "WebFetch(domain:countrystatecity.in)",
       "WebFetch(domain:geodb-cities-api.wirefreethought.com)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(unlink:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

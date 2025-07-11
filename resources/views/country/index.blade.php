@@ -208,6 +208,61 @@
                     @endif
                 </div>
 
+                <!-- Latest Announcements -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            📝 <span class="ml-2">Annonces</span>
+                        </h3>
+                        <a href="{{ route('country.annonces', $countryModel->slug) }}" 
+                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            Voir tout →
+                        </a>
+                    </div>
+                    
+                    @if($latestAnnouncements->isNotEmpty())
+                        <div class="space-y-3">
+                            @foreach($latestAnnouncements as $announcement)
+                                <a href="{{ route('country.announcement.show', [$countryModel->slug, $announcement->slug]) }}" 
+                                   class="block border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition duration-200">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <h4 class="font-medium text-gray-800 text-sm hover:text-blue-600">{{ $announcement->title }}</h4>
+                                            <p class="text-xs text-gray-600 mt-1">{{ Str::limit($announcement->description, 80) }}</p>
+                                            <div class="flex items-center mt-2 space-x-2">
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                                    @if($announcement->type === 'vente') bg-green-100 text-green-800
+                                                    @elseif($announcement->type === 'location') bg-blue-100 text-blue-800
+                                                    @elseif($announcement->type === 'colocation') bg-purple-100 text-purple-800
+                                                    @else bg-yellow-100 text-yellow-800 @endif">
+                                                    @if($announcement->type === 'vente') Vente
+                                                    @elseif($announcement->type === 'location') Location
+                                                    @elseif($announcement->type === 'colocation') Colocation
+                                                    @else Service @endif
+                                                </span>
+                                                @if($announcement->price)
+                                                    <span class="text-xs font-semibold text-gray-700">{{ number_format($announcement->price, 0, ',', ' ') }} {{ $announcement->currency }}</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">{{ $announcement->city }} • {{ $announcement->created_at->diffForHumans() }}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-6">
+                            <div class="text-gray-400 mb-2">
+                                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-gray-600 font-medium">Aucune annonce</h4>
+                            <p class="text-gray-500 text-sm">Soyez le premier à publier !</p>
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Call to Action -->
                 @auth
                     @if(auth()->user()->isAdmin() || auth()->user()->isAmbassador())
