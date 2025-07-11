@@ -39,6 +39,10 @@
                            class="px-3 py-2 text-gray-600 hover:text-blue-600 transition duration-200 {{ request()->routeIs('admin.news*') ? 'text-blue-600 font-medium' : '' }}">
                             Actualités
                         </a>
+                        <a href="{{ route('admin.announcements') }}" 
+                           class="px-3 py-2 text-gray-600 hover:text-blue-600 transition duration-200 {{ request()->routeIs('admin.announcements*') ? 'text-blue-600 font-medium' : '' }}">
+                            Annonces
+                        </a>
                     </div>
                 </div>
                 

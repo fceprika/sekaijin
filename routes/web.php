@@ -144,6 +144,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     // Preview routes
     Route::post('/articles/preview', [App\Http\Controllers\AdminController::class, 'previewArticle'])->name('articles.preview');
     Route::post('/news/preview', [App\Http\Controllers\AdminController::class, 'previewNews'])->name('news.preview');
+    
+    // Gestion des annonces
+    Route::get('/announcements', [App\Http\Controllers\Admin\AnnouncementController::class, 'index'])->name('announcements');
+    Route::get('/announcements/{announcement}', [App\Http\Controllers\Admin\AnnouncementController::class, 'show'])->name('announcements.show');
+    Route::post('/announcements/{announcement}/approve', [App\Http\Controllers\Admin\AnnouncementController::class, 'approve'])->name('announcements.approve');
+    Route::post('/announcements/{announcement}/refuse', [App\Http\Controllers\Admin\AnnouncementController::class, 'refuse'])->name('announcements.refuse');
+    Route::post('/announcements/bulk-action', [App\Http\Controllers\Admin\AnnouncementController::class, 'bulkAction'])->name('announcements.bulk-action');
 });
 
 // Page d'invitation pour les non-membres
@@ -153,6 +160,18 @@ Route::get('/invitation-membre', function () {
 
 // Profils publics (protégés par l'authentification)
 Route::get('/membre/{name}', [App\Http\Controllers\PublicProfileController::class, 'show'])->name('public.profile');
+
+// Routes globales des annonces
+Route::prefix('annonces')->group(function () {
+    Route::get('/', [App\Http\Controllers\AnnouncementController::class, 'globalIndex'])->name('announcements.index');
+    Route::get('/mes-annonces', [App\Http\Controllers\AnnouncementController::class, 'myAnnouncements'])->name('announcements.my')->middleware('auth');
+    Route::get('/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create')->middleware('auth');
+    Route::post('/', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store')->middleware('auth');
+    Route::get('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'show'])->name('announcements.show');
+    Route::get('/{announcement}/edit', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit')->middleware('auth');
+    Route::put('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update')->middleware('auth');
+    Route::delete('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy')->middleware('auth');
+});
 
 // Routes par pays avec middleware de validation (EN DERNIER pour éviter les conflits)
 Route::prefix('{country}')->middleware('country')->group(function () {
@@ -164,4 +183,10 @@ Route::prefix('{country}')->middleware('country')->group(function () {
     Route::get('/communaute', [App\Http\Controllers\CountryController::class, 'communaute'])->name('country.communaute');
     Route::get('/evenements', [App\Http\Controllers\CountryController::class, 'evenements'])->name('country.evenements');
     Route::get('/evenements/{event}', [App\Http\Controllers\CountryController::class, 'showEvent'])->name('country.event.show');
+    
+    // Routes des annonces par pays
+    Route::get('/annonces', [App\Http\Controllers\CountryController::class, 'annonces'])->name('country.annonces');
+    Route::get('/annonces/create', [App\Http\Controllers\CountryController::class, 'createAnnouncement'])->name('country.announcements.create')->middleware('auth');
+    Route::post('/annonces', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('country.announcements.store')->middleware('auth');
+    Route::get('/annonces/{announcement}', [App\Http\Controllers\CountryController::class, 'showAnnouncement'])->name('country.announcement.show');
 });

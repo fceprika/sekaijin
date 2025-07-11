@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\News;
 use App\Models\Article;
 use App\Models\Event;
+use App\Models\Announcement;
 use App\Services\SeoService;
+use Illuminate\Support\Facades\Auth;
 
 class CountryController extends Controller
 {
@@ -45,13 +47,23 @@ class CountryController extends Controller
             ->orderBy('start_date')
             ->take(3)
             ->get();
+            
+        // Get latest announcements for this country
+        $latestAnnouncements = Announcement::active()
+            ->inCountry($countryModel->name_fr)
+            ->with(['user' => function($query) {
+                $query->select('id', 'name', 'avatar', 'is_verified');
+            }])
+            ->latest()
+            ->take(3)
+            ->get();
         
         // Generate SEO data for country page
         $seoService = new SeoService();
         $seoData = $seoService->generateSeoData('country', $countryModel);
         $structuredData = $seoService->generateStructuredData('country', $countryModel);
         
-        return view('country.index', compact('countryModel', 'communityMembers', 'featuredNews', 'featuredArticles', 'upcomingEvents', 'seoData', 'structuredData'));
+        return view('country.index', compact('countryModel', 'communityMembers', 'featuredNews', 'featuredArticles', 'upcomingEvents', 'latestAnnouncements', 'seoData', 'structuredData'));
     }
 
     /**
@@ -336,5 +348,104 @@ class CountryController extends Controller
             
             abort(500, 'Une erreur est survenue lors du chargement de l\'événement.');
         }
+    }
+
+    /**
+     * Display announcements for a specific country
+     */
+    public function annonces(Request $request, $country)
+    {
+        $countryModel = $request->get('country_model');
+        
+        $query = Announcement::active()
+            ->inCountry($countryModel->name_fr)
+            ->with('user');
+
+        // Filtres
+        if ($request->filled('type')) {
+            $query->ofType($request->type);
+        }
+
+        if ($request->filled('city')) {
+            $query->inCity($request->city);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Tri
+        $sort = $request->get('sort', 'recent');
+        switch ($sort) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'views':
+                $query->orderBy('views', 'desc');
+                break;
+            default:
+                $query->latest();
+        }
+
+        $announcements = $query->paginate(12);
+
+        // Obtenir les villes pour ce pays
+        $cities = Announcement::active()
+            ->inCountry($countryModel->name_fr)
+            ->distinct()
+            ->pluck('city')
+            ->sort()
+            ->values();
+
+        return view('country.annonces', compact('countryModel', 'announcements', 'cities'));
+    }
+
+    /**
+     * Show form for creating announcement in specific country
+     */
+    public function createAnnouncement(Request $request, $country)
+    {
+        $countryModel = $request->get('country_model');
+        
+        return view('country.announcements.create', compact('countryModel'));
+    }
+
+    /**
+     * Display individual announcement
+     */
+    public function showAnnouncement(Request $request, $country, Announcement $announcement)
+    {
+        $countryModel = $request->get('country_model');
+
+        // Vérifier que l'annonce appartient bien à ce pays
+        if ($announcement->country !== $countryModel->name_fr) {
+            abort(404);
+        }
+
+        // Vérifier si l'annonce est visible
+        if (!$announcement->isActive() && 
+            (!Auth::check() || !$announcement->canBeEditedBy(Auth::user()))) {
+            abort(404);
+        }
+
+        $announcement->incrementViews();
+        $announcement->load('user');
+
+        // Annonces similaires dans le même pays
+        $similarAnnouncements = Announcement::active()
+            ->where('id', '!=', $announcement->id)
+            ->where('type', $announcement->type)
+            ->where('country', $announcement->country)
+            ->limit(4)
+            ->get();
+
+        return view('country.announcement-show', compact('countryModel', 'announcement', 'similarAnnouncements'));
     }
 }

@@ -152,32 +152,32 @@
                     <!-- Main Navigation Links -->
                     @if(isset($currentCountry))
                         <a href="{{ route('country.actualites', $currentCountry->slug) }}" 
-                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.actualites') ? 'text-blue-600' : '' }}">
-                            <span class="mr-2">📰</span>
+                           class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.actualites') ? 'text-blue-600' : '' }}">
                             Actualités
                         </a>
                         <a href="{{ route('country.blog', $currentCountry->slug) }}" 
-                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.blog') ? 'text-blue-600' : '' }}">
-                            <span class="mr-2">📝</span>
+                           class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.blog') ? 'text-blue-600' : '' }}">
                             Blog
                         </a>
                         <a href="{{ route('country.communaute', $currentCountry->slug) }}" 
-                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.communaute') ? 'text-blue-600' : '' }}">
-                            <span class="mr-2">👥</span>
+                           class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.communaute') ? 'text-blue-600' : '' }}">
                             Communauté
                         </a>
                         <a href="{{ route('country.evenements', $currentCountry->slug) }}" 
-                           class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.evenements') ? 'text-blue-600' : '' }}">
-                            <span class="mr-2">📅</span>
+                           class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.evenements') ? 'text-blue-600' : '' }}">
                             Événements
                         </a>
-                    @else
-                        <a href="/about" class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-                            <span class="mr-2">ℹ️</span>
+                        <a href="{{ route('country.annonces', $currentCountry->slug) }}" 
+                           class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium {{ request()->routeIs('country.annonces') || request()->routeIs('country.announcement.*') || request()->routeIs('country.announcements.*') ? 'text-blue-600' : '' }}">
+                            Annonces
+                        </a>
+                    @endif
+                    
+                    @if(!isset($currentCountry))
+                        <a href="/about" class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
                             À propos
                         </a>
-                        <a href="/contact" class="flex items-center py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
-                            <span class="mr-2">✉️</span>
+                        <a href="/contact" class="py-4 px-3 text-gray-700 hover:text-blue-600 transition duration-300 font-medium">
                             Contact
                         </a>
                     @endif
@@ -219,6 +219,10 @@
                                     <a href="{{ route('articles.my-articles') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
                                         <i class="fas fa-file-alt mr-3 w-4"></i>
                                         Mes articles
+                                    </a>
+                                    <a href="{{ route('announcements.my') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                        <i class="fas fa-tags mr-3 w-4"></i>
+                                        Mes annonces
                                     </a>
                                     <hr class="my-2">
                                     <form method="POST" action="{{ route('logout') }}" class="block">
@@ -343,32 +347,40 @@
                             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">{{ $currentCountry->name_fr }}</h3>
                             <a href="{{ route('country.actualites', $currentCountry->slug) }}" 
                                class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ request()->routeIs('country.actualites') ? 'bg-blue-100 text-blue-600' : '' }}">
-                                📰 Actualités
+                                Actualités
                             </a>
                             <a href="{{ route('country.blog', $currentCountry->slug) }}" 
                                class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ request()->routeIs('country.blog') ? 'bg-blue-100 text-blue-600' : '' }}">
-                                ✍️ Blog
+                                Blog
                             </a>
                             <a href="{{ route('country.communaute', $currentCountry->slug) }}" 
                                class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ request()->routeIs('country.communaute') ? 'bg-blue-100 text-blue-600' : '' }}">
-                                👥 Communauté
+                                Communauté
                             </a>
                             <a href="{{ route('country.evenements', $currentCountry->slug) }}" 
                                class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ request()->routeIs('country.evenements') ? 'bg-blue-100 text-blue-600' : '' }}">
-                                📅 Événements
+                                Événements
                             </a>
-                        </div>
-                    @else
-                        <div class="p-4 border-t border-gray-200">
-                            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Général</h3>
-                            <a href="/about" class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200">
-                                ℹ️ À propos
-                            </a>
-                            <a href="/contact" class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200">
-                                ✉️ Contact
+                            <a href="{{ route('country.annonces', $currentCountry->slug) }}" 
+                               class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200 {{ request()->routeIs('country.annonces') || request()->routeIs('country.announcement.*') || request()->routeIs('country.announcements.*') ? 'bg-blue-100 text-blue-600' : '' }}">
+                                Annonces
                             </a>
                         </div>
                     @endif
+
+                    <!-- Global sections -->
+                    <div class="p-4 border-t border-gray-200">
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Global</h3>
+                    @if(!isset($currentCountry))
+                        <a href="/about" class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200">
+                            ℹ️ À propos
+                        </a>
+                        <a href="/contact" class="block py-3 px-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition duration-200">
+                            ✉️ Contact
+                        </a>
+                    @endif
+                    </div>
+
                 </div>
 
                 <!-- Footer actions -->
