@@ -243,7 +243,7 @@
 
                     @auth
                         @if(Auth::id() !== $announcement->user_id)
-                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium" onclick="contactSeller()">
+                            <button id="contact-seller-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
                                 Contacter l'annonceur
                             </button>
                         @endif
@@ -284,7 +284,7 @@
 </div>
 
 @if($images && count($images) > 1)
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     let currentImageIndex = 0;
     const images = document.querySelectorAll('#image-carousel img');
@@ -346,11 +346,16 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endif
 
-<script>
-function contactSeller() {
-    // Ici, vous pourriez implémenter un système de messagerie interne
-    // Pour l'instant, on affiche juste une alerte
-    alert('Fonctionnalité de messagerie à venir. En attendant, utilisez les moyens de contact fournis par l\'annonceur.');
-}
+<script nonce="{{ $csp_nonce ?? '' }}">
+document.addEventListener('DOMContentLoaded', function() {
+    const contactBtn = document.getElementById('contact-seller-btn');
+    if (contactBtn) {
+        contactBtn.addEventListener('click', function() {
+            // Ici, vous pourriez implémenter un système de messagerie interne
+            // Pour l'instant, on affiche juste une alerte
+            alert('Fonctionnalité de messagerie à venir. En attendant, utilisez les moyens de contact fournis par l\'annonceur.');
+        });
+    }
+});
 </script>
 @endsection

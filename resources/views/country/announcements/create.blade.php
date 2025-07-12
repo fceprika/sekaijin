@@ -27,38 +27,38 @@
                     <!-- Desktop: Horizontal layout -->
                     <div class="hidden md:flex items-center justify-center space-x-8 mb-2">
                         <div class="flex items-center">
-                            <div id="step-1-indicator" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">1</div>
+                            <div id="step-1-indicator" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold flex-shrink-0">1</div>
                             <span class="ml-2 text-sm font-medium text-gray-900">Type d'annonce</span>
                         </div>
                         <div class="flex items-center">
-                            <div id="step-2-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold">2</div>
+                            <div id="step-2-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold flex-shrink-0">2</div>
                             <span class="ml-2 text-sm font-medium text-gray-500">Localisation</span>
                         </div>
                         <div class="flex items-center">
-                            <div id="step-3-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold">3</div>
+                            <div id="step-3-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold flex-shrink-0">3</div>
                             <span class="ml-2 text-sm font-medium text-gray-500">Détails</span>
                         </div>
                         <div class="flex items-center">
-                            <div id="step-4-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold">4</div>
+                            <div id="step-4-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold flex-shrink-0">4</div>
                             <span class="ml-2 text-sm font-medium text-gray-500">Images</span>
                         </div>
                         <div class="flex items-center">
-                            <div id="step-5-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold">5</div>
+                            <div id="step-5-indicator" class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold flex-shrink-0">5</div>
                             <span class="ml-2 text-sm font-medium text-gray-500">Aperçu</span>
                         </div>
                     </div>
                     
                     <!-- Mobile: Compact layout -->
                     <div class="md:hidden flex items-center justify-center space-x-2 mb-4">
-                        <div id="step-1-indicator-mobile" class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">1</div>
+                        <div id="step-1-indicator-mobile" class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">1</div>
                         <div class="w-8 h-1 bg-gray-300 rounded"></div>
-                        <div id="step-2-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">2</div>
+                        <div id="step-2-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">2</div>
                         <div class="w-8 h-1 bg-gray-300 rounded"></div>
-                        <div id="step-3-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">3</div>
+                        <div id="step-3-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">3</div>
                         <div class="w-8 h-1 bg-gray-300 rounded"></div>
-                        <div id="step-4-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">4</div>
+                        <div id="step-4-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">4</div>
                         <div class="w-8 h-1 bg-gray-300 rounded"></div>
-                        <div id="step-5-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">5</div>
+                        <div id="step-5-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">5</div>
                     </div>
                     
                     <!-- Current step title for mobile -->
@@ -343,7 +343,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     let currentStep = 1;
     const totalSteps = 5;

@@ -245,7 +245,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-submit form on filter change
     const form = document.getElementById('filter-form');

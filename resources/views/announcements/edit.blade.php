@@ -235,8 +235,8 @@
                                     @if($imagePath)
                                         <div class="relative group" data-image="{{ $imagePath }}">
                                             <img src="{{ Storage::url($imagePath) }}" alt="Image {{ $index + 1 }}" class="w-full h-32 object-cover rounded-lg">
-                                            <button type="button" onclick="removeExistingImage('{{ $imagePath }}')" 
-                                                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button type="button" data-image-path="{{ $imagePath }}" 
+                                                    class="remove-image-btn absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
@@ -294,7 +294,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('images');
     const newImagePreview = document.getElementById('new-image-preview');
@@ -340,21 +340,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Fonction globale pour supprimer les images existantes
-    window.removeExistingImage = function(imagePath) {
-        // Ajouter l'input hidden pour marquer l'image à supprimer
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'remove_images[]';
-        input.value = imagePath;
-        removeImagesInputs.appendChild(input);
-        
-        // Cacher l'image dans l'interface
-        const imageDiv = document.querySelector(`[data-image="${imagePath}"]`);
-        if (imageDiv) {
-            imageDiv.style.display = 'none';
-        }
-    };
+    // Gestion de la suppression des images existantes
+    document.querySelectorAll('.remove-image-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const imagePath = this.getAttribute('data-image-path');
+            
+            // Ajouter l'input hidden pour marquer l'image à supprimer
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'remove_images[]';
+            input.value = imagePath;
+            removeImagesInputs.appendChild(input);
+            
+            // Cacher l'image dans l'interface
+            const imageDiv = this.closest('[data-image]');
+            if (imageDiv) {
+                imageDiv.style.display = 'none';
+            }
+        });
+    });
 });
 </script>
 @endsection
