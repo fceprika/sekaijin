@@ -247,5 +247,7 @@
             checkboxes.forEach(cb => cb.checked = checkbox.checked);
         }
     </script>
+    
+    @stack('scripts')
 </body>
 </html>
