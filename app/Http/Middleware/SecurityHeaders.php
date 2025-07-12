@@ -44,13 +44,14 @@ class SecurityHeaders
                    "base-uri 'self'; " .
                    "form-action 'self'";
         } else {
-            // Production CSP - Strict security
-            $csp = "default-src 'self'; " .
-                   "script-src 'self' 'nonce-{$nonce}' https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; " .
-                   "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; " .
-                   "img-src 'self' data: https:; " .
-                   "font-src 'self' https://cdnjs.cloudflare.com; " .
-                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://cdn.tiny.cloud; " .
+            // Production CSP - Strict security (adapted for local testing)
+            $localSources = app()->environment('local') ? ' http://localhost:* http://127.0.0.1:*' : '';
+            $csp = "default-src 'self'{$localSources}; " .
+                   "script-src 'self' 'nonce-{$nonce}' https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://www.googletagmanager.com{$localSources}; " .
+                   "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud{$localSources}; " .
+                   "img-src 'self' data: https:{$localSources}; " .
+                   "font-src 'self' https://cdnjs.cloudflare.com{$localSources}; " .
+                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://cdn.tiny.cloud{$localSources}; " .
                    "worker-src 'self' blob:; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .
