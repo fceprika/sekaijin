@@ -32,6 +32,7 @@ class StoreNewsRequest extends FormRequest
             'is_published' => 'boolean',
             'published_at' => 'nullable|date',
             'image_url' => 'nullable|url|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:512', // 512KB max
         ];
     }
 
@@ -53,6 +54,9 @@ class StoreNewsRequest extends FormRequest
             'country_id.exists' => 'Le pays sélectionné n\'existe pas.',
             'image_url.url' => 'L\'URL de l\'image doit être valide.',
             'image_url.max' => 'L\'URL de l\'image ne peut pas dépasser 2048 caractères.',
+            'image.image' => 'Le fichier doit être une image.',
+            'image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG ou GIF.',
+            'image.max' => 'L\'image ne doit pas dépasser 500KB.',
         ];
     }
 }

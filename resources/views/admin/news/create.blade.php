@@ -27,7 +27,7 @@
     </div>
 
     <!-- Formulaire -->
-    <form method="POST" action="{{ route('admin.news.store') }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.news.store') }}" enctype="multipart/form-data" class="space-y-6">
         @csrf
         
         <div class="bg-white rounded-xl shadow-lg p-8">
@@ -89,14 +89,29 @@
                         </select>
                     </div>
 
-                    <!-- URL d'image -->
+                    <!-- Upload d'image -->
                     <div class="lg:col-span-2">
-                        <label for="image_url" class="block text-sm font-medium text-gray-700 mb-2">
-                            URL de l'image
+                        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
+                            Image de l'actualité
                         </label>
-                        <input type="url" id="image_url" name="image_url" value="{{ old('image_url') }}"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
-                               placeholder="https://exemple.com/image.jpg">
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                                        <span>Télécharger une image</span>
+                                        <input id="image" name="image" type="file" class="sr-only" accept="image/*">
+                                    </label>
+                                    <p class="pl-1">ou glisser-déposer</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 500KB</p>
+                            </div>
+                        </div>
+                        <div id="image-preview" class="mt-4 hidden">
+                            <img class="h-32 w-auto rounded-lg shadow-sm" alt="Aperçu de l'image">
+                        </div>
                     </div>
 
                     <!-- Résumé -->
@@ -225,6 +240,43 @@
                 publishDateContainer.style.display = 'block';
             } else {
                 publishDateContainer.style.display = 'none';
+            }
+        });
+
+        // Image preview functionality
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = imagePreview.querySelector('img');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Check file size (500KB = 512000 bytes)
+                if (file.size > 512000) {
+                    alert('La taille de l\'image ne doit pas dépasser 500KB. Taille actuelle: ' + Math.round(file.size / 1024) + 'KB');
+                    e.target.value = '';
+                    imagePreview.classList.add('hidden');
+                    return;
+                }
+
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Veuillez sélectionner un fichier image valide.');
+                    e.target.value = '';
+                    imagePreview.classList.add('hidden');
+                    return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
             }
         });
     });

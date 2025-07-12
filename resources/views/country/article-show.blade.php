@@ -39,6 +39,15 @@
                     <p class="text-xl text-gray-600 mb-6">{{ $article->excerpt }}</p>
                 @endif
 
+                <!-- Article Image -->
+                @if($article->image_url)
+                    <div class="mb-6">
+                        <img src="{{ $article->image_url }}" 
+                             alt="{{ $article->title }}" 
+                             class="w-full h-64 md:h-80 lg:h-96 object-cover rounded-lg shadow-sm">
+                    </div>
+                @endif
+
                 <!-- Author Info -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">

@@ -41,6 +41,7 @@ class UpdateArticleRequest extends FormRequest
             'published_at' => 'nullable|date',
             'reading_time' => 'nullable|integer|min:1|max:120',
             'image_url' => 'nullable|url|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:512', // 512KB max
         ];
     }
 
@@ -67,6 +68,9 @@ class UpdateArticleRequest extends FormRequest
             'reading_time.max' => 'Le temps de lecture ne peut pas dépasser 120 minutes.',
             'image_url.url' => 'L\'URL de l\'image doit être valide.',
             'image_url.max' => 'L\'URL de l\'image ne peut pas dépasser 2048 caractères.',
+            'image.image' => 'Le fichier doit être une image.',
+            'image.mimes' => 'L\'image doit être au format JPEG, PNG, JPG ou GIF.',
+            'image.max' => 'L\'image ne doit pas dépasser 500KB.',
         ];
     }
 }

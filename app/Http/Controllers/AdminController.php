@@ -120,6 +120,14 @@ class AdminController extends Controller
     {
         $data = $request->validated();
         
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images/articles', $filename, 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
+        
         // Auto-generate slug if not provided
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['title']);
@@ -165,6 +173,20 @@ class AdminController extends Controller
         $this->authorize('update', $article);
         
         $data = $request->validated();
+        
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($article->image_url) {
+                $oldImagePath = str_replace('/storage/', '', $article->image_url);
+                \Storage::disk('public')->delete($oldImagePath);
+            }
+            
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images/articles', $filename, 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
         
         // Auto-generate slug if not provided
         if (empty($data['slug'])) {
@@ -222,7 +244,9 @@ class AdminController extends Controller
             'published_at' => 'nullable|date',
             'views' => 'nullable|integer|min:0',
             'likes' => 'nullable|integer|min:0',
-            'reading_time' => 'nullable|integer|min:1|max:120'
+            'reading_time' => 'nullable|integer|min:1|max:120',
+            'image_url' => 'nullable|url|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:512'
         ]);
         
         // Debug logging only in development
@@ -249,6 +273,16 @@ class AdminController extends Controller
         $article->views = $validatedData['views'] ?? 0;
         $article->likes = $validatedData['likes'] ?? 0;
         $article->reading_time = $validatedData['reading_time'] ?? null;
+        
+        // Handle image upload for preview
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = 'preview_' . time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images/articles', $filename, 'public');
+            $article->image_url = '/storage/' . $path;
+        } else {
+            $article->image_url = $validatedData['image_url'] ?? null;
+        }
         
         // Set relationships properly using setRelation
         $article->setRelation('author', auth()->user());
@@ -309,7 +343,15 @@ class AdminController extends Controller
             ? \Carbon\Carbon::parse($validatedData['published_at']) 
             : now();
         $news->views = $validatedData['views'] ?? 0;
-        $news->image_url = $validatedData['image_url'] ?? null;
+        // Handle image upload for preview
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = 'preview_' . time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images/news', $filename, 'public');
+            $news->image_url = '/storage/' . $path;
+        } else {
+            $news->image_url = $validatedData['image_url'] ?? null;
+        }
         
         // Set relationships properly using setRelation
         $news->setRelation('author', auth()->user());
@@ -374,6 +416,14 @@ class AdminController extends Controller
     {
         $data = $request->validated();
         
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images/news', $filename, 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
+        
         // Set author
         $data['author_id'] = auth()->id();
         
@@ -408,6 +458,20 @@ class AdminController extends Controller
         $this->authorize('update', $news);
         
         $data = $request->validated();
+        
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($news->image_url) {
+                $oldImagePath = str_replace('/storage/', '', $news->image_url);
+                \Storage::disk('public')->delete($oldImagePath);
+            }
+            
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('images/news', $filename, 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
         
         // Set default values for checkboxes
         $data['is_featured'] = $data['is_featured'] ?? false;
