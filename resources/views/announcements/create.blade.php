@@ -11,7 +11,8 @@
 
                 <!-- Indicateur de progression -->
                 <div class="mb-8">
-                    <div class="flex items-center justify-between mb-2">
+                    <!-- Desktop: Horizontal layout -->
+                    <div class="hidden md:flex items-center justify-between mb-2">
                         <div class="flex items-center">
                             <div id="step-1-indicator" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">1</div>
                             <span class="ml-2 text-sm font-medium text-gray-900">Type d'annonce</span>
@@ -33,8 +34,27 @@
                             <span class="ml-2 text-sm font-medium text-gray-500">Aperçu</span>
                         </div>
                     </div>
+                    
+                    <!-- Mobile: Compact layout -->
+                    <div class="md:hidden flex items-center justify-center space-x-2 mb-4">
+                        <div id="step-1-indicator-mobile" class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">1</div>
+                        <div class="w-8 h-1 bg-gray-300 rounded"></div>
+                        <div id="step-2-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">2</div>
+                        <div class="w-8 h-1 bg-gray-300 rounded"></div>
+                        <div id="step-3-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">3</div>
+                        <div class="w-8 h-1 bg-gray-300 rounded"></div>
+                        <div id="step-4-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">4</div>
+                        <div class="w-8 h-1 bg-gray-300 rounded"></div>
+                        <div id="step-5-indicator-mobile" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-semibold text-sm">5</div>
+                    </div>
+                    
+                    <!-- Current step title for mobile -->
+                    <div class="md:hidden text-center mb-4">
+                        <span id="current-step-title" class="text-lg font-semibold text-gray-900">Étape 1 : Type d'annonce</span>
+                    </div>
+                    
                     <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width: 20%"></div>
+                        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
                     </div>
                 </div>
 
@@ -43,56 +63,56 @@
 
                     <!-- Étape 1: Type d'annonce -->
                     <div id="step-1" class="step">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Choisissez le type d'annonce</h2>
-                        <div class="grid grid-cols-2 gap-4">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4 md:hidden">Choisissez le type d'annonce</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <label class="relative">
                                 <input type="radio" name="type" value="vente" class="peer sr-only" required>
-                                <div class="p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <div class="p-4 sm:p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
                                     <div class="text-center">
-                                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                         </svg>
-                                        <h3 class="font-semibold text-gray-900">Vente</h3>
-                                        <p class="text-sm text-gray-600 mt-1">Vendez vos objets</p>
+                                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Vente</h3>
+                                        <p class="text-xs sm:text-sm text-gray-600 mt-1">Vendez vos objets</p>
                                     </div>
                                 </div>
                             </label>
 
                             <label class="relative">
                                 <input type="radio" name="type" value="location" class="peer sr-only">
-                                <div class="p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <div class="p-4 sm:p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
                                     <div class="text-center">
-                                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                                         </svg>
-                                        <h3 class="font-semibold text-gray-900">Location</h3>
-                                        <p class="text-sm text-gray-600 mt-1">Proposez un logement</p>
+                                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Location</h3>
+                                        <p class="text-xs sm:text-sm text-gray-600 mt-1">Proposez un logement</p>
                                     </div>
                                 </div>
                             </label>
 
                             <label class="relative">
                                 <input type="radio" name="type" value="colocation" class="peer sr-only">
-                                <div class="p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <div class="p-4 sm:p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
                                     <div class="text-center">
-                                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                         </svg>
-                                        <h3 class="font-semibold text-gray-900">Colocation</h3>
-                                        <p class="text-sm text-gray-600 mt-1">Partagez un logement</p>
+                                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Colocation</h3>
+                                        <p class="text-xs sm:text-sm text-gray-600 mt-1">Partagez un logement</p>
                                     </div>
                                 </div>
                             </label>
 
                             <label class="relative">
                                 <input type="radio" name="type" value="service" class="peer sr-only">
-                                <div class="p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50">
+                                <div class="p-4 sm:p-6 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
                                     <div class="text-center">
-                                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 text-gray-400 peer-checked:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                         </svg>
-                                        <h3 class="font-semibold text-gray-900">Service</h3>
-                                        <p class="text-sm text-gray-600 mt-1">Proposez vos services</p>
+                                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Service</h3>
+                                        <p class="text-xs sm:text-sm text-gray-600 mt-1">Proposez vos services</p>
                                     </div>
                                 </div>
                             </label>
@@ -169,7 +189,7 @@
                                 @enderror
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Prix</label>
                                     <input type="number" name="price" id="price" value="{{ old('price') }}" 
@@ -290,17 +310,20 @@
                     </div>
 
                     <!-- Boutons de navigation -->
-                    <div class="mt-8 flex justify-between">
-                        <button type="button" id="prev-btn" class="hidden px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                            Précédent
+                    <div class="mt-8 flex flex-col sm:flex-row justify-between gap-4 sm:gap-0">
+                        <button type="button" id="prev-btn" class="hidden order-2 sm:order-1 px-4 sm:px-6 py-3 sm:py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base">
+                            <span class="sm:hidden">← Précédent</span>
+                            <span class="hidden sm:inline">Précédent</span>
                         </button>
                         
-                        <button type="button" id="next-btn" class="ml-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Suivant
+                        <button type="button" id="next-btn" class="order-1 sm:order-2 sm:ml-auto px-4 sm:px-6 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium">
+                            <span class="sm:hidden">Suivant →</span>
+                            <span class="hidden sm:inline">Suivant</span>
                         </button>
                         
-                        <button type="submit" id="submit-btn" class="hidden ml-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                            Publier l'annonce
+                        <button type="submit" id="submit-btn" class="hidden order-1 sm:order-2 sm:ml-auto px-4 sm:px-6 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm sm:text-base font-medium">
+                            <span class="sm:hidden">📝 Publier</span>
+                            <span class="hidden sm:inline">Publier l'annonce</span>
                         </button>
                     </div>
                 </form>
@@ -327,19 +350,58 @@ document.addEventListener('DOMContentLoaded', function() {
         // Afficher l'étape courante
         document.getElementById(`step-${step}`).classList.remove('hidden');
         
-        // Mettre à jour les indicateurs
+        // Mettre à jour les indicateurs desktop
         for (let i = 1; i <= totalSteps; i++) {
             const indicator = document.getElementById(`step-${i}-indicator`);
+            const mobileIndicator = document.getElementById(`step-${i}-indicator-mobile`);
+            
             if (i < step) {
-                indicator.classList.remove('bg-gray-300', 'text-gray-600');
-                indicator.classList.add('bg-green-600', 'text-white');
+                // Desktop
+                if (indicator) {
+                    indicator.classList.remove('bg-gray-300', 'text-gray-600');
+                    indicator.classList.add('bg-green-600', 'text-white');
+                }
+                // Mobile
+                if (mobileIndicator) {
+                    mobileIndicator.classList.remove('bg-gray-300', 'text-gray-600');
+                    mobileIndicator.classList.add('bg-green-600', 'text-white');
+                }
             } else if (i === step) {
-                indicator.classList.remove('bg-gray-300', 'text-gray-600', 'bg-green-600');
-                indicator.classList.add('bg-blue-600', 'text-white');
+                // Desktop
+                if (indicator) {
+                    indicator.classList.remove('bg-gray-300', 'text-gray-600', 'bg-green-600');
+                    indicator.classList.add('bg-blue-600', 'text-white');
+                }
+                // Mobile
+                if (mobileIndicator) {
+                    mobileIndicator.classList.remove('bg-gray-300', 'text-gray-600', 'bg-green-600');
+                    mobileIndicator.classList.add('bg-blue-600', 'text-white');
+                }
             } else {
-                indicator.classList.remove('bg-blue-600', 'bg-green-600', 'text-white');
-                indicator.classList.add('bg-gray-300', 'text-gray-600');
+                // Desktop
+                if (indicator) {
+                    indicator.classList.remove('bg-blue-600', 'bg-green-600', 'text-white');
+                    indicator.classList.add('bg-gray-300', 'text-gray-600');
+                }
+                // Mobile
+                if (mobileIndicator) {
+                    mobileIndicator.classList.remove('bg-blue-600', 'bg-green-600', 'text-white');
+                    mobileIndicator.classList.add('bg-gray-300', 'text-gray-600');
+                }
             }
+        }
+        
+        // Mettre à jour le titre de l'étape pour mobile
+        const stepTitles = {
+            1: 'Étape 1 : Type d\'annonce',
+            2: 'Étape 2 : Localisation',
+            3: 'Étape 3 : Détails',
+            4: 'Étape 4 : Images',
+            5: 'Étape 5 : Aperçu'
+        };
+        const currentStepTitle = document.getElementById('current-step-title');
+        if (currentStepTitle) {
+            currentStepTitle.textContent = stepTitles[step];
         }
         
         // Mettre à jour la barre de progression
