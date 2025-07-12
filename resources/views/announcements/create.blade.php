@@ -12,7 +12,7 @@
                 <!-- Indicateur de progression -->
                 <div class="mb-8">
                     <!-- Desktop: Horizontal layout -->
-                    <div class="hidden md:flex items-center justify-between mb-2">
+                    <div class="hidden md:flex items-center justify-center space-x-8 mb-2">
                         <div class="flex items-center">
                             <div id="step-1-indicator" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">1</div>
                             <span class="ml-2 text-sm font-medium text-gray-900">Type d'annonce</span>
