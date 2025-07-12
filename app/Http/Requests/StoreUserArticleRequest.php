@@ -97,11 +97,11 @@ class StoreUserArticleRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Trim whitespace from text fields
+        // Trim whitespace from text fields (excluding content to prevent corruption)
         $this->merge([
             'title' => trim($this->title ?? ''),
             'excerpt' => trim($this->excerpt ?? ''),
-            'content' => trim($this->content ?? ''),
+            // Note: content field is excluded from trimming to prevent data corruption
         ]);
     }
 }
