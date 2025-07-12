@@ -8,6 +8,24 @@
         <div class="text-center mb-16">
             <h1 class="text-4xl font-bold text-gray-800 mb-4">À propos de Sekaijin</h1>
             <p class="text-xl text-gray-600">Notre mission pour les expatriés français</p>
+            
+            <!-- Définition du mot Sekaijin -->
+            <div class="max-w-4xl mx-auto mt-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 border border-blue-100">
+                <div class="text-center mb-6">
+                    <span class="text-4xl font-bold text-gray-800">世界人</span>
+                    <h3 class="text-2xl font-semibold text-gray-800 mt-2">Le sens de Sekaijin</h3>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    Le mot <strong>"Sekaijin"</strong> (世界人) vient du japonais et signifie littéralement <em>"citoyen du monde"</em>. 
+                    Il est formé de <strong>"sekai"</strong> (世界), qui veut dire "monde", et <strong>"jin"</strong> (人), qui signifie "personne".
+                </p>
+                <p class="text-gray-700 leading-relaxed">
+                    Ce terme incarne l'idée d'un individu qui dépasse les frontières culturelles et nationales, 
+                    et qui embrasse une vision ouverte, curieuse et globale du monde. C'est cette philosophie qui anime 
+                    notre communauté : connecter les Français à l'étranger dans un esprit de partage, de découverte 
+                    et d'humanité sans frontières.
+                </p>
+            </div>
         </div>
         
         <!-- Nos débuts -->
