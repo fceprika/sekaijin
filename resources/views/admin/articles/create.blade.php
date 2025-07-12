@@ -189,6 +189,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <button type="submit" 
+                            onclick="saveTinyMCEContent()"
                             class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-200">
                         <i class="fas fa-save mr-2"></i>
                         Créer l'article
@@ -281,6 +282,14 @@
             previewWindow.document.write('<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif; color: red;">Erreur lors du chargement de la prévisualisation</div>');
             previewWindow.document.close();
         });
+    }
+
+    function saveTinyMCEContent() {
+        // Force TinyMCE to save content to the textarea before form submission
+        if (typeof tinymce !== 'undefined' && tinymce.get('content')) {
+            tinymce.get('content').save();
+        }
+        return true;
     }
 </script>
 @endsection
