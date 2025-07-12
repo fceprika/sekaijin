@@ -115,7 +115,7 @@
                                                 Modifier
                                             </a>
                                             @if($article->is_published)
-                                                <a href="{{ route($article->country->slug . '.article', $article->slug) }}" 
+                                                <a href="{{ route('country.article.show', [$article->country->slug, $article->slug]) }}" 
                                                    target="_blank"
                                                    class="text-green-600 hover:text-green-900">
                                                     Voir

@@ -29,7 +29,6 @@ class ArticleController extends Controller
      */
     public function store(StoreUserArticleRequest $request)
     {
-
         $article = Article::create([
             'title' => $request->title,
             'slug' => Article::generateSlug($request->title),
