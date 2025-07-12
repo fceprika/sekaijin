@@ -134,14 +134,16 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     <div>
-                                        <h3 class="text-sm font-medium text-gray-900">{{ $newsItem->title }}</h3>
-                                        <p class="text-sm text-gray-500">{{ Str::limit($newsItem->excerpt, 60) }}</p>
-                                        @if($newsItem->is_featured)
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
-                                                <i class="fas fa-star mr-1"></i>
-                                                Featured
-                                            </span>
-                                        @endif
+                                        <a href="{{ route('admin.news.edit', $newsItem) }}" class="block hover:bg-gray-50 -m-2 p-2 rounded">
+                                            <h3 class="text-sm font-medium text-gray-900 hover:text-purple-600 transition duration-200">{{ $newsItem->title }}</h3>
+                                            <p class="text-sm text-gray-500">{{ Str::limit($newsItem->excerpt, 60) }}</p>
+                                            @if($newsItem->is_featured)
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
+                                                    <i class="fas fa-star mr-1"></i>
+                                                    Featured
+                                                </span>
+                                            @endif
+                                        </a>
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 text-sm text-gray-900">
@@ -197,17 +199,12 @@
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         @endif
-                                        <form method="POST" action="{{ route('admin.news.destroy', $newsItem) }}" 
-                                              class="inline" 
-                                              onsubmit="return confirmDelete('Êtes-vous sûr de vouloir supprimer cette actualité ?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="text-red-600 hover:text-red-900 transition duration-200" 
-                                                    title="Supprimer">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" 
+                                                onclick="deleteNews({{ $newsItem->id }})"
+                                                class="text-red-600 hover:text-red-900 transition duration-200" 
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -241,3 +238,34 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ $csp_nonce ?? '' }}">
+function deleteNews(newsId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette actualité ?')) {
+        // Create a form for the DELETE request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/news/${newsId}`;
+        
+        // Add CSRF token
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.appendChild(csrfToken);
+        
+        // Add method spoofing for DELETE
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        form.appendChild(methodField);
+        
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+@endpush
