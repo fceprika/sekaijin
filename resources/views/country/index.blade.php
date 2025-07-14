@@ -12,6 +12,21 @@
                  alt="Bannière {{ $countryModel->name_fr }}" 
                  class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+            
+            <!-- Country Switcher - Top Left -->
+            <div class="absolute top-4 left-4 flex space-x-2">
+                @foreach($allCountries as $country)
+                    <a href="{{ route('country.index', $country->slug) }}" 
+                       class="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all duration-300 
+                              {{ $country->slug === $countryModel->slug 
+                                 ? 'bg-white shadow-lg transform scale-110' 
+                                 : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm' }}"
+                       title="{{ $country->name_fr }}">
+                        {{ $country->emoji }}
+                    </a>
+                @endforeach
+            </div>
+            
             <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center text-white max-w-4xl mx-auto px-4">
                     <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
@@ -23,16 +38,6 @@
                     <p class="text-xl md:text-2xl mb-8 text-white drop-shadow max-w-3xl mx-auto">
                         {{ $countryModel->description }}
                     </p>
-                    
-                    <!-- Country Switcher -->
-                    <div class="flex justify-center space-x-4 mb-8">
-                        @foreach($allCountries as $country)
-                            <a href="{{ route('country.index', $country->slug) }}" 
-                               class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition duration-300 {{ $country->slug === $countryModel->slug ? 'bg-white text-blue-600' : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30' }}">
-                                {{ $country->emoji }} {{ $country->name_fr }}
-                            </a>
-                        @endforeach
-                    </div>
                 </div>
             </div>
         </div>
@@ -43,6 +48,21 @@
                  alt="Bannière {{ $countryModel->name_fr }}" 
                  class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+            
+            <!-- Country Switcher - Top Left -->
+            <div class="absolute top-4 left-4 flex space-x-2">
+                @foreach($allCountries as $country)
+                    <a href="{{ route('country.index', $country->slug) }}" 
+                       class="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all duration-300 
+                              {{ $country->slug === $countryModel->slug 
+                                 ? 'bg-white shadow-lg transform scale-110' 
+                                 : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm' }}"
+                       title="{{ $country->name_fr }}">
+                        {{ $country->emoji }}
+                    </a>
+                @endforeach
+            </div>
+            
             <div class="absolute inset-0 flex items-center justify-center">
                 <div class="text-center text-white max-w-4xl mx-auto px-4">
                     <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
@@ -54,16 +74,6 @@
                     <p class="text-xl md:text-2xl mb-8 text-white drop-shadow max-w-3xl mx-auto">
                         {{ $countryModel->description }}
                     </p>
-                    
-                    <!-- Country Switcher -->
-                    <div class="flex justify-center space-x-4 mb-8">
-                        @foreach($allCountries as $country)
-                            <a href="{{ route('country.index', $country->slug) }}" 
-                               class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition duration-300 {{ $country->slug === $countryModel->slug ? 'bg-white text-blue-600' : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30' }}">
-                                {{ $country->emoji }} {{ $country->name_fr }}
-                            </a>
-                        @endforeach
-                    </div>
                 </div>
             </div>
         </div>
@@ -71,6 +81,21 @@
         <!-- Default Gradient Banner for other countries -->
         <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-16 relative overflow-hidden">
             <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+            
+            <!-- Country Switcher - Top Left -->
+            <div class="absolute top-4 left-4 flex space-x-2 z-10">
+                @foreach($allCountries as $country)
+                    <a href="{{ route('country.index', $country->slug) }}" 
+                       class="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all duration-300 
+                              {{ $country->slug === $countryModel->slug 
+                                 ? 'bg-white shadow-lg transform scale-110' 
+                                 : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm' }}"
+                       title="{{ $country->name_fr }}">
+                        {{ $country->emoji }}
+                    </a>
+                @endforeach
+            </div>
+            
             <div class="relative max-w-7xl mx-auto px-4 text-center">
                 <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                     {{ $countryModel->emoji }}
@@ -81,16 +106,6 @@
                 <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
                     {{ $countryModel->description }}
                 </p>
-                
-                <!-- Country Switcher -->
-                <div class="flex justify-center space-x-4 mb-8">
-                    @foreach($allCountries as $country)
-                        <a href="{{ route('country.index', $country->slug) }}" 
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition duration-300 {{ $country->slug === $countryModel->slug ? 'bg-white text-blue-600' : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30' }}">
-                            {{ $country->emoji }} {{ $country->name_fr }}
-                        </a>
-                    @endforeach
-                </div>
             </div>
         </div>
     @endif
