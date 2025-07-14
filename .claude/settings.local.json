@@ -41,7 +41,8 @@
       "WebFetch(domain:geodb-cities-api.wirefreethought.com)",
       "Bash(git fetch:*)",
       "Bash(unlink:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(gh pr merge:*)"
     ],
     "deny": []
   }

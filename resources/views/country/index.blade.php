@@ -5,110 +5,11 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    @if($countryModel->slug === 'thailande')
-        <!-- Thailand Banner -->
-        <div class="relative h-96 md:h-[500px] overflow-hidden">
-            <img src="{{ asset('images/banners/thailand-banner.jpg') }}" 
-                 alt="Bannière {{ $countryModel->name_fr }}" 
-                 class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-            
-            <!-- Country Switcher - Top Left -->
-            <div class="absolute top-4 left-4 flex space-x-2">
-                @foreach($allCountries as $country)
-                    <a href="{{ route('country.index', $country->slug) }}" 
-                       class="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all duration-300 
-                              {{ $country->slug === $countryModel->slug 
-                                 ? 'bg-white shadow-lg transform scale-110' 
-                                 : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm' }}"
-                       title="{{ $country->name_fr }}">
-                        {{ $country->emoji }}
-                    </a>
-                @endforeach
-            </div>
-            
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center text-white max-w-4xl mx-auto px-4">
-                    <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                        {{ $countryModel->emoji }}
-                        <span class="text-white drop-shadow-lg">
-                            {{ $countryModel->name_fr }}
-                        </span>
-                    </h1>
-                    <p class="text-xl md:text-2xl mb-8 text-white drop-shadow max-w-3xl mx-auto">
-                        {{ $countryModel->description }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    @elseif($countryModel->slug === 'japon')
-        <!-- Japan Banner -->
-        <div class="relative h-96 md:h-[500px] overflow-hidden">
-            <img src="{{ asset('images/banners/banner_japan.jpg') }}" 
-                 alt="Bannière {{ $countryModel->name_fr }}" 
-                 class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-            
-            <!-- Country Switcher - Top Left -->
-            <div class="absolute top-4 left-4 flex space-x-2">
-                @foreach($allCountries as $country)
-                    <a href="{{ route('country.index', $country->slug) }}" 
-                       class="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all duration-300 
-                              {{ $country->slug === $countryModel->slug 
-                                 ? 'bg-white shadow-lg transform scale-110' 
-                                 : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm' }}"
-                       title="{{ $country->name_fr }}">
-                        {{ $country->emoji }}
-                    </a>
-                @endforeach
-            </div>
-            
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center text-white max-w-4xl mx-auto px-4">
-                    <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                        {{ $countryModel->emoji }}
-                        <span class="text-white drop-shadow-lg">
-                            {{ $countryModel->name_fr }}
-                        </span>
-                    </h1>
-                    <p class="text-xl md:text-2xl mb-8 text-white drop-shadow max-w-3xl mx-auto">
-                        {{ $countryModel->description }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    @else
-        <!-- Default Gradient Banner for other countries -->
-        <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-16 relative overflow-hidden">
-            <div class="absolute inset-0 bg-black bg-opacity-20"></div>
-            
-            <!-- Country Switcher - Top Left -->
-            <div class="absolute top-4 left-4 flex space-x-2 z-10">
-                @foreach($allCountries as $country)
-                    <a href="{{ route('country.index', $country->slug) }}" 
-                       class="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all duration-300 
-                              {{ $country->slug === $countryModel->slug 
-                                 ? 'bg-white shadow-lg transform scale-110' 
-                                 : 'bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm' }}"
-                       title="{{ $country->name_fr }}">
-                        {{ $country->emoji }}
-                    </a>
-                @endforeach
-            </div>
-            
-            <div class="relative max-w-7xl mx-auto px-4 text-center">
-                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                    {{ $countryModel->emoji }}
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">
-                        {{ $countryModel->name_fr }}
-                    </span>
-                </h1>
-                <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-                    {{ $countryModel->description }}
-                </p>
-            </div>
-        </div>
-    @endif
+    @include('partials.country-banner', [
+        'bannerImage' => $countryModel->getBannerImage(),
+        'countryModel' => $countryModel,
+        'allCountries' => $allCountries
+    ])
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-12">

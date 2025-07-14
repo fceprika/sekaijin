@@ -204,6 +204,58 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 
 ## Recent Updates (July 2025)
 
+### Complete Announcements/Classified Ads System (July 11-12, 2025)
+- **NEW: Announcement Model & System**: Full classified ads platform with CRUD operations
+  - Four announcement types: `vente` (sales), `location` (rentals), `colocation` (shared housing), `service` (services)
+  - Multi-image upload support with secure storage in `/storage/announcements/`
+  - Price and currency management with international support (EUR, USD, THB, JPY, GBP, CHF)
+  - Expiration date system for time-limited listings
+  - Advanced search and filtering by type, location, price, and text search
+- **Admin Moderation System**: 3-state approval workflow
+  - `pending` → `active` → `refused` with detailed refusal reasons
+  - Bulk operations for efficient moderation (approve/refuse/delete multiple)
+  - Admin dashboard with filtering by status, country, and search terms
+- **User Dashboard**: Personal announcements management at `/mes-annonces`
+  - View, edit, delete own announcements
+  - Real-time status tracking (pending approval, active, expired)
+  - Statistics display (views, creation date, status)
+- **Responsive Multi-Step Form**: 5-step announcement creation process
+  - Step 1: Type selection with visual icons
+  - Step 2: Location (country/city/address)
+  - Step 3: Details (title, description, price, expiration)
+  - Step 4: Image uploads with preview
+  - Step 5: Final review before submission
+  - Mobile-optimized with progress indicators and form validation
+- **Location Integration**: 
+  - Global announcements at `/annonces` with country filtering
+  - Country-specific announcements at `/{country}/annonces` 
+  - City-based filtering and search within countries
+  - Pre-filled country selection when accessing from country pages
+
+### Critical Bug Fixes & Technical Improvements (July 12, 2025)
+- **Content Corruption Fix**: Resolved critical issue where user-created articles contained encoded POST data
+  - Root cause: `TrimStrings` middleware interfering with content fields
+  - Solution: Excluded `content` and `description` fields from automatic trimming
+  - Impact: User article creation now works correctly without data corruption
+- **Article URL Encoding Bug**: Fixed malformed URLs in my-articles dashboard
+  - Issue: Dynamic route name construction creating non-existent routes like `thailande.article`
+  - Fix: Changed to proper route parameters `route('country.article.show', [$country, $slug])`
+  - Result: "Voir" buttons now generate correct article URLs
+- **TinyMCE Synchronization**: Enhanced admin form reliability
+  - Added `saveTinyMCEContent()` function to force content sync before submission
+  - Applied to all admin forms using TinyMCE (articles/news create/edit)
+  - Prevents content loss during form submission in admin interface
+- **Responsive Design Improvements**: Fixed announcements module mobile layout
+  - Progress indicator spacing unified with `justify-center space-x-8`
+  - Mobile navigation enhancements for announcement creation
+  - Improved form validation feedback on smaller screens
+- **Session Management**: Added database-driven session storage
+  - New migration: `2025_07_12_043816_create_sessions_table.php`
+  - Enhanced security and scalability for user sessions
+  - Proper session cleanup and management
+
+### Enhanced User Experience & Content Management
+
 ### Simplified Registration & Profile Management
 - Simplified registration form to essential fields only (pseudo, email, country, password)
 - Added comprehensive user profile management system
