@@ -40,4 +40,18 @@ class Country extends Model
     {
         return $this->hasMany(User::class, 'country_residence', 'name_fr');
     }
+
+    /**
+     * Get the banner image path for this country
+     */
+    public function getBannerImage(): ?string
+    {
+        $bannerMapping = [
+            'thailande' => 'images/banners/thailand-banner.jpg',
+            'vietnam' => 'images/banners/vietnam_banner.jpg',
+            'japon' => 'images/banners/banner_japan.jpg',
+        ];
+
+        return $bannerMapping[$this->slug] ?? null;
+    }
 }
