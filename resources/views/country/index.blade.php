@@ -8,7 +8,7 @@
     @if($countryModel->slug === 'thailande')
         <!-- Thailand Banner -->
         <div class="relative h-96 md:h-[500px] overflow-hidden">
-            <img src="{{ asset('storage/images/banners/thailand-banner.jpg') }}" 
+            <img src="{{ asset('images/banners/thailand-banner.jpg') }}" 
                  alt="Bannière {{ $countryModel->name_fr }}" 
                  class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black bg-opacity-40"></div>
@@ -39,7 +39,7 @@
     @elseif($countryModel->slug === 'japon')
         <!-- Japan Banner -->
         <div class="relative h-96 md:h-[500px] overflow-hidden">
-            <img src="{{ asset('storage/images/banners/banner_japan.jpg') }}" 
+            <img src="{{ asset('images/banners/banner_japan.jpg') }}" 
                  alt="Bannière {{ $countryModel->name_fr }}" 
                  class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black bg-opacity-40"></div>
