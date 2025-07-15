@@ -42,7 +42,8 @@
       "Bash(git fetch:*)",
       "Bash(unlink:*)",
       "Bash(cp:*)",
-      "Bash(gh pr merge:*)"
+      "Bash(gh pr merge:*)",
+      "Bash(git restore:*)"
     ],
     "deny": []
   }
