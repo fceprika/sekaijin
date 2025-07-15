@@ -52,7 +52,7 @@
     
     <!-- Structured Data -->
     @if(isset($structuredData))
-        <script type="application/ld+json">
+        <script type="application/ld+json" nonce="{{ $csp_nonce ?? '' }}">
             {!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
         </script>
     @endif
@@ -730,7 +730,7 @@
     </footer>
 
     <!-- Favorites functionality script -->
-    <script>
+    <script nonce="{{ $csp_nonce ?? '' }}">
     function toggleFavorite(type, id) {
         const button = document.getElementById(`favorite-btn-${type}-${id}`);
         const originalText = button.querySelector('span')?.textContent;
