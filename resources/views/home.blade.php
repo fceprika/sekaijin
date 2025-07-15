@@ -5,24 +5,18 @@
 @section('content')
 <!-- Hero Section with Wallpaper -->
 <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden cursor-pointer" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat;" onclick="window.location.href='/thailande'">
-    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+    <div class="absolute inset-0 bg-black bg-opacity-10"></div>
     <div class="relative max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Bienvenue sur 
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">
-                Sekaijin
-            </span>
+        <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight" style="font-size: 3rem;">
+            Le monde est vaste. Et vous n'êtes pas seul.
         </h1>
         <p class="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
-            Rejoignez la communauté française la plus active de Thaïlande ! 
-            <span class="block mt-2 text-lg md:text-xl text-yellow-300 font-semibold">
-                🇹🇭 Plus de {{ $thailandMembers }} compatriotes vous attendent
-            </span>
+            Des expatriés français vous attendent en Thaïlande, au Japon, et ailleurs.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
             @guest
                 <a href="/inscription" id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative" onclick="event.stopPropagation();">
-                    👥 Rejoindre la communauté
+                    Créer mon compte
                 </a>
             @endguest
             <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative" onclick="event.stopPropagation()">
@@ -36,10 +30,10 @@
 </div>
 
 <!-- Map Transition Block -->
-<div class="bg-gradient-to-r from-blue-50 to-purple-50 py-12">
+<div class="bg-gradient-to-r from-gray-100 to-blue-100 py-12">
     <div class="max-w-7xl mx-auto px-4 text-center">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            🌏 Explorez notre carte des membres dans le monde entier
+            Explorez notre carte des membres dans le monde entier
         </h2>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
             Découvrez où se trouvent nos membres à travers le globe et rejoignez une communauté française internationale
