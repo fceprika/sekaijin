@@ -75,8 +75,16 @@
                         </div>
                     </div>
                     
-                    <!-- Social Actions -->
+                    <!-- Actions -->
                     <div class="flex items-center space-x-4">
+                        @admin
+                            <a href="{{ url('/admin/news/' . $news->id . '/edit') }}" class="inline-flex items-center px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>
+                                Modifier
+                            </a>
+                        @endadmin
+                        
+                        <!-- Social Actions -->
                         <span class="text-sm text-gray-500">{{ $news->views }} vues</span>
                         <button class="text-gray-600 hover:text-blue-600 transition-colors">
                             <i class="fas fa-share-alt"></i>

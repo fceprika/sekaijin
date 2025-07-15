@@ -164,8 +164,15 @@
                                 @endif
                             </div>
                             
-                            @if(Auth::check() && $announcement->canBeEditedBy(Auth::user()))
-                                <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2">
+                                @admin
+                                    <a href="{{ route('admin.announcements.show', $announcement->id) }}" class="inline-flex items-center px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors">
+                                        <i class="fas fa-cog mr-2"></i>
+                                        Gérer (Admin)
+                                    </a>
+                                @endadmin
+                                
+                                @if(Auth::check() && $announcement->canBeEditedBy(Auth::user()))
                                     <a href="{{ route('announcements.edit', $announcement) }}" 
                                        class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
                                         <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,8 +190,8 @@
                                             Supprimer
                                         </button>
                                     </form>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

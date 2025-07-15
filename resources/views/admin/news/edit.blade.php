@@ -55,6 +55,62 @@
         @csrf
         @method('PUT')
         
+        <!-- Options de publication et actions en haut -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Publication et actions rapides</h2>
+                    
+                    <div class="flex items-center space-x-6">
+                        <!-- Actualité en vedette -->
+                        <div class="flex items-center">
+                            <input id="is_featured_top" name="is_featured" type="checkbox" value="1" 
+                                   {{ old('is_featured', $news->is_featured) ? 'checked' : '' }}
+                                   class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                            <label for="is_featured_top" class="ml-2 text-sm font-medium text-gray-700">
+                                Actualité en vedette
+                            </label>
+                        </div>
+
+                        <!-- Actualité publiée -->
+                        <div class="flex items-center">
+                            <input id="is_published_top" name="is_published" type="checkbox" value="1" 
+                                   {{ old('is_published', $news->is_published) ? 'checked' : '' }}
+                                   class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                            <label for="is_published_top" class="ml-2 text-sm font-medium text-gray-700">
+                                Actualité publiée
+                            </label>
+                        </div>
+
+                        <!-- Date de publication -->
+                        <div class="flex items-center space-x-2">
+                            <label for="published_at_top" class="text-sm font-medium text-gray-700">
+                                Date de publication:
+                            </label>
+                            <input type="datetime-local" id="published_at_top" name="published_at" 
+                                   value="{{ old('published_at', $news->published_at ? $news->published_at->format('Y-m-d\TH:i') : '') }}"
+                                   class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boutons d'action en haut -->
+                <div class="flex items-center space-x-3">
+                    <button type="submit" 
+                            onclick="saveTinyMCEContent()"
+                            class="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition duration-200">
+                        <i class="fas fa-save mr-2"></i>
+                        Mettre à jour
+                    </button>
+                    <button type="button" onclick="previewNews()" 
+                            class="inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+                        <i class="fas fa-eye mr-2"></i>
+                        Prévisualiser
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <div class="bg-white rounded-xl shadow-lg p-8">
             <!-- Informations de base -->
             <div class="space-y-6">
@@ -209,62 +265,49 @@
             </div>
         </div>
 
-        <!-- Options de publication -->
+        <!-- Informations de publication (informations seulement) -->
         <div class="bg-white rounded-xl shadow-lg p-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Options de publication</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Informations de publication</h2>
             
             <div class="space-y-4">
-                <!-- Actualité en vedette -->
-                <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                        <input id="is_featured" name="is_featured" type="checkbox" value="1" 
-                               {{ old('is_featured', $news->is_featured) ? 'checked' : '' }}
-                               class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Status actuel -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Statut actuel</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <span class="text-sm text-gray-600">Publication:</span>
+                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $news->is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $news->is_published ? 'Publiée' : 'Brouillon' }}
+                                </span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-sm text-gray-600">En vedette:</span>
+                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $news->is_featured ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $news->is_featured ? 'Oui' : 'Non' }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ml-3">
-                        <label for="is_featured" class="text-sm font-medium text-gray-700">
-                            Actualité en vedette
-                        </label>
-                        <p class="text-xs text-gray-500">Mettre cette actualité en avant sur la page d'accueil</p>
-                    </div>
-                </div>
 
-                <!-- Publiée -->
-                <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                        <input id="is_published" name="is_published" type="checkbox" value="1" 
-                               {{ old('is_published', $news->is_published) ? 'checked' : '' }}
-                               class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
-                    </div>
-                    <div class="ml-3">
-                        <label for="is_published" class="text-sm font-medium text-gray-700">
-                            Actualité publiée
-                        </label>
-                        <p class="text-xs text-gray-500">
-                            @if($news->is_published)
-                                Actualité actuellement visible publiquement
-                            @else
-                                Actualité actuellement en brouillon
+                    <!-- Date de publication -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Dates importantes</h3>
+                        <div class="space-y-1 text-sm text-gray-600">
+                            @if($news->published_at)
+                                <div>Publiée le {{ $news->published_at->format('d/m/Y à H:i') }}</div>
                             @endif
-                        </p>
+                            <div>Créée le {{ $news->created_at->format('d/m/Y à H:i') }}</div>
+                            @if($news->updated_at != $news->created_at)
+                                <div>Modifiée le {{ $news->updated_at->format('d/m/Y à H:i') }}</div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-
-                <!-- Date de publication -->
-                <div id="publish-date-container" style="{{ old('is_published', $news->is_published) ? 'display: block;' : 'display: none;' }}">
-                    <label for="published_at" class="block text-sm font-medium text-gray-700 mb-2">
-                        Date de publication
-                    </label>
-                    <input type="datetime-local" id="published_at" name="published_at" 
-                           value="{{ old('published_at', $news->published_at ? $news->published_at->format('Y-m-d\TH:i') : '') }}"
-                           class="w-full max-w-md px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200">
-                    <p class="text-xs text-gray-500 mt-1">
-                        @if($news->published_at)
-                            Publiée le {{ $news->published_at->format('d/m/Y à H:i') }}
-                        @else
-                            Définir la date de publication
-                        @endif
-                    </p>
+                
+                <div class="text-xs text-gray-500 bg-purple-50 rounded-lg p-3">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Les options de publication peuvent être modifiées dans la section "Publication et actions rapides" en haut de cette page.
                 </div>
             </div>
         </div>
@@ -335,17 +378,7 @@
             slugInput.value = slug;
         });
 
-        // Show/hide publish date based on checkbox
-        const isPublishedCheckbox = document.getElementById('is_published');
-        const publishDateContainer = document.getElementById('publish-date-container');
-        
-        isPublishedCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                publishDateContainer.style.display = 'block';
-            } else {
-                publishDateContainer.style.display = 'none';
-            }
-        });
+        // Publication controls moved to top section
 
         // Image preview functionality
         const imageInput = document.getElementById('image');

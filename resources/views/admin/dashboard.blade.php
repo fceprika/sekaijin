@@ -156,9 +156,9 @@
             @if($recent_articles->count() > 0)
                 <div class="space-y-4">
                     @foreach($recent_articles as $article)
-                        <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+                        <a href="{{ route('admin.articles.edit', $article) }}" class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 group">
                             <div class="flex-1">
-                                <h3 class="font-medium text-gray-800 mb-1">{{ $article->title }}</h3>
+                                <h3 class="font-medium text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">{{ $article->title }}</h3>
                                 <div class="flex items-center space-x-4 text-xs text-gray-500">
                                     <span>
                                         <i class="fas fa-user mr-1"></i>
@@ -180,12 +180,11 @@
                                 @else
                                     <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Brouillon</span>
                                 @endif
-                                <a href="{{ route('admin.articles.edit', $article) }}" 
-                                   class="text-blue-600 hover:text-blue-800">
+                                <div class="text-blue-600 group-hover:text-blue-800 transition-colors">
                                     <i class="fas fa-edit"></i>
-                                </a>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @else
@@ -206,9 +205,9 @@
             @if($recent_news->count() > 0)
                 <div class="space-y-4">
                     @foreach($recent_news as $news)
-                        <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+                        <a href="{{ route('admin.news.edit', $news) }}" class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 group">
                             <div class="flex-1">
-                                <h3 class="font-medium text-gray-800 mb-1">{{ $news->title }}</h3>
+                                <h3 class="font-medium text-gray-800 mb-1 group-hover:text-purple-600 transition-colors">{{ $news->title }}</h3>
                                 <div class="flex items-center space-x-4 text-xs text-gray-500">
                                     <span>
                                         <i class="fas fa-user mr-1"></i>
@@ -230,12 +229,11 @@
                                 @else
                                     <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Brouillon</span>
                                 @endif
-                                <a href="{{ route('admin.news.edit', $news) }}" 
-                                   class="text-purple-600 hover:text-purple-800">
+                                <div class="text-purple-600 group-hover:text-purple-800 transition-colors">
                                     <i class="fas fa-edit"></i>
-                                </a>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @else

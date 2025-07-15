@@ -84,10 +84,6 @@
                     
                     <!-- Social Actions -->
                     <div class="flex items-center space-x-4">
-                        <button class="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors">
-                            <i class="far fa-heart"></i>
-                            <span>{{ $article->likes ?? 0 }}</span>
-                        </button>
                         <button class="text-gray-600 hover:text-blue-600 transition-colors">
                             <i class="fas fa-share-alt"></i>
                         </button>
@@ -106,10 +102,6 @@
             <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
-                        <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
-                            <i class="far fa-heart"></i>
-                            <span>J'aime ({{ $article->likes ?? 0 }})</span>
-                        </button>
                         <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
                             <i class="fas fa-share-alt"></i>
                             <span>Partager</span>

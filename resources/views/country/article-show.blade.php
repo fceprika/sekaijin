@@ -75,12 +75,16 @@
                         </div>
                     </div>
                     
-                    <!-- Social Actions -->
+                    <!-- Actions -->
                     <div class="flex items-center space-x-4">
-                        <button class="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors">
-                            <i class="far fa-heart"></i>
-                            <span>{{ $article->likes }}</span>
-                        </button>
+                        @admin
+                            <a href="{{ url('/admin/articles/' . $article->id . '/edit') }}" class="inline-flex items-center px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>
+                                Modifier
+                            </a>
+                        @endadmin
+                        
+                        <!-- Social Actions -->
                         <button class="text-gray-600 hover:text-blue-600 transition-colors">
                             <i class="fas fa-share-alt"></i>
                         </button>
@@ -99,10 +103,6 @@
             <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
-                        <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
-                            <i class="far fa-heart"></i>
-                            <span>J'aime ({{ $article->likes }})</span>
-                        </button>
                         <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
                             <i class="fas fa-share-alt"></i>
                             <span>Partager</span>
