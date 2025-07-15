@@ -51,7 +51,7 @@ class SecurityHeaders
                    "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud{$localSources}; " .
                    "img-src 'self' data: https:{$localSources}; " .
                    "font-src 'self' https://cdnjs.cloudflare.com{$localSources}; " .
-                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://cdn.tiny.cloud{$localSources}; " .
+                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://cdn.tiny.cloud{$localSources}; " .
                    "worker-src 'self' blob:; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .
