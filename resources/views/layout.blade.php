@@ -793,9 +793,6 @@
                     if (icon) icon.classList.remove('text-blue-600');
                     if (span) span.textContent = 'Sauvegarder';
                 }
-                
-                // Show success message briefly
-                showNotification(data.message, 'success');
             } else {
                 throw new Error(data.message || 'Erreur inconnue');
             }
