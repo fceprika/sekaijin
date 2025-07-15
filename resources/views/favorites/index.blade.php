@@ -69,7 +69,9 @@
                                         <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                             {{ ucfirst($article->category) }}
                                         </span>
-                                        <button onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite('article', {{ $article->id }})" 
+                                        <button data-toggle-favorite 
+                                                data-favorite-type="article" 
+                                                data-favorite-id="{{ $article->id }}"
                                                 id="favorite-btn-article-{{ $article->id }}"
                                                 class="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                                             <i class="fas fa-bookmark text-sm"></i>
@@ -149,7 +151,9 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <button onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite('news', {{ $news->id }})" 
+                                        <button data-toggle-favorite 
+                                                data-favorite-type="news" 
+                                                data-favorite-id="{{ $news->id }}"
                                                 id="favorite-btn-news-{{ $news->id }}"
                                                 class="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                                             <i class="fas fa-bookmark text-sm"></i>

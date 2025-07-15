@@ -731,6 +731,21 @@
 
     <!-- Favorites functionality script -->
     <script nonce="{{ $csp_nonce ?? '' }}">
+    // Add event listeners for favorite buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click listeners to all favorite buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('[data-toggle-favorite]')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const button = e.target.closest('[data-toggle-favorite]');
+                const type = button.dataset.favoriteType;
+                const id = button.dataset.favoriteId;
+                toggleFavorite(type, id);
+            }
+        });
+    });
+
     function toggleFavorite(type, id) {
         const button = document.getElementById(`favorite-btn-${type}-${id}`);
         const originalText = button.querySelector('span')?.textContent;
@@ -835,13 +850,18 @@
         notification.innerHTML = `
             <div class="flex items-center">
                 <span class="flex-1">${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                <button class="ml-2 text-white hover:text-gray-200 close-notification">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                     </svg>
                 </button>
             </div>
         `;
+        
+        // Add click listener for close button
+        notification.querySelector('.close-notification').addEventListener('click', function() {
+            notification.remove();
+        });
         
         document.body.appendChild(notification);
         

@@ -109,7 +109,9 @@
                             <span>Partager</span>
                         </button>
                         @auth
-                            <button onclick="toggleFavorite('news', {{ $news->id }})" 
+                            <button data-toggle-favorite 
+                                    data-favorite-type="news" 
+                                    data-favorite-id="{{ $news->id }}"
                                     id="favorite-btn-news-{{ $news->id }}"
                                     class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors {{ $news->isFavoritedBy(auth()->user()) ? 'bg-blue-50 border-blue-300 text-blue-700' : '' }}">
                                 <i class="fas fa-bookmark {{ $news->isFavoritedBy(auth()->user()) ? 'text-blue-600' : '' }}"></i>
