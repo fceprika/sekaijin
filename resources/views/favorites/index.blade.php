@@ -97,7 +97,6 @@
                                             @if($article->reading_time)
                                                 <span>{{ $article->reading_time }}</span>
                                             @endif
-                                            <span>{{ $article->views }} vues</span>
                                         </div>
                                     </div>
                                 </div>
@@ -175,7 +174,6 @@
                                             @endif
                                             <span>{{ $news->published_at->format('d/m/Y') }}</span>
                                         </div>
-                                        <span>{{ $news->views }} vues</span>
                                     </div>
                                 </div>
                             </a>

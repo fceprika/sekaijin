@@ -128,7 +128,6 @@
                                             </a>
                                         </div>
                                         <div class="flex items-center space-x-4">
-                                            <span class="text-xs text-gray-500">{{ $newsItem->views }} vues</span>
                                             <a href="{{ route('country.news.show', [$countryModel->slug, $newsItem->slug]) }}" class="text-blue-600 hover:text-blue-800 font-medium">Lire la suite →</a>
                                         </div>
                                     </div>
@@ -207,7 +206,7 @@
                                             {{ $sidebarNews->title }}
                                         </a>
                                     </h4>
-                                    <p class="text-xs text-gray-500">{{ $sidebarNews->published_at->format('d/m/Y') }} • {{ $sidebarNews->views }} vues</p>
+                                    <p class="text-xs text-gray-500">{{ $sidebarNews->published_at->format('d/m/Y') }}</p>
                                 </div>
                             @endforeach
                         </div>

@@ -233,7 +233,11 @@ class CountryController extends Controller
             $seoData = $seoService->generateSeoData('article', $article);
             $structuredData = $seoService->generateStructuredData('article', $article);
             
-            return view('country.article-show', compact('countryModel', 'article', 'relatedArticles', 'seoData', 'structuredData'));
+            // Make country data available under expected variable names
+            $currentCountry = $countryModel;
+            $country = $countryModel;
+            
+            return view('country.article-show', compact('countryModel', 'currentCountry', 'country', 'article', 'relatedArticles', 'seoData', 'structuredData'));
             
         } catch (\Exception $e) {
             \Log::error('Error displaying article: ' . $e->getMessage(), [
@@ -286,7 +290,11 @@ class CountryController extends Controller
             $seoData = $seoService->generateSeoData('news', $news);
             $structuredData = $seoService->generateStructuredData('news', $news);
             
-            return view('country.news-show', compact('countryModel', 'news', 'relatedNews', 'seoData', 'structuredData'));
+            // Make country data available under expected variable names
+            $currentCountry = $countryModel;
+            $country = $countryModel;
+            
+            return view('country.news-show', compact('countryModel', 'currentCountry', 'country', 'news', 'relatedNews', 'seoData', 'structuredData'));
             
         } catch (\Exception $e) {
             \Log::error('Error displaying news: ' . $e->getMessage(), [
@@ -337,7 +345,11 @@ class CountryController extends Controller
             $seoData = $seoService->generateSeoData('event', $event);
             $structuredData = $seoService->generateStructuredData('event', $event);
             
-            return view('country.event-show', compact('countryModel', 'event', 'relatedEvents', 'seoData', 'structuredData'));
+            // Make country data available under expected variable names
+            $currentCountry = $countryModel;
+            $country = $countryModel;
+            
+            return view('country.event-show', compact('countryModel', 'currentCountry', 'country', 'event', 'relatedEvents', 'seoData', 'structuredData'));
             
         } catch (\Exception $e) {
             \Log::error('Error displaying event: ' . $e->getMessage(), [

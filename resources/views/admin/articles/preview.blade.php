@@ -42,7 +42,6 @@
                         {{ ucfirst($article->category ?? 'Témoignage') }}
                     </span>
                     <div class="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>{{ $article->views ?? 0 }} vues</span>
                         @if($article->reading_time)
                             <span>{{ $article->reading_time }}</span>
                         @endif
