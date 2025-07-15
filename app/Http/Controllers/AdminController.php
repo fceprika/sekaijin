@@ -269,7 +269,7 @@ class AdminController extends Controller
             'likes' => 'nullable|integer|min:0',
             'reading_time' => 'nullable|integer|min:1|max:120',
             'image_url' => 'nullable|url|max:2048',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:512'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:512'
         ]);
         
         // Debug logging only in development
