@@ -85,8 +85,10 @@
                         @endadmin
                         
                         <!-- Social Actions -->
-                        <span class="text-sm text-gray-500">{{ $news->views }} vues</span>
-                        <button class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <button class="share-button text-gray-600 hover:text-blue-600 transition-colors" 
+                                data-url="{{ route('country.news.show', [$country->slug, $news->id]) }}"
+                                data-title="{{ $news->title }} - {{ $country->name_fr }}"
+                                data-text="{{ $news->excerpt }}">
                             <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
@@ -104,7 +106,10 @@
             <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
-                        <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button class="share-button flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                                data-url="{{ route('country.news.show', [$country->slug, $news->id]) }}"
+                                data-title="{{ $news->title }} - {{ $country->name_fr }}"
+                                data-text="{{ $news->excerpt }}">
                             <i class="fas fa-share-alt"></i>
                             <span>Partager</span>
                         </button>

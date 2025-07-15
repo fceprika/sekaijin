@@ -1,0 +1,313 @@
+/* Styles pour le composant de partage */
+
+/* Menu de partage modal */
+.share-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.share-menu.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.share-menu-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.share-menu-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.share-menu.show .share-menu-content {
+    transform: translateY(0);
+}
+
+/* Style desktop */
+@media (min-width: 768px) {
+    .share-menu-content {
+        position: absolute;
+        bottom: auto;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        width: 400px;
+        max-height: 600px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .share-menu.show .share-menu-content {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.share-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.share-menu-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.share-menu-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.share-menu-close:hover {
+    background-color: #f3f4f6;
+}
+
+.share-menu-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.share-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: #374151;
+}
+
+.share-option:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+}
+
+.share-option:active {
+    transform: translateY(0);
+}
+
+.share-option i {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.share-option span {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Couleurs spécifiques aux plateformes */
+.share-option[data-platform="facebook"] i {
+    color: #1877F2;
+}
+
+.share-option[data-platform="twitter"] i {
+    color: #1DA1F2;
+}
+
+.share-option[data-platform="linkedin"] i {
+    color: #0A66C2;
+}
+
+.share-option[data-platform="whatsapp"] i {
+    color: #25D366;
+}
+
+.share-option[data-platform="telegram"] i {
+    color: #0088cc;
+}
+
+.share-option[data-platform="email"] i {
+    color: #EA4335;
+}
+
+.share-option[data-platform="copy"] i {
+    color: #6B7280;
+}
+
+/* Notifications */
+.share-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #10B981;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.share-notification.show {
+    transform: translateX(0);
+}
+
+.share-notification.error {
+    background: #EF4444;
+}
+
+.share-notification.success {
+    background: #10B981;
+}
+
+.share-notification.info {
+    background: #3B82F6;
+}
+
+/* Styles pour les boutons de partage existants */
+.share-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.share-button:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+    color: #1f2937;
+}
+
+.share-button i {
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .share-menu-options {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .share-option {
+        padding: 12px 8px;
+    }
+    
+    .share-option i {
+        font-size: 1.25rem;
+    }
+    
+    .share-option span {
+        font-size: 0.75rem;
+    }
+}
+
+/* Indicateur de support Web Share API */
+@supports (not (backdrop-filter: blur(4px))) {
+    .share-menu-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+}
+
+/* Animation pour les boutons de partage */
+.share-button {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.share-button:active {
+    transform: translateY(1px);
+}
+
+/* Style pour les boutons de partage dans les articles */
+.article-share-button,
+.news-share-button,
+.event-share-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    color: #6b7280;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.article-share-button:hover,
+.news-share-button:hover,
+.event-share-button:hover {
+    background-color: #f3f4f6;
+    color: #3b82f6;
+    border-color: #d1d5db;
+}
+
+.article-share-button i,
+.news-share-button i,
+.event-share-button i {
+    font-size: 0.875rem;
+}
+
+/* Adaptation pour les petits écrans */
+@media (max-width: 640px) {
+    .share-notification {
+        left: 20px;
+        right: 20px;
+        top: 20px;
+        transform: translateY(-100%);
+    }
+    
+    .share-notification.show {
+        transform: translateY(0);
+    }
+}

@@ -84,7 +84,6 @@
                     
                     <!-- Social Actions -->
                     <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-500">{{ $news->views ?? 0 }} vues</span>
                         <button class="text-gray-600 hover:text-blue-600 transition-colors">
                             <i class="fas fa-share-alt"></i>
                         </button>

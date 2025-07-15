@@ -77,6 +77,9 @@
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Share Component CSS -->
+    <link rel="stylesheet" href="/css/share-component.css">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Mapbox JS -->
@@ -878,5 +881,8 @@
         }, 4000);
     }
     </script>
+    
+    <!-- Share Component JavaScript -->
+    <script src="/js/share-component.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 </body>
 </html>

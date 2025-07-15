@@ -134,7 +134,10 @@
                                 </a>
                             @endif
                         @endauth
-                        <button class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <button class="share-button text-gray-600 hover:text-blue-600 transition-colors" 
+                                data-url="{{ route('country.event.show', [$country->slug, $event->slug]) }}"
+                                data-title="{{ $event->title }} - {{ $country->name_fr }}"
+                                data-text="{{ $event->description }}">
                             <i class="fas fa-share-alt"></i>
                             <span class="ml-1">Partager</span>
                         </button>

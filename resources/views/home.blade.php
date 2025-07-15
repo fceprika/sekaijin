@@ -3,9 +3,9 @@
 @section('title', 'Accueil - Sekaijin')
 
 @section('content')
-<!-- Hero Section with Gradient -->
-<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden cursor-pointer" onclick="window.location.href='/thailande'">
-    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+<!-- Hero Section with Wallpaper -->
+<div class="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-24 relative overflow-hidden cursor-pointer" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat;" onclick="window.location.href='/thailande'">
+    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
     <div class="relative max-w-7xl mx-auto px-4 text-center">
         <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             Bienvenue sur 

@@ -26,7 +26,6 @@
                         {{ ucfirst($article->category) }}
                     </span>
                     <div class="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>{{ $article->views }} vues</span>
                         @if($article->reading_time)
                             <span>{{ $article->reading_time }}</span>
                         @endif
@@ -85,7 +84,10 @@
                         @endadmin
                         
                         <!-- Social Actions -->
-                        <button class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <button class="share-button text-gray-600 hover:text-blue-600 transition-colors" 
+                                data-url="{{ route('country.article.show', [$country->slug, $article->slug]) }}"
+                                data-title="{{ $article->title }} - {{ $country->name_fr }}"
+                                data-text="{{ $article->excerpt }}">
                             <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
@@ -103,7 +105,10 @@
             <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
-                        <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button class="share-button flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                                data-url="{{ route('country.article.show', [$country->slug, $article->slug]) }}"
+                                data-title="{{ $article->title }} - {{ $country->name_fr }}"
+                                data-text="{{ $article->excerpt }}">
                             <i class="fas fa-share-alt"></i>
                             <span>Partager</span>
                         </button>
