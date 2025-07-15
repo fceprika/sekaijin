@@ -35,6 +35,18 @@
     <div class="absolute bottom-10 right-10 w-16 h-16 bg-pink-400 rounded-full opacity-20 animate-bounce"></div>
 </div>
 
+<!-- Map Transition Block -->
+<div class="bg-gradient-to-r from-blue-50 to-purple-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            🌏 Explorez notre carte des membres dans le monde entier
+        </h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Découvrez où se trouvent nos membres à travers le globe et rejoignez une communauté française internationale
+        </p>
+    </div>
+</div>
+
 <!-- Interactive Map Section -->
 <div class="bg-white">
     <div id="map" class="h-[400px] md:h-[500px] lg:h-[600px] w-full"></div>
