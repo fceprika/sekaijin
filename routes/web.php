@@ -186,7 +186,7 @@ Route::prefix('{country}')->middleware('country')->group(function () {
     Route::get('/actualites', [App\Http\Controllers\CountryController::class, 'actualites'])->name('country.actualites');
     Route::get('/actualites/{news:slug}', [App\Http\Controllers\CountryController::class, 'showNews'])->name('country.news.show');
     Route::get('/blog', [App\Http\Controllers\CountryController::class, 'blog'])->name('country.blog');
-    Route::get('/blog/{article}', [App\Http\Controllers\CountryController::class, 'showArticle'])->name('country.article.show');
+    Route::get('/blog/{article:slug}', [App\Http\Controllers\CountryController::class, 'showArticle'])->name('country.article.show');
     Route::get('/communaute', [App\Http\Controllers\CountryController::class, 'communaute'])->name('country.communaute');
     Route::get('/evenements', [App\Http\Controllers\CountryController::class, 'evenements'])->name('country.evenements');
     Route::get('/evenements/{event}', [App\Http\Controllers\CountryController::class, 'showEvent'])->name('country.event.show');
