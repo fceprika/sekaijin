@@ -154,4 +154,32 @@ class News extends Model
     {
         return $this->forceSlugUpdateFlag;
     }
+
+    /**
+     * Get users who favorited this news
+     */
+    public function favoritedBy()
+    {
+        return $this->morphToMany(User::class, 'favoritable', 'favorites');
+    }
+
+    /**
+     * Get favorites for this news
+     */
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
+    }
+
+    /**
+     * Check if this news is favorited by a specific user
+     */
+    public function isFavoritedBy($user): bool
+    {
+        if (!$user) return false;
+        
+        return $this->favorites()
+            ->where('user_id', $user->id)
+            ->exists();
+    }
 }

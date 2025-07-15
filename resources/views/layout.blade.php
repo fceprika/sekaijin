@@ -83,7 +83,7 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow-lg relative">
+    <nav class="bg-white shadow-lg sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex space-x-7">
@@ -223,6 +223,10 @@
                                     <a href="{{ route('announcements.my') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
                                         <i class="fas fa-tags mr-3 w-4"></i>
                                         Mes annonces
+                                    </a>
+                                    <a href="{{ route('favorites.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                        <i class="fas fa-bookmark mr-3 w-4"></i>
+                                        Mes favoris
                                     </a>
                                     <hr class="my-2">
                                     <form method="POST" action="{{ route('logout') }}" class="block">
@@ -543,6 +547,26 @@
                     }
                 });
             }
+
+            // Sticky navigation effect
+            const nav = document.querySelector('nav');
+            let lastScrollTop = 0;
+
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > 100) {
+                    // Add enhanced shadow and slightly compact navigation when scrolled
+                    nav.classList.add('shadow-xl');
+                    nav.classList.remove('shadow-lg');
+                } else {
+                    // Reset to original shadow
+                    nav.classList.add('shadow-lg');
+                    nav.classList.remove('shadow-xl');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
         });
     </script>
 
@@ -704,5 +728,48 @@
             </div>
         </div>
     </footer>
+
+    <!-- Favorites functionality script -->
+    <script>
+    function toggleFavorite(type, id) {
+        fetch('/favorites/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                type: type,
+                id: id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const button = document.getElementById(`favorite-btn-${type}-${id}`);
+                const icon = button.querySelector('i');
+                const span = button.querySelector('span');
+                
+                if (data.favorited) {
+                    // Item is now favorited
+                    button.classList.add('bg-blue-50', 'border-blue-300', 'text-blue-700');
+                    button.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+                    icon.classList.add('text-blue-600');
+                    span.textContent = 'Sauvegardé';
+                } else {
+                    // Item is no longer favorited
+                    button.classList.remove('bg-blue-50', 'border-blue-300', 'text-blue-700');
+                    button.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                    icon.classList.remove('text-blue-600');
+                    span.textContent = 'Sauvegarder';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    </script>
 </body>
 </html>

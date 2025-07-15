@@ -107,6 +107,19 @@
                             <i class="fas fa-share-alt"></i>
                             <span>Partager</span>
                         </button>
+                        @auth
+                            <button onclick="toggleFavorite('article', {{ $article->id }})" 
+                                    id="favorite-btn-article-{{ $article->id }}"
+                                    class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors {{ $article->isFavoritedBy(auth()->user()) ? 'bg-blue-50 border-blue-300 text-blue-700' : '' }}">
+                                <i class="fas fa-bookmark {{ $article->isFavoritedBy(auth()->user()) ? 'text-blue-600' : '' }}"></i>
+                                <span>{{ $article->isFavoritedBy(auth()->user()) ? 'Sauvegardé' : 'Sauvegarder' }}</span>
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-bookmark"></i>
+                                <span>Sauvegarder</span>
+                            </a>
+                        @endauth
                     </div>
                     
                     <a href="{{ route('country.blog', $currentCountry->slug) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">

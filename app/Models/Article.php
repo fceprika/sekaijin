@@ -165,4 +165,32 @@ class Article extends Model
     {
         return $this->forceSlugUpdateFlag;
     }
+
+    /**
+     * Get users who favorited this article
+     */
+    public function favoritedBy()
+    {
+        return $this->morphToMany(User::class, 'favoritable', 'favorites');
+    }
+
+    /**
+     * Get favorites for this article
+     */
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
+    }
+
+    /**
+     * Check if this article is favorited by a specific user
+     */
+    public function isFavoritedBy($user): bool
+    {
+        if (!$user) return false;
+        
+        return $this->favorites()
+            ->where('user_id', $user->id)
+            ->exists();
+    }
 }
