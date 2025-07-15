@@ -185,7 +185,7 @@ class Article extends Model
     /**
      * Check if this article is favorited by a specific user
      */
-    public function isFavoritedBy($user): bool
+    public function isFavoritedBy(?\App\Models\User $user): bool
     {
         if (!$user) return false;
         

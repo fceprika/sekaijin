@@ -174,7 +174,7 @@ class News extends Model
     /**
      * Check if this news is favorited by a specific user
      */
-    public function isFavoritedBy($user): bool
+    public function isFavoritedBy(?\App\Models\User $user): bool
     {
         if (!$user) return false;
         

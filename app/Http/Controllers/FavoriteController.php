@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Favorite;
 use App\Models\News;
+use App\Http\Requests\ToggleFavoriteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,19 +19,18 @@ class FavoriteController extends Controller
     /**
      * Toggle favorite status for an item
      */
-    public function toggle(Request $request)
+    public function toggle(ToggleFavoriteRequest $request)
     {
-        $request->validate([
-            'type' => 'required|in:article,news',
-            'id' => 'required|integer|exists:' . ($request->type === 'article' ? 'articles' : 'news') . ',id'
-        ]);
-
         $user = Auth::user();
-        $type = $request->type;
-        $itemId = $request->id;
+        
+        // Check authorization
+        $this->authorize('toggle', Favorite::class);
+        $type = $request->input('type');
+        $itemId = $request->input('id');
+        $modelClass = $request->getModelClass();
 
-        // Determine the model class
-        $modelClass = $type === 'article' ? Article::class : News::class;
+        // Verify the content exists and is published (already done in FormRequest)
+        $contentItem = $request->getContentItem();
 
         // Find existing favorite
         $favorite = Favorite::where('user_id', $user->id)
@@ -71,6 +71,9 @@ class FavoriteController extends Controller
     public function index()
     {
         $user = Auth::user();
+        
+        // Check authorization
+        $this->authorize('viewAny', Favorite::class);
 
         // Get favorite articles with their relationships
         $favoriteArticles = $user->favoriteArticles()
