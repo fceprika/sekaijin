@@ -161,6 +161,13 @@ Route::get('/invitation-membre', function () {
 // Profils publics (protégés par l'authentification)
 Route::get('/membre/{name}', [App\Http\Controllers\PublicProfileController::class, 'show'])->name('public.profile');
 
+// Routes des favoris (protégées par l'authentification)
+Route::middleware('auth')->group(function () {
+    Route::post('/favorites/toggle', [App\Http\Controllers\FavoriteController::class, 'toggle'])->name('favorites.toggle');
+    Route::get('/mes-favoris', [App\Http\Controllers\FavoriteController::class, 'index'])->name('favorites.index');
+    Route::get('/favorites/count', [App\Http\Controllers\FavoriteController::class, 'count'])->name('favorites.count');
+});
+
 // Routes globales des annonces
 Route::prefix('annonces')->group(function () {
     Route::get('/', [App\Http\Controllers\AnnouncementController::class, 'globalIndex'])->name('announcements.index');

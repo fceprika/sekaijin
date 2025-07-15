@@ -108,10 +108,19 @@
                             <i class="fas fa-share-alt"></i>
                             <span>Partager</span>
                         </button>
-                        <button class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
-                            <i class="fas fa-bookmark"></i>
-                            <span>Sauvegarder</span>
-                        </button>
+                        @auth
+                            <button onclick="toggleFavorite('news', {{ $news->id }})" 
+                                    id="favorite-btn-news-{{ $news->id }}"
+                                    class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors {{ $news->isFavoritedBy(auth()->user()) ? 'bg-blue-50 border-blue-300 text-blue-700' : '' }}">
+                                <i class="fas fa-bookmark {{ $news->isFavoritedBy(auth()->user()) ? 'text-blue-600' : '' }}"></i>
+                                <span>{{ $news->isFavoritedBy(auth()->user()) ? 'Sauvegardé' : 'Sauvegarder' }}</span>
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" class="flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-bookmark"></i>
+                                <span>Sauvegarder</span>
+                            </a>
+                        @endauth
                     </div>
                     
                     <a href="{{ route('country.actualites', $currentCountry->slug) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">

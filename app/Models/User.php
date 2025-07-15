@@ -182,6 +182,41 @@ class User extends Authenticatable
     }
 
     /**
+     * Get favorites for this user
+     */
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * Get favorite articles for this user
+     */
+    public function favoriteArticles()
+    {
+        return $this->morphedByMany(Article::class, 'favoritable', 'favorites');
+    }
+
+    /**
+     * Get favorite news for this user
+     */
+    public function favoriteNews()
+    {
+        return $this->morphedByMany(News::class, 'favoritable', 'favorites');
+    }
+
+    /**
+     * Check if user has favorited a specific item
+     */
+    public function hasFavorited($item): bool
+    {
+        return $this->favorites()
+            ->where('favoritable_type', get_class($item))
+            ->where('favoritable_id', $item->id)
+            ->exists();
+    }
+
+    /**
      * Check if user has enabled location sharing
      */
     public function hasLocationSharing(): bool

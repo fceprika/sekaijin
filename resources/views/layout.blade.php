@@ -83,7 +83,7 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow-lg relative">
+    <nav class="bg-white shadow-lg sticky top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex space-x-7">
@@ -223,6 +223,10 @@
                                     <a href="{{ route('announcements.my') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
                                         <i class="fas fa-tags mr-3 w-4"></i>
                                         Mes annonces
+                                    </a>
+                                    <a href="{{ route('favorites.index') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                        <i class="fas fa-bookmark mr-3 w-4"></i>
+                                        Mes favoris
                                     </a>
                                     <hr class="my-2">
                                     <form method="POST" action="{{ route('logout') }}" class="block">
@@ -543,6 +547,26 @@
                     }
                 });
             }
+
+            // Sticky navigation effect
+            const nav = document.querySelector('nav');
+            let lastScrollTop = 0;
+
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > 100) {
+                    // Add enhanced shadow and slightly compact navigation when scrolled
+                    nav.classList.add('shadow-xl');
+                    nav.classList.remove('shadow-lg');
+                } else {
+                    // Reset to original shadow
+                    nav.classList.add('shadow-lg');
+                    nav.classList.remove('shadow-xl');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
         });
     </script>
 
@@ -704,5 +728,138 @@
             </div>
         </div>
     </footer>
+
+    <!-- Favorites functionality script -->
+    <script>
+    function toggleFavorite(type, id) {
+        const button = document.getElementById(`favorite-btn-${type}-${id}`);
+        const originalText = button.querySelector('span')?.textContent;
+        
+        // Disable button during request
+        button.disabled = true;
+        button.style.opacity = '0.6';
+        if (button.querySelector('span')) {
+            button.querySelector('span').textContent = 'Chargement...';
+        }
+        
+        fetch('/favorites/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                type: type,
+                id: id
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const icon = button.querySelector('i');
+                const span = button.querySelector('span');
+                
+                if (data.favorited) {
+                    // Item is now favorited
+                    button.classList.add('bg-blue-50', 'border-blue-300', 'text-blue-700');
+                    button.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+                    if (icon) icon.classList.add('text-blue-600');
+                    if (span) span.textContent = 'Sauvegardé';
+                } else {
+                    // Item is no longer favorited
+                    button.classList.remove('bg-blue-50', 'border-blue-300', 'text-blue-700');
+                    button.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                    if (icon) icon.classList.remove('text-blue-600');
+                    if (span) span.textContent = 'Sauvegarder';
+                }
+                
+                // Show success message briefly
+                showNotification(data.message, 'success');
+            } else {
+                throw new Error(data.message || 'Erreur inconnue');
+            }
+        })
+        .catch(error => {
+            console.error('Favorite toggle error:', error);
+            
+            // Restore original text
+            if (button.querySelector('span')) {
+                button.querySelector('span').textContent = originalText;
+            }
+            
+            // Show user-friendly error message
+            let errorMessage = 'Erreur lors de la sauvegarde. Veuillez réessayer.';
+            if (error.message.includes('401') || error.message.includes('Unauthenticated')) {
+                errorMessage = 'Vous devez être connecté pour sauvegarder du contenu.';
+                // Redirect to login after a delay
+                setTimeout(() => {
+                    window.location.href = '/connexion';
+                }, 2000);
+            } else if (error.message.includes('422')) {
+                errorMessage = 'Ce contenu ne peut pas être sauvegardé.';
+            }
+            
+            showNotification(errorMessage, 'error');
+        })
+        .finally(() => {
+            // Re-enable button
+            button.disabled = false;
+            button.style.opacity = '1';
+        });
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification-toast');
+        existingNotifications.forEach(n => n.remove());
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification-toast fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg max-w-sm transition-all duration-300 transform translate-x-full`;
+        
+        // Set colors based on type
+        if (type === 'success') {
+            notification.classList.add('bg-green-500', 'text-white');
+        } else if (type === 'error') {
+            notification.classList.add('bg-red-500', 'text-white');
+        } else {
+            notification.classList.add('bg-blue-500', 'text-white');
+        }
+        
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Auto remove after 4 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 4000);
+    }
+    </script>
 </body>
 </html>
