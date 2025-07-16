@@ -5,7 +5,14 @@
 class ShareComponent {
     constructor() {
         this.isWebShareSupported = 'share' in navigator;
+        this.isMobile = this.checkIfMobile();
         this.init();
+    }
+
+    checkIfMobile() {
+        // Détecter si c'est un appareil mobile
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
     }
 
     init() {
@@ -23,15 +30,29 @@ class ShareComponent {
         const title = button.dataset.title || document.title;
         const text = button.dataset.text || '';
         const platform = button.dataset.platform;
+        const forceMenu = button.dataset.forceMenu === 'true';
 
-        // Si c'est un bouton de partage générique et que Web Share est supporté
-        if (!platform && this.isWebShareSupported) {
-            try {
-                await this.shareWithWebAPI(url, title, text);
+        // Si c'est un bouton de partage générique
+        if (!platform) {
+            // Si forceMenu est activé, toujours afficher le menu
+            if (forceMenu) {
+                this.showShareMenu(button, url, title, text);
                 return;
-            } catch (error) {
-                console.log('Web Share API non utilisée:', error);
-                // Fallback vers le menu de partage personnalisé
+            }
+            
+            // Utiliser Web Share API uniquement sur mobile ET si supporté
+            if (this.isMobile && this.isWebShareSupported) {
+                try {
+                    await this.shareWithWebAPI(url, title, text);
+                    return;
+                } catch (error) {
+                    console.log('Web Share API non utilisée:', error);
+                    // Fallback vers le menu de partage personnalisé
+                    this.showShareMenu(button, url, title, text);
+                    return;
+                }
+            } else {
+                // Sur desktop ou si Web Share n'est pas supporté, afficher le menu
                 this.showShareMenu(button, url, title, text);
                 return;
             }
