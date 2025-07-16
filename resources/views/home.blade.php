@@ -3,54 +3,57 @@
 @section('title', 'Accueil - Sekaijin')
 
 @section('content')
-<!-- Hero Section with Wallpaper - Full Height -->
-<div class="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden cursor-pointer flex flex-col justify-center" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat;" onclick="window.location.href='/thailande'">
-    <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-    <div class="relative max-w-7xl mx-auto px-4 text-center py-12">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Le monde est vaste. Et vous n'êtes pas seul.
-        </h1>
-        <p class="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto">
-            Des expatriés français vous attendent en Thaïlande, au Japon, et ailleurs.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-            @guest
-                <a href="/inscription" id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative" onclick="event.stopPropagation();">
-                    Créer mon compte
+<!-- Hero Container - Full Height (minus navbar) -->
+<div class="h-screen flex flex-col" style="height: calc(100vh - 80px);">
+    <!-- Hero Section with Wallpaper - 70% de la hauteur -->
+    <div class="flex-grow bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden cursor-pointer flex flex-col justify-center" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat; flex-basis: 70%;" onclick="window.location.href='/thailande'">
+        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div class="relative max-w-7xl mx-auto px-4 text-center py-8">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                Le monde est vaste. Et vous n'êtes pas seul.
+            </h1>
+            <p class="text-lg md:text-xl mb-8 text-blue-100 max-w-3xl mx-auto">
+                Des expatriés français vous attendent en Thaïlande, au Japon, et ailleurs.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
+                @guest
+                    <a href="/inscription" id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative" onclick="event.stopPropagation();">
+                        Créer mon compte
+                    </a>
+                @endguest
+                <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative" onclick="event.stopPropagation()">
+                    Découvrir la Thaïlande
                 </a>
-            @endguest
-            <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative" onclick="event.stopPropagation()">
-                Découvrir la Thaïlande
-            </a>
+            </div>
         </div>
+        
+        <!-- Floating shapes -->
+        <div class="absolute top-10 left-10 w-20 h-20 bg-yellow-400 rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-16 h-16 bg-pink-400 rounded-full opacity-20 animate-bounce"></div>
     </div>
-    
-    <!-- Scroll Indicator -->
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center" onclick="event.stopPropagation(); document.getElementById('map-transition').scrollIntoView({ behavior: 'smooth' });" style="cursor: pointer;">
-        <p class="text-white text-sm mb-2 opacity-90 font-medium">Découvrez la carte</p>
-        <div class="scroll-indicator">
-            <svg class="w-8 h-8 mx-auto text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-            </svg>
-        </div>
-    </div>
-    
-    <!-- Floating shapes -->
-    <div class="absolute top-10 left-10 w-20 h-20 bg-yellow-400 rounded-full opacity-20 animate-pulse"></div>
-    <div class="absolute bottom-20 right-10 w-16 h-16 bg-pink-400 rounded-full opacity-20 animate-bounce"></div>
-</div>
 
-<!-- Map Transition Block -->
-<div id="map-transition" class="bg-gradient-to-r from-gray-100 to-blue-100 py-12">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Explorez notre carte des membres dans le monde entier
-        </h2>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-            Découvrez où se trouvent nos membres à travers le globe et rejoignez une communauté française internationale
-        </p>
+    <!-- Map Transition Block - 30% de la hauteur -->
+    <div id="map-transition" class="bg-gradient-to-r from-gray-100 to-blue-100 flex flex-col justify-center" style="flex-basis: 30%;">
+        <div class="max-w-7xl mx-auto px-4 text-center py-6">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+                Explorez notre carte des membres dans le monde entier
+            </h2>
+            <p class="text-base md:text-lg text-gray-600 max-w-2xl mx-auto mb-4">
+                Découvrez où se trouvent nos membres à travers le globe et rejoignez une communauté française internationale
+            </p>
+            <!-- Scroll Indicator -->
+            <div class="text-center cursor-pointer" onclick="document.getElementById('map').scrollIntoView({ behavior: 'smooth' });">
+                <p class="text-gray-700 text-2xl mb-2 font-medium">Voir la carte</p>
+                <div class="scroll-indicator">
+                    <svg class="w-6 h-6 mx-auto text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+<!-- Fin du container hero plein écran -->
 
 <!-- Interactive Map Section -->
 <div class="bg-white">
@@ -465,11 +468,18 @@ function addClusterMarker(map, cluster) {
     animation: scroll-down 2s ease-in-out infinite;
 }
 
-/* Amélioration de l'overlay pour mobile */
+/* Amélioration de la hauteur pour mobile */
 @media (max-width: 768px) {
-    .min-h-screen {
-        min-height: 100vh;
-        min-height: -webkit-fill-available;
+    .h-screen {
+        height: calc(100vh - 64px) !important; /* Navbar plus petite sur mobile */
+        height: calc(100svh - 64px) !important; /* Support pour les nouveaux viewports */
+    }
+}
+
+@media (min-width: 769px) {
+    .h-screen {
+        height: calc(100vh - 64px) !important; /* Navbar desktop */
+        height: calc(100svh - 64px) !important; /* Support pour les nouveaux viewports */
     }
 }
 
