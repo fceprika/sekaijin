@@ -7,7 +7,7 @@
 <div class="h-screen flex flex-col" style="height: calc(100vh - 80px);">
     <!-- Hero Section with Wallpaper - 70% de la hauteur -->
     <div class="flex-grow bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden cursor-pointer flex flex-col justify-center" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat; flex-basis: 70%;" onclick="window.location.href='/thailande'">
-        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
         <div class="relative max-w-7xl mx-auto px-4 text-center py-8">
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
                 Le monde est vaste. Et vous n'êtes pas seul.
