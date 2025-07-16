@@ -6,7 +6,7 @@
 <!-- Hero Container - Full Height (minus navbar) -->
 <div class="h-screen flex flex-col" style="height: calc(100vh - 80px);">
     <!-- Hero Section with Wallpaper - 70% de la hauteur -->
-    <div class="flex-grow bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden cursor-pointer flex flex-col justify-center" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat; flex-basis: 70%;" onclick="window.location.href='/thailande'">
+    <div class="flex-grow bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden cursor-pointer flex flex-col justify-center" style="background-image: url('/images/wallpaper_sekaijin.webp'); background-size: cover; background-position: center; background-repeat: no-repeat; flex-basis: 70%;" id="hero-section">
         <div class="absolute inset-0 bg-black bg-opacity-10"></div>
         <div class="relative max-w-7xl mx-auto px-4 text-center py-8">
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
@@ -17,11 +17,11 @@
             </p>
             <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
                 @guest
-                    <a href="/inscription" id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative" onclick="event.stopPropagation();">
+                    <a href="/inscription" id="hero-btn" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-lg w-full sm:w-auto z-10 relative">
                         Créer mon compte
                     </a>
                 @endguest
-                <a href="/thailande" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative" onclick="event.stopPropagation()">
+                <a href="/thailande" id="discover-btn" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition duration-300 inline-block w-full sm:w-auto text-center z-10 relative">
                     Découvrir la Thaïlande
                 </a>
             </div>
@@ -42,7 +42,7 @@
                 Découvrez où se trouvent nos membres à travers le globe et rejoignez une communauté française internationale
             </p>
             <!-- Scroll Indicator -->
-            <div class="text-center cursor-pointer" onclick="document.getElementById('map').scrollIntoView({ behavior: 'smooth' });">
+            <div class="text-center cursor-pointer" id="scroll-to-map">
                 <p class="text-gray-700 text-2xl mb-2 font-medium">Voir la carte</p>
                 <div class="scroll-indicator">
                     <svg class="w-6 h-6 mx-auto text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,6 +200,39 @@
 
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
+    // Event handlers for hero section
+    const heroSection = document.getElementById('hero-section');
+    const heroBtn = document.getElementById('hero-btn');
+    const discoverBtn = document.getElementById('discover-btn');
+    const scrollToMap = document.getElementById('scroll-to-map');
+    
+    // Hero section click handler
+    if (heroSection) {
+        heroSection.addEventListener('click', function() {
+            window.location.href = '/thailande';
+        });
+    }
+    
+    // Prevent propagation for buttons inside hero
+    if (heroBtn) {
+        heroBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    if (discoverBtn) {
+        discoverBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // Scroll to map handler
+    if (scrollToMap) {
+        scrollToMap.addEventListener('click', function() {
+            document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+    
     // Initialize Mapbox with secure API proxy
     $.get('/api/map-config')
         .done(function(config) {
