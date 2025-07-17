@@ -292,7 +292,7 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Cross-linking between private profile management and public profile
 - Proper 404 handling for non-existent profiles
 - French date formatting and localization throughout
-- **Privacy Protection**: Only profile owners can access their own private profiles
+- **Privacy Protection**: Private profiles are only accessible to authenticated users
 
 ### User Role System (July 2025)
 - **Four-tier Role System**: `free` (default), `premium`, `ambassador`, `admin` with distinct privileges
