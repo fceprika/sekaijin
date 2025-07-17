@@ -51,6 +51,14 @@
             <div class="p-8">
                 <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-8">
                     @csrf
+                    
+                    <!-- Bouton de soumission en haut -->
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                            class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition duration-300 shadow-lg">
+                            Mettre à jour mon profil
+                        </button>
+                    </div>
 
                     <!-- Informations de base -->
                     <div class="bg-gray-50 rounded-xl p-6">
@@ -194,7 +202,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">Pays de résidence *</label>
-                                    <select id="country_residence" name="country_residence" required
+                                    <select id="country_residence" name="country_residence"
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                         <option value="">Sélectionnez un pays</option>
                                         @include('partials.countries', ['selected' => old('country_residence', $user->country_residence), 'filter' => 'europe_asia'])
@@ -1012,6 +1020,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Masquer mode manuel
         document.getElementById('manual-location-section').classList.add('hidden');
         
+        // Retirer l'attribut required du select pays en mode manuel
+        document.getElementById('country_residence').removeAttribute('required');
+        
         // Afficher mode auto avec données
         document.getElementById('auto-location-section').classList.remove('hidden');
         document.getElementById('detected-country-display').value = country;
@@ -1033,6 +1044,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function switchToManualMode() {
         // Afficher mode manuel
         document.getElementById('manual-location-section').classList.remove('hidden');
+        
+        // Ajouter l'attribut required au select pays en mode manuel
+        document.getElementById('country_residence').setAttribute('required', 'required');
         
         // Masquer mode auto
         document.getElementById('auto-location-section').classList.add('hidden');
@@ -1144,6 +1158,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialiser l'état visuel des boutons au chargement
     updateButtonStates();
+    
+    // Initialiser l'état required des champs selon le mode actuel
+    function initializeRequiredState() {
+        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
+        const isManualMode = !document.getElementById('manual-location-section').classList.contains('hidden');
+        
+        if (isAutoMode) {
+            document.getElementById('country_residence').removeAttribute('required');
+        } else if (isManualMode) {
+            document.getElementById('country_residence').setAttribute('required', 'required');
+        }
+    }
+    
+    // Initialiser l'état au chargement
+    initializeRequiredState();
 });
 </script>
 

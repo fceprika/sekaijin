@@ -19,7 +19,23 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $validator = Validator::make($request->all(), [
+        // Déterminer si on utilise le mode automatique ou manuel AVANT la validation
+        $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
+        
+        // Préparer les données pour la validation
+        $validationData = $request->all();
+        
+        // Si mode automatique, utiliser les données auto pour la validation
+        if ($useAutoMode) {
+            $validationData['country_residence'] = $request->country_residence_auto;
+            $validationData['city_residence'] = $request->city_residence_auto;
+        } else {
+            // En mode manuel, s'assurer que les champs auto sont vides pour la validation
+            $validationData['country_residence_auto'] = null;
+            $validationData['city_residence_auto'] = null;
+        }
+
+        $validator = Validator::make($validationData, [
             'name' => [
                 'required',
                 'string',
@@ -43,7 +59,7 @@ class ProfileController extends Controller
             'last_name' => 'nullable|string|max:255',
             'birth_date' => 'nullable|date|before:today',
             'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
-            'country_residence' => 'required|string|max:255',
+            'country_residence' => 'nullable|string|max:255',
             'destination_country' => [
                 'nullable', 
                 'string', 
@@ -71,6 +87,11 @@ class ProfileController extends Controller
             ],
             'share_location' => 'nullable|boolean',
             'share_location_hidden' => 'nullable|boolean',
+            'is_public_profile' => 'nullable|boolean',
+            'country_residence_auto' => 'nullable|string|max:255',
+            'city_residence_auto' => 'nullable|string|max:255',
+            'detected_latitude' => 'nullable|numeric',
+            'detected_longitude' => 'nullable|numeric',
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
@@ -92,6 +113,7 @@ class ProfileController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
+
 
         // Gérer l'avatar avec gestion d'erreurs sécurisée
         $avatarPath = $user->avatar; // Conserver l'avatar actuel par défaut
@@ -119,11 +141,29 @@ class ProfileController extends Controller
             return back()->withErrors(['avatar' => 'Erreur lors du traitement de l\'image.'])->withInput();
         }
 
-        // Déterminer si on utilise le mode automatique ou manuel
-        $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
+        // Déterminer le pays et la ville selon le mode disponible
+        $country = null;
+        $city = null;
         
-        $country = $useAutoMode ? $request->country_residence_auto : $request->country_residence;
-        $city = $useAutoMode ? $request->city_residence_auto : $request->city_residence;
+        if ($useAutoMode && $request->filled('country_residence_auto')) {
+            $country = $request->country_residence_auto;
+            $city = $request->city_residence_auto;
+        } elseif ($request->filled('country_residence')) {
+            $country = $request->country_residence;
+            $city = $request->city_residence;
+        } else {
+            // Garder les valeurs actuelles si aucun nouveau pays n'est spécifié
+            $country = $user->country_residence;
+            $city = $user->city_residence;
+        }
+        
+        // Gérer la logique de la checkbox share_location (peut être désactivée)
+        $shareLocation = false;
+        if ($request->has('share_location') && $request->boolean('share_location')) {
+            $shareLocation = true;
+        } elseif ($request->has('share_location_hidden') && $request->boolean('share_location_hidden')) {
+            $shareLocation = true;
+        }
         
         // Mettre à jour les informations de l'utilisateur
         $updateData = [
@@ -145,10 +185,11 @@ class ProfileController extends Controller
             'twitter_username' => $request->twitter_username,
             'facebook_username' => $request->facebook_username,
             'telegram_username' => $request->telegram_username,
-            'is_visible_on_map' => $request->boolean('share_location', $request->boolean('share_location_hidden', false)),
+            'is_visible_on_map' => $shareLocation,
+            'is_public_profile' => $request->boolean('is_public_profile', false),
         ];
 
-        // Récupérer les coordonnées
+        // Récupérer les coordonnées seulement si des nouvelles données sont fournies
         if ($useAutoMode && $request->filled('detected_latitude') && $request->filled('detected_longitude')) {
             // Mode automatique : utiliser les coordonnées détectées directement
             $updateData['latitude'] = $request->detected_latitude;
@@ -167,6 +208,7 @@ class ProfileController extends Controller
                 ]);
             }
         }
+        // Si aucune nouvelle donnée de localisation n'est fournie, garder les coordonnées actuelles
 
         // Ajouter le nouveau mot de passe s'il est fourni
         if ($request->filled('new_password')) {
