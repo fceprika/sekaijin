@@ -346,6 +346,23 @@
                                             </div>
                                         </label>
                                     </div>
+                                    
+                                    <!-- Visibilité du profil -->
+                                    <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                        <label class="flex items-start cursor-pointer">
+                                            <input id="is_public_profile" name="is_public_profile" type="checkbox" value="1"
+                                                class="w-5 h-5 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2 mt-0.5 mr-3">
+                                            <div>
+                                                <span class="text-base font-medium text-yellow-800">👁️ Profil public accessible à tous</span>
+                                                <p class="text-sm text-yellow-700 mt-1">
+                                                    Permettez aux personnes non connectées de voir votre profil public. Si cette option est désactivée, seuls les membres connectés pourront voir votre profil.
+                                                </p>
+                                                <p class="text-xs text-gray-600 mt-2">
+                                                    <span class="text-blue-600">🔗</span> URL de votre profil : <span class="font-mono text-xs"><span id="profile-url-base"></span>/membre/<span id="profile-url-preview" class="font-bold">votre-pseudo</span></span>
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
 
                             </div>
@@ -412,6 +429,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordConfirmInput = document.getElementById('password_confirmation_step1');
     const avatarInput = document.getElementById('avatar');
     const avatarPreview = document.getElementById('avatar-preview');
+    
+    // Initialiser l'URL de base au chargement
+    updateProfileUrlPreview();
     
     // Navigation entre étapes
     function showStep2(userData) {
@@ -553,6 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const takenIcon = document.getElementById('username-taken');
         
         updateAvatarPreview();
+        updateProfileUrlPreview();
         
         if (username.length < 3) {
             statusDiv.classList.add('hidden');
@@ -597,6 +618,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = nameInput.value || 'Avatar';
         if (!avatarInput.files || avatarInput.files.length === 0) {
             avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3B82F6&color=fff&size=80`;
+        }
+    }
+    
+    function updateProfileUrlPreview() {
+        const username = nameInput.value.trim();
+        const previewElement = document.getElementById('profile-url-preview');
+        const baseUrlElement = document.getElementById('profile-url-base');
+        
+        // Mettre à jour l'URL de base
+        if (baseUrlElement) {
+            baseUrlElement.textContent = window.location.origin;
+        }
+        
+        // Mettre à jour le pseudo
+        if (previewElement) {
+            if (username) {
+                // Convertir en slug (minuscules, remplacer espaces par tirets)
+                const slug = username.toLowerCase().replace(/[^a-z0-9._-]/g, '');
+                previewElement.textContent = slug || 'votre-pseudo';
+            } else {
+                previewElement.textContent = 'votre-pseudo';
+            }
         }
     }
     

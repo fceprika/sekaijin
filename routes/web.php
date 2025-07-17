@@ -69,7 +69,7 @@ Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showReg
 Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/inscription/enrichir-profil', [App\Http\Controllers\AuthController::class, 'enrichProfile'])->name('enrich.profile')->middleware('auth');
 Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
-Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:20,1');
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
 // API Routes with rate limiting

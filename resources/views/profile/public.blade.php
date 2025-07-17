@@ -2,8 +2,63 @@
 
 @section('title', 'Profil de ' . $user->name . ' - Sekaijin')
 
+@section('head')
+    @if(!$user->is_public_profile)
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="googlebot" content="noindex, nofollow">
+    @else
+        <!-- SEO Meta Tags pour profils publics -->
+        <meta name="description" content="Profil de {{ $user->name }}, {{ $user->getRoleDisplayName() }} de la communauté Sekaijin{{ $user->country_residence ? ' résidant en ' . $user->country_residence : '' }}{{ $user->bio ? '. ' . Str::limit(strip_tags($user->bio), 120) : '' }}">
+        <meta name="keywords" content="expatrié français, {{ $user->name }}, {{ $user->country_residence }}, Sekaijin, communauté française, profil expatrié">
+        <meta name="author" content="{{ $user->name }}">
+        
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:type" content="profile">
+        <meta property="og:title" content="Profil de {{ $user->name }} - Sekaijin">
+        <meta property="og:description" content="Découvrez le profil de {{ $user->name }}, membre de la communauté Sekaijin{{ $user->country_residence ? ' résidant en ' . $user->country_residence : '' }}">
+        <meta property="og:url" content="{{ $user->getPublicProfileUrl() }}">
+        <meta property="og:image" content="{{ $user->getAvatarUrl() }}">
+        <meta property="og:site_name" content="Sekaijin">
+        
+        <!-- Twitter Card Meta Tags -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="Profil de {{ $user->name }} - Sekaijin">
+        <meta name="twitter:description" content="Découvrez le profil de {{ $user->name }}, membre de la communauté Sekaijin{{ $user->country_residence ? ' résidant en ' . $user->country_residence : '' }}">
+        <meta name="twitter:image" content="{{ $user->getAvatarUrl() }}">
+        
+        <!-- Structured Data (JSON-LD) -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "name": "{{ $user->name }}",
+            "description": "{{ $user->bio ? strip_tags($user->bio) : 'Membre de la communauté Sekaijin' }}",
+            "image": "{{ $user->getAvatarUrl() }}",
+            "url": "{{ $user->getPublicProfileUrl() }}",
+            @if($user->country_residence)
+            "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "{{ $user->country_residence }}"
+                @if($user->city_residence)
+                ,"addressLocality": "{{ $user->city_residence }}"
+                @endif
+            },
+            @endif
+            "memberOf": {
+                "@type": "Organization",
+                "name": "Sekaijin",
+                "url": "{{ url('/') }}"
+            }
+        }
+        </script>
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="{{ url($user->getPublicProfileUrl()) }}">
+    @endif
+@endsection
+
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12">
+<div class="min-h-screen bg-gray-50 py-12" itemscope itemtype="https://schema.org/Person">
     <div class="max-w-4xl mx-auto px-4">
         <!-- Header Section -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
@@ -16,12 +71,13 @@
                         <div class="flex-shrink-0">
                             <img class="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover" 
                                  src="{{ $user->getAvatarUrl() }}" 
-                                 alt="Avatar de {{ $user->name }}">
+                                 alt="Avatar de {{ $user->name }}"
+                                 itemprop="image">
                         </div>
                         
                         <!-- Info utilisateur -->
                         <div class="flex-1">
-                            <h1 class="text-2xl md:text-3xl font-bold mb-3">{{ $user->name }}</h1>
+                            <h1 class="text-2xl md:text-3xl font-bold mb-3" itemprop="name">{{ $user->name }}</h1>
                             
                             <!-- Badges -->
                             <div class="flex flex-wrap items-center gap-2 mb-2">

@@ -49,6 +49,7 @@ class User extends Authenticatable
         'latitude', // Needed for map  
         'longitude', // Needed for map
         'city_detected', // Needed for map
+        'is_public_profile',
     ];
 
     /**
@@ -73,6 +74,7 @@ class User extends Authenticatable
         'is_verified' => 'boolean',
         'password' => 'hashed',
         'is_visible_on_map' => 'boolean',
+        'is_public_profile' => 'boolean',
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
     ];
