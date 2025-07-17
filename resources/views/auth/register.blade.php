@@ -350,7 +350,7 @@
                                     <!-- Visibilité du profil -->
                                     <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                         <label class="flex items-start cursor-pointer">
-                                            <input id="is_public_profile" name="is_public_profile" type="checkbox" value="1" checked
+                                            <input id="is_public_profile" name="is_public_profile" type="checkbox" value="1"
                                                 class="w-5 h-5 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2 mt-0.5 mr-3">
                                             <div>
                                                 <span class="text-base font-medium text-yellow-800">👁️ Profil public accessible à tous</span>

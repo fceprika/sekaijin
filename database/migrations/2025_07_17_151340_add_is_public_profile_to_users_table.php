@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_public_profile')->default(true)->after('is_visible_on_map');
+            $table->boolean('is_public_profile')->default(false)->after('is_visible_on_map');
             $table->index('is_public_profile');
         });
     }
