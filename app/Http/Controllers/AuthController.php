@@ -119,6 +119,7 @@ class AuthController extends Controller
             'country_residence' => 'nullable|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'share_location' => 'nullable|boolean',
+            'is_public_profile' => 'nullable|boolean',
             'initial_latitude' => 'nullable|numeric|between:-90,90',
             'initial_longitude' => 'nullable|numeric|between:-180,180',
         ], [
@@ -166,6 +167,7 @@ class AuthController extends Controller
             'country_residence' => $country,
             'city_residence' => $city,
             'is_visible_on_map' => $request->boolean('share_location', false),
+            'is_public_profile' => $request->boolean('is_public_profile', false),
         ];
         
         // Récupérer les coordonnées
