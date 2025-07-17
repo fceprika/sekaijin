@@ -331,6 +331,46 @@
                         </div>
                     </div>
 
+                    <!-- Visibilité du profil -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                        <h2 class="text-xl font-semibold text-yellow-800 mb-6 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            👁️ Visibilité du profil
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input id="is_public_profile" name="is_public_profile" type="checkbox" value="1" 
+                                           {{ old('is_public_profile', $user->is_public_profile) ? 'checked' : '' }}
+                                           class="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2">
+                                </div>
+                                <div class="ml-3">
+                                    <label for="is_public_profile" class="text-sm font-medium text-yellow-800">
+                                        Profil public accessible à tous
+                                    </label>
+                                    <p class="text-xs text-yellow-600 mt-1">
+                                        Permettez aux personnes non connectées de voir votre profil public. 
+                                        Si cette option est désactivée, seuls les membres connectés pourront voir votre profil.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Information sur l'URL du profil -->
+                            <div class="mt-4 p-4 bg-white rounded-lg border border-yellow-200">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">🔗 URL de votre profil :</span>
+                                    <a href="{{ $user->getPublicProfileUrl() }}" class="text-blue-600 hover:text-blue-800 ml-1" target="_blank">
+                                        {{ url($user->getPublicProfileUrl()) }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Réseaux sociaux -->
                     <div class="bg-gray-50 rounded-xl p-6">
                         <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">

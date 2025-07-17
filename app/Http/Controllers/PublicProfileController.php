@@ -11,17 +11,17 @@ class PublicProfileController extends Controller
 {
     public function show($name)
     {
-        // Vérifier si l'utilisateur est connecté
-        if (!auth()->check()) {
-            return redirect()->route('member.invitation');
-        }
-        
         // Recherche optimisée avec le champ indexé name_slug
         $slug = strtolower(trim($name));
         $user = User::where('name_slug', $slug)->first();
         
         if (!$user) {
             abort(404, 'Membre introuvable');
+        }
+        
+        // Vérifier si le profil est public ou si l'utilisateur est connecté
+        if (!$user->is_public_profile && !auth()->check()) {
+            return redirect()->route('member.invitation');
         }
         
         // Redirection canonique vers l'URL en minuscules si nécessaire
