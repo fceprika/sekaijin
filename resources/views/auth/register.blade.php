@@ -358,7 +358,7 @@
                                                     Permettez aux personnes non connectées de voir votre profil public. Si cette option est désactivée, seuls les membres connectés pourront voir votre profil.
                                                 </p>
                                                 <p class="text-xs text-gray-600 mt-2">
-                                                    <span class="text-blue-600">🔗</span> URL de votre profil : <span class="font-mono text-xs">http://localhost:8000/membre/<span id="profile-url-preview" class="font-bold">votre-pseudo</span></span>
+                                                    <span class="text-blue-600">🔗</span> URL de votre profil : <span class="font-mono text-xs"><span id="profile-url-base"></span>/membre/<span id="profile-url-preview" class="font-bold">votre-pseudo</span></span>
                                                 </p>
                                             </div>
                                         </label>
@@ -429,6 +429,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordConfirmInput = document.getElementById('password_confirmation_step1');
     const avatarInput = document.getElementById('avatar');
     const avatarPreview = document.getElementById('avatar-preview');
+    
+    // Initialiser l'URL de base au chargement
+    updateProfileUrlPreview();
     
     // Navigation entre étapes
     function showStep2(userData) {
@@ -621,6 +624,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateProfileUrlPreview() {
         const username = nameInput.value.trim();
         const previewElement = document.getElementById('profile-url-preview');
+        const baseUrlElement = document.getElementById('profile-url-base');
+        
+        // Mettre à jour l'URL de base
+        if (baseUrlElement) {
+            baseUrlElement.textContent = window.location.origin;
+        }
+        
+        // Mettre à jour le pseudo
         if (previewElement) {
             if (username) {
                 // Convertir en slug (minuscules, remplacer espaces par tirets)

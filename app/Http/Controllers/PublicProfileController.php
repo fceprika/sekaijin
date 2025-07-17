@@ -19,8 +19,8 @@ class PublicProfileController extends Controller
             abort(404, 'Membre introuvable');
         }
         
-        // Vérifier si le profil est public ou si l'utilisateur est connecté
-        if (!$user->is_public_profile && !auth()->check()) {
+        // Vérifier si le profil est public ou si l'utilisateur est connecté ET autorisé
+        if (!$user->is_public_profile && (!auth()->check() || auth()->id() !== $user->id)) {
             return redirect()->route('member.invitation');
         }
         

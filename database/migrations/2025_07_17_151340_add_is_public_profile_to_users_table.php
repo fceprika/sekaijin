@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->boolean('is_public_profile')->default(true)->after('is_visible_on_map');
+            $table->index('is_public_profile');
         });
     }
 
@@ -22,6 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropIndex(['is_public_profile']);
             $table->dropColumn('is_public_profile');
         });
     }

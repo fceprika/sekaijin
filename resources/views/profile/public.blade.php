@@ -2,6 +2,13 @@
 
 @section('title', 'Profil de ' . $user->name . ' - Sekaijin')
 
+@section('head')
+    @if(!$user->is_public_profile)
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="googlebot" content="noindex, nofollow">
+    @endif
+@endsection
+
 @section('content')
 <div class="min-h-screen bg-gray-50 py-12">
     <div class="max-w-4xl mx-auto px-4">
