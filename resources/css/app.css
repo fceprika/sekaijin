@@ -182,3 +182,32 @@
     padding: 0;
     color: #111827;
 }
+
+/* Form Change Tracker Styles */
+.field-changed {
+    @apply border-orange-400 ring-2 ring-orange-200;
+}
+
+.change-indicator {
+    @apply text-orange-600 font-medium text-xs;
+    animation: pulse 2s infinite;
+}
+
+.form-no-changes .submit-btn {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+.form-has-changes .submit-btn {
+    @apply opacity-100 cursor-pointer;
+}
+
+/* Animation subtile pour les champs modifiés */
+@keyframes field-highlight {
+    0% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(251, 146, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0); }
+}
+
+.field-changed {
+    animation: field-highlight 1s ease-out;
+}

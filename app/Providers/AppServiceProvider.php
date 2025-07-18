@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Set Carbon locale to French for date formatting
+        Carbon::setLocale('fr');
+        
         // Register Blade directives for role checking
         Blade::directive('role', function ($role) {
             return "<?php if(auth()->check() && auth()->user()->isRole($role)): ?>";

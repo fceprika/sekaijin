@@ -95,21 +95,19 @@
                                         placeholder="votre@email.fr">
                                 </div>
 
-                                <!-- Pays d'intérêt (forcé à Thaïlande pour le moment) -->
-                                <input type="hidden" id="destination_country" name="destination_country" value="Thaïlande">
-                                
-                                <!-- Message informatif -->
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <div class="flex items-center">
-                                        <span class="text-2xl mr-3">🇹🇭</span>
-                                        <div>
-                                            <p class="text-blue-800 font-medium">Destination : Thaïlande</p>
-                                            <p class="text-blue-700 text-sm mt-1">
-                                                Rejoignez notre communauté d'expatriés français en Thaïlande. 
-                                                D'autres destinations seront bientôt disponibles !
-                                            </p>
-                                        </div>
-                                    </div>
+                                <!-- Pays d'intérêt (optionnel) -->
+                                <div class="form-group">
+                                    <label for="interest_country" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Pays d'intérêt <span class="text-gray-500 text-xs">(optionnel)</span>
+                                    </label>
+                                    <select id="interest_country" name="interest_country"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                        <option value="">Sélectionnez un pays qui vous intéresse</option>
+                                        @foreach(\App\Models\Country::orderBy('name_fr')->get() as $country)
+                                            <option value="{{ $country->name_fr }}">{{ $country->emoji }} {{ $country->name_fr }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Quel pays vous intéresse le plus pour votre expatriation ?</p>
                                 </div>
 
                                 <!-- Mot de passe -->
@@ -424,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Éléments du formulaire
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
-    const destinationCountryInput = document.getElementById('destination_country');
+    const destinationCountryInput = document.getElementById('interest_country');
     const passwordInput = document.getElementById('password_step1');
     const passwordConfirmInput = document.getElementById('password_confirmation_step1');
     const avatarInput = document.getElementById('avatar');

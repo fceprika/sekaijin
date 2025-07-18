@@ -30,10 +30,32 @@
                 </div>
             </div>
 
-            <!-- Messages de succès/erreur -->
+            <!-- Messages de succès/erreur/info -->
             @if (session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 m-6 rounded-lg">
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('info'))
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-4 m-6 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        {{ session('info') }}
+                    </div>
+                </div>
+            @endif
+
+            @if (session('location_warning'))
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-6 py-4 m-6 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        {{ session('location_warning') }}
+                    </div>
                 </div>
             @endif
 
@@ -169,6 +191,30 @@
                             Localisation
                         </h2>
                         
+                        <!-- Champs cachés pour préserver les valeurs actuelles -->
+                        <input type="hidden" name="current_country_residence" value="{{ $user->country_residence }}">
+                        <input type="hidden" name="current_city_residence" value="{{ $user->city_residence }}">
+                        
+                        <!-- Affichage de la localisation actuelle si elle existe -->
+                        @if($user->country_residence || $user->city_residence)
+                            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">📍 Localisation actuelle :</p>
+                                        <p class="text-blue-700 mt-1">
+                                            @if($user->city_residence)
+                                                {{ $user->city_residence }}, 
+                                            @endif
+                                            {{ $user->country_residence ?? 'Non défini' }}
+                                        </p>
+                                    </div>
+                                    <p class="text-xs text-blue-600">
+                                        Cliquez sur un bouton ci-dessous pour modifier
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
+                        
                         <!-- Message de géolocalisation -->
                         <div id="geolocation-message" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                             <div class="flex items-center">
@@ -264,15 +310,22 @@
                             </div>
                         </div>
                         
-                        <!-- Pays de destination (si résidence en France) -->
-                        <div id="destination-country-container" class="mt-6" style="display: none;">
-                            <label for="destination_country" class="block text-sm font-medium text-gray-700 mb-2">Pays de destination souhaité</label>
-                            <select id="destination_country" name="destination_country"
+                        <!-- Pays d'intérêt -->
+                        <div id="interest-country-container" class="mt-6">
+                            <label for="interest_country" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pays d'intérêt <span class="text-gray-500 text-xs">(optionnel)</span>
+                            </label>
+                            <select id="interest_country" name="interest_country"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                <option value="">Sélectionnez votre pays de destination</option>
-                                @include('partials.countries', ['selected' => old('destination_country', $user->destination_country), 'exclude' => 'France'])
+                                <option value="">Sélectionnez un pays qui vous intéresse</option>
+                                @foreach(\App\Models\Country::orderBy('name_fr')->get() as $country)
+                                    <option value="{{ $country->name_fr }}" 
+                                        {{ old('interest_country', $user->interest_country) == $country->name_fr ? 'selected' : '' }}>
+                                        {{ $country->emoji }} {{ $country->name_fr }}
+                                    </option>
+                                @endforeach
                             </select>
-                            <p class="text-xs text-gray-500 mt-1">Où souhaitez-vous vous expatrier ?</p>
+                            <p class="text-xs text-gray-500 mt-1">Quel pays vous intéresse le plus pour votre expatriation ?</p>
                         </div>
                     </div>
 
@@ -573,607 +626,198 @@
     </div>
 </div>
 
-<script src="/js/geolocation.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
-    const countryResidence = document.getElementById('country_residence');
-    const destinationContainer = document.getElementById('destination-country-container');
-    
-    // Fonction pour afficher/masquer le champ destination
-    function toggleDestinationCountry() {
-        if (countryResidence.value === 'France') {
-            destinationContainer.style.display = 'block';
-        } else {
-            destinationContainer.style.display = 'none';
-            document.getElementById('destination_country').value = '';
-        }
-    }
-    
-    // Écouter les changements
-    countryResidence.addEventListener('change', function() {
-        toggleDestinationCountry();
-        loadCitiesForCountry(this.value);
-    });
-    
-    // Vérifier au chargement
-    toggleDestinationCountry();
-    
-    // Fonction pour charger les villes dynamiquement
-    function loadCitiesForCountry(countryName) {
-        const citySelect = document.getElementById('city_residence');
-        const cityLoading = document.getElementById('city-loading');
-        
-        if (!countryName) {
-            citySelect.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
-            citySelect.disabled = true;
-            cityLoading.classList.add('hidden');
-            updateLocationSharingState();
+    // Attendre que les modules soient chargés
+    function initializeComponents() {
+        if (typeof ProfileLocationManager === 'undefined' || typeof FormChangeTracker === 'undefined') {
+            setTimeout(initializeComponents, 100);
             return;
         }
         
-        // Activer le champ ville et afficher le loading
-        citySelect.disabled = false;
-        citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
-        cityLoading.classList.remove('hidden');
+        // Initialiser le gestionnaire de localisation
+        const locationManager = new ProfileLocationManager();
         
-        // Appel AJAX pour récupérer les villes
-        fetch('/api/cities', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ country: countryName })
-        })
-        .then(response => response.json())
-        .then(data => {
-            cityLoading.classList.add('hidden');
-            citySelect.innerHTML = '<option value="">Choisissez une ville</option>';
-            
-            if (data.success && data.cities && data.cities.length > 0) {
-                data.cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    citySelect.appendChild(option);
-                });
-                
-                // Restaurer la valeur sélectionnée si elle existe
-                const currentCity = '{{ old('city_residence', $user->city_residence) }}';
-                if (currentCity) {
-                    citySelect.value = currentCity;
-                }
-            } else {
-                citySelect.innerHTML = '<option value="">Aucune ville trouvée</option>';
-            }
-            
-            // Vérifier l'état de la checkbox après chargement
-            updateLocationSharingState();
-        })
-        .catch(error => {
-            console.error('Erreur lors du chargement des villes:', error);
-            cityLoading.classList.add('hidden');
-            citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
-            updateLocationSharingState();
-        });
-    }
-    
-    // Initialiser les villes au chargement si l'utilisateur a déjà un pays de résidence
-    if (countryResidence.value) {
-        loadCitiesForCountry(countryResidence.value);
-    }
-    
-    // Fonction pour mettre à jour l'état de la checkbox de partage de localisation
-    function updateLocationSharingState() {
-        const citySelect = document.getElementById('city_residence');
-        const shareLocationCheckbox = document.getElementById('share_location');
-        const shareLocationHidden = document.getElementById('share_location_hidden');
-        const locationRequirement = document.getElementById('location-requirement');
-        
-        // Vérifier si on est en mode automatique
-        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
-        const hasDetectedLocation = document.getElementById('detected-city-value').value !== '';
-        
-        // Vérifier si des coordonnées sont disponibles
-        const hasDetectedCoordinates = document.getElementById('detected-latitude') && document.getElementById('detected-latitude').value !== '';
-        const hasManualCity = citySelect && citySelect.value && citySelect.value !== '';
-        
-        // Vérifier si l'utilisateur a déjà des données de localisation existantes (depuis la base de données)
-        const hasExistingLocation = {{ ($user->latitude && $user->longitude) ? 'true' : 'false' }};
-        
-        // Activer la checkbox si : ville sélectionnée OU mode automatique avec coordonnées détectées OU données existantes
-        const shouldActivateCheckbox = hasManualCity || (isAutoMode && (hasDetectedLocation || hasDetectedCoordinates)) || hasExistingLocation;
-        
-        if (shouldActivateCheckbox) {
-            shareLocationCheckbox.disabled = false;
-            locationRequirement.classList.add('hidden');
-            
-            // Auto-cocher la checkbox seulement si :
-            // 1. On vient de détecter des coordonnées (pas de données existantes)
-            // 2. OU on a sélectionné une ville manuellement
-            // 3. ET la checkbox n'est pas déjà cochée
-            // 4. ET on n'a pas de préférence utilisateur sauvegardée
-            const isFirstTimeDetection = (hasDetectedCoordinates || hasManualCity) && !hasExistingLocation;
-            if (isFirstTimeDetection && !shareLocationCheckbox.checked) {
-                shareLocationCheckbox.checked = true;
-            }
-        } else {
-            shareLocationCheckbox.disabled = true;
-            locationRequirement.classList.remove('hidden');
-        }
-        
-        // Synchroniser le champ caché avec la checkbox
-        shareLocationHidden.value = shareLocationCheckbox.checked ? '1' : '0';
-    }
-    
-    // Écouter les changements sur la checkbox pour synchroniser le champ caché
-    document.getElementById('share_location').addEventListener('change', function() {
-        const shareLocationHidden = document.getElementById('share_location_hidden');
-        shareLocationHidden.value = this.checked ? '1' : '0';
-    });
-    
-    // Écouter les changements sur le select de ville
-    document.getElementById('city_residence').addEventListener('change', updateLocationSharingState);
-    
-    // Charger les villes au chargement initial si un pays est sélectionné
-    if (countryResidence.value) {
-        loadCitiesForCountry(countryResidence.value);
-    } else {
-        // Si aucun pays n'est sélectionné, s'assurer que la checkbox est désactivée
-        updateLocationSharingState();
-    }
-    
-    // Logique des nouveaux boutons de mode
-    const autoLocationBtn = document.getElementById('auto-location-btn');
-    const manualLocationBtn = document.getElementById('manual-location-btn');
-    const autoLocationIcon = document.getElementById('auto-location-icon');
-    const autoLocationText = document.getElementById('auto-location-text');
-    
-    // Fonction pour mettre à jour l'état visuel des boutons
-    function updateButtonStates() {
-        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
-        const isManualMode = !document.getElementById('manual-location-section').classList.contains('hidden');
-        
-        if (isAutoMode) {
-            // Mode automatique actif - couleur vive + ring
-            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-green-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-blue-300';
-            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-400 to-red-400 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
-        } else if (isManualMode) {
-            // Mode manuel actif - couleur vive + ring
-            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-400 to-green-400 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-500 hover:to-green-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
-            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-red-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-orange-300';
-        } else {
-            // Aucun mode actif (état initial) - couleurs attractives par défaut
-            autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transition duration-200 flex items-center justify-center shadow-md';
-            manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition duration-200 flex items-center justify-center shadow-md';
-        }
-    }
-    
-    // Géolocalisation automatique
-    if (autoLocationBtn) {
-        autoLocationBtn.addEventListener('click', async function() {
-            if (!navigator.geolocation) {
-                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
-                return;
-            }
-
-            autoLocationIcon.textContent = '⏳';
-            autoLocationText.textContent = 'Localisation en cours...';
-            autoLocationBtn.disabled = true;
-
-            try {
-                // Use the same geolocation logic as the registration page
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(
-                        resolve,
-                        reject,
-                        {
-                            enableHighAccuracy: false,
-                            timeout: 10000,
-                            maximumAge: 300000 // 5 minutes cache
-                        }
-                    );
-                });
-
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-
-                // Use internal API to avoid CSP issues
-                const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
-
-                if (!response.ok) {
-                    throw new Error('Erreur de géocodage');
-                }
-
-                const data = await response.json();
-                
-                if (!data.success || !data.city || !data.countryName) {
-                    throw new Error('Impossible de déterminer votre localisation');
-                }
-
-                const city = data.city;
-                const countryDisplayName = data.countryName;
-                
-                // Basculer vers le mode automatique avec les données détectées
-                switchToAutoMode(countryDisplayName, city, lat, lng);
-
-                autoLocationIcon.textContent = '✅';
-                autoLocationText.textContent = 'Position détectée';
-                autoLocationBtn.disabled = false;
-                
-                // Mettre à jour l'état visuel des boutons
-                updateButtonStates();
-
-            } catch (error) {
-                console.warn('Erreur de géolocalisation:', error);
-                autoLocationIcon.textContent = '❌';
-                autoLocationText.textContent = 'Erreur de localisation';
-                autoLocationBtn.disabled = false;
-                
-                // Show user-friendly error message
-                let errorMessage = 'Erreur de localisation';
-                if (error.code === 1) {
-                    errorMessage = 'Autorisation refusée';
-                } else if (error.code === 2) {
-                    errorMessage = 'Position indisponible';
-                } else if (error.code === 3) {
-                    errorMessage = 'Délai dépassé';
-                }
-                autoLocationText.textContent = errorMessage;
-            }
-        });
-    }
-    
-    // Saisie manuelle
-    if (manualLocationBtn) {
-        manualLocationBtn.addEventListener('click', function() {
-            switchToManualMode();
-            updateButtonStates();
-        });
-    }
-    
-    
-    // Gestion de l'aperçu de l'avatar dans le profil
-    const avatarInput = document.getElementById('avatar');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const removeAvatarCheckbox = document.querySelector('input[name="remove_avatar"]');
-    const originalAvatarSrc = avatarPreview.src;
-    
-    // Prévisualiser l'image uploadée
-    if (avatarInput) {
-        avatarInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // Vérifier la taille du fichier (100KB max)
-                if (file.size > 100 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
-                    this.value = '';
-                    return;
-                }
-                
-                // Vérifier le type de fichier
-                if (!file.type.match('image.*')) {
-                    alert('Veuillez sélectionner un fichier image.');
-                    this.value = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    avatarPreview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-                
-                // Décocher la suppression si un nouveau fichier est sélectionné
-                if (removeAvatarCheckbox) {
-                    removeAvatarCheckbox.checked = false;
-                }
-            } else {
-                // Revenir à l'avatar original
-                avatarPreview.src = originalAvatarSrc;
-            }
-        });
-    }
-    
-    // Gérer la case à cocher "Supprimer l'avatar"
-    if (removeAvatarCheckbox) {
-        removeAvatarCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                // Afficher un aperçu de l'avatar par défaut
-                const userName = document.getElementById('name').value || 'Avatar';
-                avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3B82F6&color=fff&size=80`;
-                // Vider l'input file
-                if (avatarInput) {
-                    avatarInput.value = '';
-                }
-            } else {
-                // Revenir à l'avatar original
-                avatarPreview.src = originalAvatarSrc;
-            }
-        });
-    }
-    
-    // Gestion interactive du upload d'avatar (réutilise avatarInput déjà déclaré)
-    const avatarUploadDiv = avatarInput?.parentNode;
-    
-    if (avatarInput && avatarUploadDiv) {
-        // Mettre à jour le texte quand un fichier est sélectionné
-        avatarInput.addEventListener('change', function() {
-            const file = this.files[0];
-            const fileName = file?.name;
-            const textElement = avatarUploadDiv.querySelector('p.text-sm');
-            
-            if (file) {
-                // Vérifier la taille du fichier (100KB max)
-                if (file.size > 100 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
-                    this.value = '';
-                    // Revenir à l'apparence normale
-                    if (textElement) {
-                        textElement.textContent = 'Choisir une image';
-                        textElement.classList.remove('text-green-600');
-                        textElement.classList.add('text-blue-600');
-                    }
-                    const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-                    if (uploadDiv) {
-                        uploadDiv.classList.remove('border-green-300', 'bg-green-50');
-                        uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
-                    }
-                    return;
-                }
-                
-                // Vérifier le type de fichier
-                if (!file.type.match('image.*')) {
-                    alert('Veuillez sélectionner un fichier image.');
-                    this.value = '';
-                    return;
-                }
-            }
-            
-            if (fileName) {
-                if (textElement) {
-                    textElement.textContent = fileName;
-                    textElement.classList.remove('text-blue-600');
-                    textElement.classList.add('text-green-600');
-                }
-                // Changer l'apparence pour montrer qu'un fichier est sélectionné
-                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-                if (uploadDiv) {
-                    uploadDiv.classList.remove('border-blue-300', 'bg-blue-50');
-                    uploadDiv.classList.add('border-green-300', 'bg-green-50');
-                }
-            } else {
-                if (textElement) {
-                    textElement.textContent = 'Choisir une image';
-                    textElement.classList.remove('text-green-600');
-                    textElement.classList.add('text-blue-600');
-                }
-                // Revenir à l'apparence normale
-                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-                if (uploadDiv) {
-                    uploadDiv.classList.remove('border-green-300', 'bg-green-50');
-                    uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
-                }
-            }
+        // Initialiser le tracker de changements
+        const changeTracker = new FormChangeTracker('form[action="{{ route('profile.update') }}"]', {
+            excludeFields: ['_token', 'avatar', 'remove_avatar'],
+            showVisualIndicators: true
         });
         
-        // Effet de survol drag & drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            avatarUploadDiv.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            avatarUploadDiv.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            avatarUploadDiv.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-            if (uploadDiv) {
-                uploadDiv.classList.add('border-blue-500', 'bg-blue-200');
-            }
-        }
-        
-        function unhighlight() {
-            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-            if (uploadDiv) {
-                uploadDiv.classList.remove('border-blue-500', 'bg-blue-200');
-            }
-        }
-        
-        avatarUploadDiv.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length > 0) {
-                const file = files[0];
-                
-                // Vérification immédiate pour le drag & drop
-                if (file.size > 100 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
-                    return;
-                }
-                
-                if (!file.type.match('image.*')) {
-                    alert('Veuillez sélectionner un fichier image.');
-                    return;
-                }
-                
-                avatarInput.files = files;
-                avatarInput.dispatchEvent(new Event('change'));
-            }
-        }
-    }
-    
-    // Fonctions de basculement entre modes manuel/automatique
-    function switchToAutoMode(country, city, lat, lng) {
-        // Masquer mode manuel
-        document.getElementById('manual-location-section').classList.add('hidden');
-        
-        // Retirer l'attribut required du select pays en mode manuel
-        document.getElementById('country_residence').removeAttribute('required');
-        
-        // Afficher mode auto avec données
-        document.getElementById('auto-location-section').classList.remove('hidden');
-        document.getElementById('detected-country-display').value = country;
-        document.getElementById('detected-city-display').value = city;
-        
-        // Remplir champs cachés
-        document.getElementById('detected-country-value').value = country;
-        document.getElementById('detected-city-value').value = city;
-        document.getElementById('detected-latitude').value = lat;
-        document.getElementById('detected-longitude').value = lng;
-        
-        // Activer checkbox localisation
-        updateLocationSharingState();
-        
-        // Mettre à jour l'état visuel des boutons
-        updateButtonStates();
-    }
-
-    function switchToManualMode() {
-        // Afficher mode manuel
-        document.getElementById('manual-location-section').classList.remove('hidden');
-        
-        // Ajouter l'attribut required au select pays en mode manuel
-        document.getElementById('country_residence').setAttribute('required', 'required');
-        
-        // Masquer mode auto
-        document.getElementById('auto-location-section').classList.add('hidden');
-        
-        // Vider champs cachés
-        document.getElementById('detected-country-value').value = '';
-        document.getElementById('detected-city-value').value = '';
-        document.getElementById('detected-latitude').value = '';
-        document.getElementById('detected-longitude').value = '';
-        
-        // Réinitialiser les dropdowns manuels seulement si pas de valeur existante
-        if (!countryResidence.value) {
-            countryResidence.value = '';
-            cityResidence.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
-            cityResidence.disabled = true;
-        } else {
-            // Si un pays est déjà sélectionné, charger les villes correspondantes
-            loadCitiesForCountry(countryResidence.value);
-        }
-        
-        // Réinitialiser checkbox
-        updateLocationSharingState();
-        
-        // Mettre à jour l'état visuel des boutons
-        updateButtonStates();
-    }
-    
-    // Event listener pour le bouton "Modifier manuellement"
-    const editManualLocationBtn = document.getElementById('edit-manual-location');
-    if (editManualLocationBtn) {
-        editManualLocationBtn.addEventListener('click', switchToManualMode);
-    }
-    
-    // Gestion du bouton de suppression de la localisation
-    const clearLocationBtn = document.getElementById('clear-location-btn');
-    if (clearLocationBtn) {
-        clearLocationBtn.addEventListener('click', function() {
-            if (confirm('Êtes-vous sûr de vouloir supprimer toutes vos données de localisation ? Cette action ne peut pas être annulée.')) {
-                clearLocationData();
-            }
-        });
-    }
-    
-    // Fonction pour supprimer les données de localisation
-    async function clearLocationData() {
-        try {
-            // Désactiver le bouton pendant la requête
-            if (clearLocationBtn) {
-                clearLocationBtn.disabled = true;
-                clearLocationBtn.innerHTML = '<svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Suppression...';
-            }
-            
-            const response = await fetch('/profile/clear-location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
+        // Écouter les changements du formulaire
+        const form = document.querySelector('form[action="{{ route('profile.update') }}"]');
+        if (form) {
+            form.addEventListener('formChanged', function(e) {
+                const { hasChanges, changedFields, changedCount } = e.detail;
+                // Les changements sont maintenant détectés silencieusement
             });
             
-            const data = await response.json();
-            
-            if (data.success) {
-                // Masquer la section "Localisation active"
-                const currentLocationInfo = document.getElementById('current-location-info');
-                if (currentLocationInfo) {
-                    currentLocationInfo.style.display = 'none';
+            // Intercepter la soumission pour ne traiter que les champs modifiés
+            form.addEventListener('submit', function(e) {
+                if (!changeTracker.hasChanges()) {
+                    e.preventDefault();
+                    alert('Aucun changement détecté. Rien à sauvegarder.');
+                    return false;
                 }
                 
-                // Réinitialiser la checkbox
-                const shareLocationCheckbox = document.getElementById('share_location');
-                if (shareLocationCheckbox) {
-                    shareLocationCheckbox.checked = false;
-                    shareLocationCheckbox.disabled = true;
-                }
+                // Ajouter les champs modifiés en tant que données cachées
+                const changedFields = changeTracker.getChangedFields();
                 
-                // Réinitialiser les modes
-                document.getElementById('auto-location-section').classList.add('hidden');
-                document.getElementById('manual-location-section').classList.add('hidden');
-                
-                // Vider les champs
-                document.getElementById('detected-country-value').value = '';
-                document.getElementById('detected-city-value').value = '';
-                document.getElementById('detected-latitude').value = '';
-                document.getElementById('detected-longitude').value = '';
-                
-                // Réinitialiser l'état des boutons
-                updateButtonStates();
-                updateLocationSharingState();
-                
-                // Afficher un message de succès
-                alert('Vos données de localisation ont été supprimées avec succès.');
-                
-            } else {
-                throw new Error(data.message || 'Erreur lors de la suppression');
-            }
-            
-        } catch (error) {
-            console.error('Erreur lors de la suppression:', error);
-            alert('Une erreur est survenue lors de la suppression. Veuillez réessayer.');
-        } finally {
-            // Réactiver le bouton
-            if (clearLocationBtn) {
-                clearLocationBtn.disabled = false;
-                clearLocationBtn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>Supprimer';
-            }
+                // Créer un champ caché avec la liste des champs modifiés
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'changed_fields';
+                hiddenInput.value = JSON.stringify(changedFields);
+                form.appendChild(hiddenInput);
+            });
         }
-    }
-    
-    // Initialiser l'état visuel des boutons au chargement
-    updateButtonStates();
-    
-    // Initialiser l'état required des champs selon le mode actuel
-    function initializeRequiredState() {
-        const isAutoMode = !document.getElementById('auto-location-section').classList.contains('hidden');
-        const isManualMode = !document.getElementById('manual-location-section').classList.contains('hidden');
         
-        if (isAutoMode) {
-            document.getElementById('country_residence').removeAttribute('required');
-        } else if (isManualMode) {
-            document.getElementById('country_residence').setAttribute('required', 'required');
+        // Hook avec le gestionnaire de localisation pour détecter les changements de localisation
+        if (window.ProfileLocationManager) {
+            // Surcharger les méthodes de changement de mode pour trigger le change tracker
+            const originalSwitchToAutoMode = locationManager.switchToAutoMode;
+            const originalSwitchToManualMode = locationManager.switchToManualMode;
+            
+            locationManager.switchToAutoMode = function(...args) {
+                const result = originalSwitchToAutoMode.apply(this, args);
+                // Donner un délai pour que les champs soient remplis
+                setTimeout(() => changeTracker.checkAllFields(), 100);
+                return result;
+            };
+            
+            locationManager.switchToManualMode = function(...args) {
+                const result = originalSwitchToManualMode.apply(this, args);
+                // Donner un délai pour que les champs soient remplis
+                setTimeout(() => changeTracker.checkAllFields(), 100);
+                return result;
+            };
+        }
+        
+        // Gestion de l'aperçu de l'avatar dans le profil
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const removeAvatarCheckbox = document.querySelector('input[name="remove_avatar"]');
+        const originalAvatarSrc = avatarPreview.src;
+        
+        // Prévisualiser l'image uploadée
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // Vérifier la taille du fichier (100KB max)
+                    if (file.size > 100 * 1024) {
+                        alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    // Vérifier le type de fichier
+                    if (!file.type.match('image.*')) {
+                        alert('Veuillez sélectionner un fichier image.');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    // Décocher la suppression si un nouveau fichier est sélectionné
+                    if (removeAvatarCheckbox) {
+                        removeAvatarCheckbox.checked = false;
+                    }
+                } else {
+                    // Remettre l'image originale si aucun fichier
+                    avatarPreview.src = originalAvatarSrc;
+                }
+            });
+        }
+
+        // Gérer la case à cocher de suppression d'avatar
+        if (removeAvatarCheckbox) {
+            removeAvatarCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Montrer une image par défaut ou vide
+                    avatarPreview.src = '/images/default-avatar.svg';
+                    // Vider le champ de fichier
+                    if (avatarInput) {
+                        avatarInput.value = '';
+                    }
+                } else {
+                    // Remettre l'image originale
+                    avatarPreview.src = originalAvatarSrc;
+                }
+            });
+        }
+
+        // Support drag & drop pour l'avatar
+        const avatarUploadDiv = document.getElementById('avatar-upload');
+        if (avatarUploadDiv) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                avatarUploadDiv.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                avatarUploadDiv.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                avatarUploadDiv.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                if (uploadDiv) {
+                    uploadDiv.classList.add('border-blue-500', 'bg-blue-200');
+                }
+            }
+            
+            function unhighlight() {
+                const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
+                if (uploadDiv) {
+                    uploadDiv.classList.remove('border-blue-500', 'bg-blue-200');
+                }
+            }
+            
+            avatarUploadDiv.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    const file = files[0];
+                    
+                    // Vérification immédiate pour le drag & drop
+                    if (file.size > 100 * 1024) {
+                        alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                        return;
+                    }
+                    
+                    if (!file.type.match('image.*')) {
+                        alert('Veuillez sélectionner un fichier image.');
+                        return;
+                    }
+                    
+                    avatarInput.files = files;
+                    avatarInput.dispatchEvent(new Event('change'));
+                }
+            }
         }
     }
     
-    // Initialiser l'état au chargement
-    initializeRequiredState();
+    // Initialiser les composants
+    initializeComponents();
 });
 </script>
+
+@vite(['resources/js/profile-location.js', 'resources/js/form-change-tracker.js'])
 
 @endsection
