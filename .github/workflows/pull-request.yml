@@ -81,8 +81,9 @@ jobs:
 
     - name: Setup environment
       run: |
+        cp .env.testing.example .env.testing
+        php artisan key:generate --env=testing
         cp .env.testing .env
-        php artisan key:generate
         echo "DB_HOST=127.0.0.1" >> .env
         echo "DB_PORT=3306" >> .env
         echo "DB_DATABASE=sekaijin_test" >> .env
