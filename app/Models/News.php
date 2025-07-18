@@ -31,7 +31,7 @@ class News extends Model
     ];
 
     /**
-     * Get the country that owns the news
+     * Get the country that owns the news.
      */
     public function country()
     {
@@ -39,7 +39,7 @@ class News extends Model
     }
 
     /**
-     * Get the author of the news
+     * Get the author of the news.
      */
     public function author()
     {
@@ -47,17 +47,17 @@ class News extends Model
     }
 
     /**
-     * Scope for published news
+     * Scope for published news.
      */
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
-                     ->whereNotNull('published_at')
-                     ->where('published_at', '<=', now());
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
     }
 
     /**
-     * Scope for featured news
+     * Scope for featured news.
      */
     public function scopeFeatured($query)
     {
@@ -65,7 +65,7 @@ class News extends Model
     }
 
     /**
-     * Scope for a specific country
+     * Scope for a specific country.
      */
     public function scopeForCountry($query, $countryId)
     {
@@ -73,21 +73,21 @@ class News extends Model
     }
 
     /**
-     * Generate a unique slug from title
+     * Generate a unique slug from title.
      */
     public static function generateSlug($title, $id = null)
     {
         $baseSlug = \Illuminate\Support\Str::slug($title);
         $slug = $baseSlug;
         $counter = 1;
-        
-        while (self::where('slug', $slug)->when($id, function($query, $id) {
+
+        while (self::where('slug', $slug)->when($id, function ($query, $id) {
             return $query->where('id', '!=', $id);
         })->exists()) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
         }
-        
+
         return $slug;
     }
 
@@ -100,55 +100,56 @@ class News extends Model
     }
 
     /**
-     * Boot the model events
+     * Boot the model events.
      */
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($news) {
             if (empty($news->slug)) {
                 $news->slug = self::generateSlug($news->title);
             }
         });
-        
+
         static::updating(function ($news) {
             // Regenerate slug if title changed OR if slug is empty OR if force update is requested
             if ($news->isDirty('title') && (empty($news->slug) || $news->shouldForceSlugUpdate())) {
                 $news->slug = self::generateSlug($news->title, $news->id);
             }
         });
-        
+
         // Invalidate content cache when news is created, updated, or deleted
         static::created(function ($news) {
             \App\Services\ContentCacheService::invalidateContentCache();
         });
-        
+
         static::updated(function ($news) {
             \App\Services\ContentCacheService::invalidateContentCache();
         });
-        
+
         static::deleted(function ($news) {
             \App\Services\ContentCacheService::invalidateContentCache();
         });
     }
-    
+
     /**
-     * Temporary flag for forcing slug update (not persisted to DB)
+     * Temporary flag for forcing slug update (not persisted to DB).
      */
     private $forceSlugUpdateFlag = false;
-    
+
     /**
-     * Force slug regeneration on next save
+     * Force slug regeneration on next save.
      */
     public function forceSlugUpdate()
     {
         $this->forceSlugUpdateFlag = true;
+
         return $this;
     }
-    
+
     /**
-     * Check if force slug update is requested
+     * Check if force slug update is requested.
      */
     public function shouldForceSlugUpdate()
     {
@@ -156,7 +157,7 @@ class News extends Model
     }
 
     /**
-     * Get users who favorited this news
+     * Get users who favorited this news.
      */
     public function favoritedBy()
     {
@@ -164,7 +165,7 @@ class News extends Model
     }
 
     /**
-     * Get favorites for this news
+     * Get favorites for this news.
      */
     public function favorites()
     {
@@ -172,12 +173,14 @@ class News extends Model
     }
 
     /**
-     * Check if this news is favorited by a specific user
+     * Check if this news is favorited by a specific user.
      */
     public function isFavoritedBy(?\App\Models\User $user): bool
     {
-        if (!$user) return false;
-        
+        if (! $user) {
+            return false;
+        }
+
         return $this->favorites()
             ->where('user_id', $user->id)
             ->exists();

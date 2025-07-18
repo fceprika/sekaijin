@@ -30,7 +30,7 @@ class UpdateArticleRequest extends FormRequest
                 'string',
                 'max:255',
                 'regex:/^[a-z0-9-]+$/',
-                Rule::unique('articles', 'slug')->ignore($this->route('article')->id)
+                Rule::unique('articles', 'slug')->ignore($this->route('article')->id),
             ],
             'excerpt' => 'required|string|max:500',
             'content' => 'required|string|min:200',

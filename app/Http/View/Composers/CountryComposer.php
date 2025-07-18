@@ -4,8 +4,8 @@ namespace App\Http\View\Composers;
 
 use App\Models\Country;
 use App\Models\User;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\View\View;
 
 class CountryComposer
 {
@@ -25,20 +25,22 @@ class CountryComposer
             if ($count >= 1000) {
                 return number_format($count / 1000, 0) . 'K+';
             }
+
             return $count;
         });
 
         $totalCountries = Cache::remember('total_countries_with_members', 3600, function () {
             $count = User::whereNotNull('country_residence')
-                        ->distinct('country_residence')
-                        ->count('country_residence');
+                ->distinct('country_residence')
+                ->count('country_residence');
+
             return $count . '+';
         });
 
         $view->with([
             'allCountries' => $allCountries,
             'totalMembers' => $totalMembers,
-            'totalCountries' => $totalCountries
+            'totalCountries' => $totalCountries,
         ]);
     }
 }

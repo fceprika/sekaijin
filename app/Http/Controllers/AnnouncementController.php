@@ -7,7 +7,6 @@ use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class AnnouncementController extends Controller
 {
@@ -37,8 +36,12 @@ class AnnouncementController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
         }
 
         // Tri
@@ -77,6 +80,7 @@ class AnnouncementController extends Controller
     public function create()
     {
         $countries = Country::orderBy('name_fr')->get();
+
         return view('announcements.create', compact('countries'));
     }
 
@@ -92,7 +96,7 @@ class AnnouncementController extends Controller
             'city' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'expiration_date' => 'nullable|date|after:today'
+            'expiration_date' => 'nullable|date|after:today',
         ]);
 
         $validated['user_id'] = Auth::id();
@@ -124,8 +128,8 @@ class AnnouncementController extends Controller
     public function show(Announcement $announcement)
     {
         // Vérifier si l'annonce est visible
-        if (!$announcement->isActive() && 
-            (!Auth::check() || !$announcement->canBeEditedBy(Auth::user()))) {
+        if (! $announcement->isActive() &&
+            (! Auth::check() || ! $announcement->canBeEditedBy(Auth::user()))) {
             abort(404);
         }
 
@@ -145,17 +149,18 @@ class AnnouncementController extends Controller
 
     public function edit(Announcement $announcement)
     {
-        if (!$announcement->canBeEditedBy(Auth::user())) {
+        if (! $announcement->canBeEditedBy(Auth::user())) {
             abort(403);
         }
 
         $countries = Country::orderBy('name_fr')->get();
+
         return view('announcements.edit', compact('announcement', 'countries'));
     }
 
     public function update(Request $request, Announcement $announcement)
     {
-        if (!$announcement->canBeEditedBy(Auth::user())) {
+        if (! $announcement->canBeEditedBy(Auth::user())) {
             abort(403);
         }
 
@@ -171,7 +176,7 @@ class AnnouncementController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'expiration_date' => 'nullable|date|after:today',
             'remove_images' => 'nullable|array',
-            'remove_images.*' => 'string'
+            'remove_images.*' => 'string',
         ]);
 
         // Gestion de la suppression d'images
@@ -209,7 +214,7 @@ class AnnouncementController extends Controller
 
     public function destroy(Announcement $announcement)
     {
-        if (!$announcement->canBeEditedBy(Auth::user())) {
+        if (! $announcement->canBeEditedBy(Auth::user())) {
             abort(403);
         }
 

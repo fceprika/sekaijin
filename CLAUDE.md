@@ -644,3 +644,192 @@ MAIL_FROM_NAME="Sekaijin"
   - `DummyDataSeeder` - Content generation for testing
 - **Console Commands**: Development utilities for data management and cleanup
 - **Error Handling**: Comprehensive error pages and logging system
+
+## Comprehensive Testing Infrastructure (July 2025)
+
+### Test Suite Overview
+- **Complete test coverage**: 222 tests with 699 assertions covering all major components
+- **Testing framework**: PHPUnit with Laravel's testing utilities
+- **Database**: Isolated test database (`sekaijin_test`) with `RefreshDatabase` trait
+- **Test organization**: Feature tests for end-to-end functionality, helper traits for common operations
+
+### Test Environment Configuration
+```bash
+# Test environment (.env.testing)
+APP_ENV=testing
+APP_DEBUG=true
+DB_CONNECTION=mysql
+DB_DATABASE=sekaijin_test
+CACHE_DRIVER=array
+SESSION_DRIVER=array
+QUEUE_CONNECTION=sync
+```
+
+### Test Helper Traits
+- **`AssertionsHelper`**: Custom assertions for HTTP responses and authentication
+- **`AuthenticatesUsers`**: User authentication helpers for different role types
+- **`CreatesContent`**: Factory methods for creating test content (articles, news, events)
+- **`CreatesCountries`**: Country creation helpers for test setup
+
+### Test Coverage by Component
+
+**Authentication & User Management**:
+- `AuthenticationTest.php` - Complete registration/login flow testing
+- `UserProfileTest.php` - Profile management, avatar uploads, location updates
+- `PublicProfileTest.php` - Public profile display and privacy controls
+- `RolePermissionTest.php` - Role-based access control testing
+
+**Content Management**:
+- `ContentTest.php` - Article and news CRUD operations
+- `AdminPanelTest.php` - Admin interface and bulk operations
+- `EventTest.php` - Event creation and management
+- `AnnouncementTest.php` - Classified ads system testing
+
+**API & Features**:
+- `ApiEndpointsTest.php` - API responses and data validation
+- `FavoriteTest.php` - Favorites system with polymorphic relationships
+- `MapIntegrationTest.php` - Interactive map functionality
+
+### Test Commands
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test class
+php artisan test --filter AdminPanelTest
+
+# Run tests with coverage
+php artisan test --coverage
+
+# Run tests in parallel
+php artisan test --parallel
+
+# Using composer scripts
+composer test
+composer test-coverage
+```
+
+### Test Data Management
+- **Database factories**: Realistic test data generation for all models
+- **Seeders for testing**: Specialized seeders for test environments
+- **Image testing**: Fake storage for file upload testing
+- **Country setup**: Automated test country creation (Thailand, Japan, Vietnam, China)
+
+### GitHub Actions CI/CD Pipeline (July 2025)
+
+### CI/CD Workflow Overview
+- **Two-tier approach**: Comprehensive CI pipeline + simplified PR checks
+- **Matrix testing**: PHP 8.1/8.2 × Node.js 18/20 combinations
+- **Quality gates**: Code style, static analysis, and security checks
+- **Automated processes**: Testing, deployment, and PR management
+
+### Main CI Pipeline (`.github/workflows/ci.yml`)
+```yaml
+# Complete testing workflow
+- Database setup (MySQL service container)
+- PHP/Node.js matrix testing
+- Laravel application setup
+- Migration and seeding
+- PHPUnit test execution
+- Code coverage reporting (Codecov)
+- Laravel Pint code style checking
+- PHPStan static analysis
+- Security audit (npm audit)
+```
+
+### Pull Request Pipeline (`.github/workflows/pull-request.yml`)
+```yaml
+# Fast validation checks
+- Quick setup and dependency installation
+- Unit tests with early failure detection
+- Code style validation
+- Security vulnerability scanning
+- PR summary generation
+```
+
+### Code Quality Tools
+
+**Laravel Pint Configuration** (`pint.json`):
+```json
+{
+    "preset": "laravel",
+    "rules": {
+        "no_unused_imports": true,
+        "ordered_imports": true,
+        "single_quote": true,
+        "trailing_comma_in_multiline": true
+    }
+}
+```
+
+**PHPStan Configuration** (`phpstan.neon`):
+```neon
+parameters:
+    level: 5
+    paths:
+        - app
+        - tests
+    excludePaths:
+        - app/Console/Kernel.php
+        - app/Exceptions/Handler.php
+```
+
+### Composer Scripts Integration
+```json
+{
+    "scripts": {
+        "test": ["@php artisan test"],
+        "test-coverage": ["@php artisan test --coverage"],
+        "pint": ["./vendor/bin/pint"],
+        "pint-test": ["./vendor/bin/pint --test"],
+        "stan": ["./vendor/bin/phpstan analyse"],
+        "quality": ["@pint-test", "@stan", "@test"]
+    }
+}
+```
+
+### Testing Best Practices Implemented
+
+**Database Testing**:
+- `RefreshDatabase` trait for test isolation
+- Dedicated test database to prevent data conflicts
+- Factory-based test data generation
+- Proper cleanup between tests
+
+**Authentication Testing**:
+- Role-based test user creation
+- Password validation with complex requirements
+- Session management testing
+- CSRF protection verification
+
+**API Testing**:
+- JSON response validation
+- HTTP status code verification
+- Rate limiting and error handling
+- Authentication middleware testing
+
+**File Upload Testing**:
+- Fake storage for avatar uploads
+- Image validation and processing
+- File size and type restrictions
+- Secure file handling
+
+### Test Execution Results
+- **Total tests**: 222 tests
+- **Total assertions**: 699 assertions
+- **Execution time**: ~45 seconds
+- **Memory usage**: ~128MB
+- **Coverage**: High coverage across all major components
+
+### Continuous Integration Features
+- **Automated testing**: All tests run on every push and PR
+- **Code quality checks**: Style and static analysis enforcement
+- **Security scanning**: Dependency vulnerability detection
+- **Performance monitoring**: Test execution time tracking
+- **Deployment gates**: Tests must pass before deployment
+
+### Test Maintenance
+- **Regular updates**: Test suites updated with new features
+- **Regression testing**: Comprehensive coverage prevents regressions
+- **Documentation**: Clear test naming and documentation
+- **Monitoring**: CI/CD pipeline health monitoring

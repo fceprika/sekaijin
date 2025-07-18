@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
-use Carbon\Carbon;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,38 +24,38 @@ class AppServiceProvider extends ServiceProvider
     {
         // Set Carbon locale to French for date formatting
         Carbon::setLocale('fr');
-        
+
         // Register Blade directives for role checking
         Blade::directive('role', function ($role) {
             return "<?php if(auth()->check() && auth()->user()->isRole($role)): ?>";
         });
 
         Blade::directive('endrole', function () {
-            return "<?php endif; ?>";
+            return '<?php endif; ?>';
         });
 
         Blade::directive('admin', function () {
-            return "<?php if(auth()->check() && auth()->user()->isAdmin()): ?>";
+            return '<?php if(auth()->check() && auth()->user()->isAdmin()): ?>';
         });
 
         Blade::directive('endadmin', function () {
-            return "<?php endif; ?>";
+            return '<?php endif; ?>';
         });
 
         Blade::directive('premium', function () {
-            return "<?php if(auth()->check() && auth()->user()->isPremium()): ?>";
+            return '<?php if(auth()->check() && auth()->user()->isPremium()): ?>';
         });
 
         Blade::directive('endpremium', function () {
-            return "<?php endif; ?>";
+            return '<?php endif; ?>';
         });
 
         Blade::directive('ambassador', function () {
-            return "<?php if(auth()->check() && auth()->user()->isAmbassador()): ?>";
+            return '<?php if(auth()->check() && auth()->user()->isAmbassador()): ?>';
         });
 
         Blade::directive('endambassador', function () {
-            return "<?php endif; ?>";
+            return '<?php endif; ?>';
         });
 
         // Register view composers for performance optimization

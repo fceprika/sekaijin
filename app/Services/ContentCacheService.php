@@ -2,34 +2,34 @@
 
 namespace App\Services;
 
+use App\Models\Article;
 use App\Models\Country;
-use App\Models\News;
-use App\Models\Article; 
 use App\Models\Event;
+use App\Models\News;
 use Illuminate\Support\Facades\Cache;
 
 class ContentCacheService
 {
     /**
-     * Cache duration for content (15 minutes)
+     * Cache duration for content (15 minutes).
      */
     const CONTENT_CACHE_DURATION = 15 * 60;
-    
+
     /**
-     * Get cached content for all countries to avoid cache fragmentation
+     * Get cached content for all countries to avoid cache fragmentation.
      */
     public static function getAllCountriesContent()
     {
         return Cache::remember('content.all_countries', self::CONTENT_CACHE_DURATION, function () {
             $countries = Country::all();
             $content = [];
-            
+
             foreach ($countries as $country) {
                 $content[$country->slug] = [
                     'country' => $country,
                     'news' => News::where('country_id', $country->id)
                         ->where('is_published', true)
-                        ->with(['author' => function($query) {
+                        ->with(['author' => function ($query) {
                             $query->select('id', 'name', 'avatar', 'is_verified');
                         }])
                         ->select('id', 'title', 'slug', 'excerpt', 'content', 'category', 'author_id', 'created_at')
@@ -38,7 +38,7 @@ class ContentCacheService
                         ->get(),
                     'articles' => Article::where('country_id', $country->id)
                         ->where('is_published', true)
-                        ->with(['author' => function($query) {
+                        ->with(['author' => function ($query) {
                             $query->select('id', 'name', 'avatar', 'is_verified');
                         }])
                         ->select('id', 'title', 'slug', 'excerpt', 'content', 'category', 'author_id', 'created_at')
@@ -47,7 +47,7 @@ class ContentCacheService
                         ->get(),
                     'events' => Event::where('country_id', $country->id)
                         ->where('is_published', true)
-                        ->with(['organizer' => function($query) {
+                        ->with(['organizer' => function ($query) {
                             $query->select('id', 'name', 'is_verified');
                         }])
                         ->select('id', 'title', 'description', 'start_date', 'location', 'is_online', 'organizer_id')
@@ -57,22 +57,23 @@ class ContentCacheService
                         ->get(),
                 ];
             }
-            
+
             \Log::info('All countries content cached', [
                 'countries_count' => count($content),
-                'cache_key' => 'content.all_countries'
+                'cache_key' => 'content.all_countries',
             ]);
-            
+
             return $content;
         });
     }
-    
+
     /**
-     * Get content for specific country from cache
+     * Get content for specific country from cache.
      */
     public static function getCountryContent($countrySlug)
     {
         $allContent = self::getAllCountriesContent();
+
         return $allContent[$countrySlug] ?? [
             'country' => null,
             'news' => collect(),
@@ -80,25 +81,25 @@ class ContentCacheService
             'events' => collect(),
         ];
     }
-    
+
     /**
-     * Get Thailand content (for homepage)
+     * Get Thailand content (for homepage).
      */
     public static function getThailandContent()
     {
         return self::getCountryContent('thailande');
     }
-    
+
     /**
-     * Clear content cache
+     * Clear content cache.
      */
     public static function clearCache()
     {
         Cache::forget('content.all_countries');
     }
-    
+
     /**
-     * Invalidate cache when content is created/updated/deleted
+     * Invalidate cache when content is created/updated/deleted.
      */
     public static function invalidateContentCache()
     {

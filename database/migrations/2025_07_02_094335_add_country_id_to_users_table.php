@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -34,13 +34,13 @@ return new class extends Migration
     }
 
     /**
-     * Populate country_id values based on existing country_residence names
+     * Populate country_id values based on existing country_residence names.
      */
     private function populateCountryIds(): void
     {
         // Get all countries for mapping
         $countries = DB::table('countries')->get()->keyBy('name_fr');
-        
+
         // Update users with matching country_id
         foreach ($countries as $country) {
             DB::table('users')

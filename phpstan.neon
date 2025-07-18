@@ -1,0 +1,18 @@
+parameters:
+    level: 5
+    paths:
+        - app
+        - config
+        - database
+        - routes
+    excludePaths:
+        - app/Console/Commands
+        - database/migrations
+        - database/seeders
+    ignoreErrors:
+        - '#Call to an undefined method App\\Models\\User::[a-zA-Z0-9\\_]+\(\)#'
+        - '#Access to an undefined property App\\Models\\User::\$[a-zA-Z0-9\\_]+#'
+        - '#Parameter \#1 \$callback of method Illuminate\\Support\\Collection::map\(\) expects callable\(mixed, int\|string\): mixed, Closure\(App\\Models\\[a-zA-Z0-9\\_]+\): mixed given#'
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false

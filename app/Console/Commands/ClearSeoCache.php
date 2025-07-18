@@ -23,11 +23,11 @@ class ClearSeoCache extends Command
     public function handle()
     {
         $this->info('Clearing SEO caches...');
-        
+
         // Clear sitemap cache
         Cache::forget('sitemap.xml');
         $this->line('✓ Sitemap cache cleared');
-        
+
         // Clear any other SEO-related caches
         $seoKeys = [
             'meta.homepage',
@@ -35,15 +35,15 @@ class ClearSeoCache extends Command
             'meta.contact',
             'structured_data.homepage',
         ];
-        
+
         foreach ($seoKeys as $key) {
             Cache::forget($key);
         }
-        
+
         $this->line('✓ Meta tags cache cleared');
-        
+
         $this->info('All SEO caches cleared successfully!');
-        
+
         return 0;
     }
 }

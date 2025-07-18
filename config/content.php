@@ -14,27 +14,27 @@ return [
         'témoignage' => [
             'label' => 'Témoignage',
             'color' => 'bg-blue-100 text-blue-800',
-            'description' => 'Expériences personnelles et récits d\'expatriation'
+            'description' => 'Expériences personnelles et récits d\'expatriation',
         ],
         'guide-pratique' => [
             'label' => 'Guide pratique',
             'color' => 'bg-green-100 text-green-800',
-            'description' => 'Conseils pratiques pour la vie à l\'étranger'
+            'description' => 'Conseils pratiques pour la vie à l\'étranger',
         ],
         'travail' => [
             'label' => 'Travail',
             'color' => 'bg-purple-100 text-purple-800',
-            'description' => 'Carrière et opportunités professionnelles'
+            'description' => 'Carrière et opportunités professionnelles',
         ],
         'lifestyle' => [
             'label' => 'Lifestyle',
             'color' => 'bg-yellow-100 text-yellow-800',
-            'description' => 'Mode de vie et culture locale'
+            'description' => 'Mode de vie et culture locale',
         ],
         'cuisine' => [
             'label' => 'Cuisine',
             'color' => 'bg-orange-100 text-orange-800',
-            'description' => 'Gastronomie et spécialités culinaires'
+            'description' => 'Gastronomie et spécialités culinaires',
         ],
     ],
 
@@ -51,22 +51,22 @@ return [
         'administrative' => [
             'label' => 'Administratif',
             'color' => 'bg-gray-100 text-gray-800',
-            'description' => 'Démarches administratives et réglementations'
+            'description' => 'Démarches administratives et réglementations',
         ],
         'vie-pratique' => [
             'label' => 'Vie pratique',
             'color' => 'bg-blue-100 text-blue-800',
-            'description' => 'Informations utiles du quotidien'
+            'description' => 'Informations utiles du quotidien',
         ],
         'culture' => [
             'label' => 'Culture',
             'color' => 'bg-purple-100 text-purple-800',
-            'description' => 'Événements culturels et traditions locales'
+            'description' => 'Événements culturels et traditions locales',
         ],
         'economie' => [
             'label' => 'Économie',
             'color' => 'bg-green-100 text-green-800',
-            'description' => 'Actualités économiques et financières'
+            'description' => 'Actualités économiques et financières',
         ],
     ],
 
@@ -83,27 +83,27 @@ return [
         'networking' => [
             'label' => 'Networking',
             'color' => 'bg-blue-100 text-blue-800',
-            'description' => 'Rencontres professionnelles et réseautage'
+            'description' => 'Rencontres professionnelles et réseautage',
         ],
         'social' => [
             'label' => 'Social',
             'color' => 'bg-green-100 text-green-800',
-            'description' => 'Événements sociaux et rencontres amicales'
+            'description' => 'Événements sociaux et rencontres amicales',
         ],
         'culture' => [
             'label' => 'Culture',
             'color' => 'bg-purple-100 text-purple-800',
-            'description' => 'Activités culturelles et artistiques'
+            'description' => 'Activités culturelles et artistiques',
         ],
         'sport' => [
             'label' => 'Sport',
             'color' => 'bg-orange-100 text-orange-800',
-            'description' => 'Activités sportives et bien-être'
+            'description' => 'Activités sportives et bien-être',
         ],
         'education' => [
             'label' => 'Éducation',
             'color' => 'bg-yellow-100 text-yellow-800',
-            'description' => 'Formations et ateliers éducatifs'
+            'description' => 'Formations et ateliers éducatifs',
         ],
     ],
 

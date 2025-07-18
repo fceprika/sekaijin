@@ -25,7 +25,7 @@ class EventPolicy
         if ($event->is_published) {
             return true;
         }
-        
+
         // Organizers can view their own unpublished events
         return $user && $event->organizer_id === $user->id;
     }
@@ -48,7 +48,7 @@ class EventPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Organizers can only update their own events
         return $event->organizer_id === $user->id;
     }
@@ -62,7 +62,7 @@ class EventPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Organizers can only delete their own events
         return $event->organizer_id === $user->id;
     }
@@ -103,7 +103,7 @@ class EventPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Organizers can publish/unpublish their own events
         return $event->organizer_id === $user->id;
     }
@@ -117,7 +117,7 @@ class EventPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Organizers can manage participants for their own events
         return $event->organizer_id === $user->id;
     }

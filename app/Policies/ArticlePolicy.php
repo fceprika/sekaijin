@@ -25,7 +25,7 @@ class ArticlePolicy
         if ($article->is_published) {
             return true;
         }
-        
+
         // Authors can view their own unpublished articles
         return $user && $article->author_id === $user->id;
     }
@@ -48,7 +48,7 @@ class ArticlePolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Authors can only update their own articles
         return $article->author_id === $user->id;
     }
@@ -62,7 +62,7 @@ class ArticlePolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Authors can only delete their own articles
         return $article->author_id === $user->id;
     }
@@ -103,7 +103,7 @@ class ArticlePolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Authors can publish/unpublish their own articles
         return $article->author_id === $user->id;
     }

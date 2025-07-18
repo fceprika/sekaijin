@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\Article;
-use App\Models\News;
-use App\Models\Event;
 use App\Models\Country;
+use App\Models\Event;
+use App\Models\News;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class SeoService
 {
     /**
-     * Default SEO configuration
+     * Default SEO configuration.
      */
     private array $defaultSeo = [
         'title' => 'Sekaijin - Communauté des expatriés français',
@@ -22,16 +22,16 @@ class SeoService
         'image' => '/images/sekaijin_logo.png',
         'type' => 'website',
         'locale' => 'fr_FR',
-        'site_name' => 'Sekaijin'
+        'site_name' => 'Sekaijin',
     ];
 
     /**
-     * Generate SEO data for any page
+     * Generate SEO data for any page.
      */
     public function generateSeoData(string $type, $model = null, array $customData = []): array
     {
         $seo = $this->defaultSeo;
-        
+
         switch ($type) {
             case 'home':
                 $seo = $this->getHomeSeoData();
@@ -66,7 +66,7 @@ class SeoService
         $seo['canonical'] = $seo['canonical'] ?? URL::current();
 
         // Ensure proper URL format for image
-        if (isset($seo['image']) && !str_starts_with($seo['image'], 'http')) {
+        if (isset($seo['image']) && ! str_starts_with($seo['image'], 'http')) {
             $seo['image'] = URL::to($seo['image']);
         }
 
@@ -74,7 +74,7 @@ class SeoService
     }
 
     /**
-     * Home page SEO data
+     * Home page SEO data.
      */
     private function getHomeSeoData(): array
     {
@@ -83,12 +83,12 @@ class SeoService
             'description' => 'Rejoignez plus de 25 000 expatriés français dans 150 pays. Découvrez des conseils pratiques, connectez-vous avec des compatriotes et vivez pleinement votre expérience à l\'étranger.',
             'keywords' => 'expatriés français, communauté française, expat, vivre à l\'étranger, français à l\'étranger, expatriation, communauté internationale',
             'canonical' => URL::to('/'),
-            'type' => 'website'
+            'type' => 'website',
         ];
     }
 
     /**
-     * Article SEO data
+     * Article SEO data.
      */
     private function getArticleSeoData(Article $article): array
     {
@@ -103,13 +103,13 @@ class SeoService
                 'modified_time' => $article->updated_at?->toISOString() ?? now()->toISOString(),
                 'author' => $article->author->name ?? 'Sekaijin',
                 'section' => $this->getCategoryDisplayName($article->category ?? null),
-                'tag' => [$article->category, $article->country->name_fr ?? '']
-            ]
+                'tag' => [$article->category, $article->country->name_fr ?? ''],
+            ],
         ];
     }
 
     /**
-     * News SEO data
+     * News SEO data.
      */
     private function getNewsSeoData(News $news): array
     {
@@ -124,13 +124,13 @@ class SeoService
                 'modified_time' => $news->updated_at?->toISOString() ?? now()->toISOString(),
                 'author' => $news->author->name ?? 'Sekaijin',
                 'section' => 'Actualités',
-                'tag' => [$news->category, $news->country->name_fr ?? '']
-            ]
+                'tag' => [$news->category, $news->country->name_fr ?? ''],
+            ],
         ];
     }
 
     /**
-     * Event SEO data
+     * Event SEO data.
      */
     private function getEventSeoData(Event $event): array
     {
@@ -144,13 +144,13 @@ class SeoService
                 'start_time' => $event->start_date?->toISOString(),
                 'end_time' => $event->end_date?->toISOString(),
                 'location' => $event->location,
-                'organizer' => $event->organizer->name ?? 'Sekaijin'
-            ]
+                'organizer' => $event->organizer->name ?? 'Sekaijin',
+            ],
         ];
     }
 
     /**
-     * Country SEO data
+     * Country SEO data.
      */
     private function getCountrySeoData(Country $country): array
     {
@@ -159,12 +159,12 @@ class SeoService
             'description' => "Découvrez la communauté française en {$country->name_fr}. Actualités, conseils pratiques, événements et témoignages d'expatriés français.",
             'keywords' => "expatriés français {$country->name_fr}, français en {$country->name_fr}, communauté française {$country->name_fr}, vivre en {$country->name_fr}",
             'canonical' => URL::to("/{$country->slug}"),
-            'type' => 'website'
+            'type' => 'website',
         ];
     }
 
     /**
-     * Profile SEO data
+     * Profile SEO data.
      */
     private function getProfileSeoData(User $user): array
     {
@@ -174,12 +174,12 @@ class SeoService
             'keywords' => "profil {$user->name}, expatrié français, membre Sekaijin",
             'canonical' => URL::to("/membre/{$user->name}"),
             'type' => 'profile',
-            'image' => $user->avatar ? URL::to("/storage/{$user->avatar}") : '/images/default-avatar.png'
+            'image' => $user->avatar ? URL::to("/storage/{$user->avatar}") : '/images/default-avatar.png',
         ];
     }
 
     /**
-     * About page SEO data
+     * About page SEO data.
      */
     private function getAboutSeoData(): array
     {
@@ -188,12 +188,12 @@ class SeoService
             'description' => 'Découvrez Sekaijin, la plateforme qui connecte les expatriés français du monde entier. Notre mission, nos valeurs et notre communauté.',
             'keywords' => 'à propos Sekaijin, communauté expatriés français, mission, valeurs, équipe',
             'canonical' => URL::to('/about'),
-            'type' => 'website'
+            'type' => 'website',
         ];
     }
 
     /**
-     * Contact page SEO data
+     * Contact page SEO data.
      */
     private function getContactSeoData(): array
     {
@@ -202,47 +202,47 @@ class SeoService
             'description' => 'Contactez l\'équipe Sekaijin. Nous sommes là pour vous accompagner dans votre expérience d\'expatriation.',
             'keywords' => 'contact Sekaijin, support, aide, équipe',
             'canonical' => URL::to('/contact'),
-            'type' => 'website'
+            'type' => 'website',
         ];
     }
 
     /**
-     * Generate keywords from content
+     * Generate keywords from content.
      */
     private function generateKeywords(?string $title, ?string $category, ?string $country): string
     {
         $keywords = [];
-        
+
         // Add base keywords
         $keywords[] = 'expatriés français';
         $keywords[] = 'communauté française';
-        
+
         // Add category
         if ($category) {
             $keywords[] = $this->getCategoryDisplayName($category);
         }
-        
+
         // Add country
         if ($country) {
             $keywords[] = "français en {$country}";
             $keywords[] = "expatriés {$country}";
         }
-        
+
         // Add title words (significant ones)
         if ($title) {
             $titleWords = str_word_count(strtolower($title), 1, 'àáâãäåæçèéêëìíîïñòóôõöøùúûüýÿ');
-            $significantWords = array_filter($titleWords, function($word) {
-                return strlen($word) > 3 && !in_array($word, ['dans', 'pour', 'avec', 'cette', 'tout', 'tous', 'leur', 'leurs', 'mais', 'plus', 'très', 'bien', 'après', 'avant']);
+            $significantWords = array_filter($titleWords, function ($word) {
+                return strlen($word) > 3 && ! in_array($word, ['dans', 'pour', 'avec', 'cette', 'tout', 'tous', 'leur', 'leurs', 'mais', 'plus', 'très', 'bien', 'après', 'avant']);
             });
-            
+
             $keywords = array_merge($keywords, array_slice($significantWords, 0, 3));
         }
-        
+
         return implode(', ', array_unique($keywords));
     }
 
     /**
-     * Get category display name
+     * Get category display name.
      */
     private function getCategoryDisplayName(?string $category): string
     {
@@ -255,18 +255,18 @@ class SeoService
             'administrative' => 'Administratif',
             'vie-pratique' => 'Vie Pratique',
             'culture' => 'Culture',
-            'economie' => 'Économie'
+            'economie' => 'Économie',
         ];
-        
-        if (!$category) {
+
+        if (! $category) {
             return 'Général';
         }
-        
+
         return $categories[$category] ?? ucfirst($category);
     }
 
     /**
-     * Generate JSON-LD structured data
+     * Generate JSON-LD structured data.
      */
     public function generateStructuredData(string $type, $model = null): array
     {
@@ -279,8 +279,8 @@ class SeoService
             'sameAs' => [
                 'https://facebook.com/sekaijin',
                 'https://twitter.com/sekaijin',
-                'https://instagram.com/sekaijin'
-            ]
+                'https://instagram.com/sekaijin',
+            ],
         ];
 
         switch ($type) {
@@ -298,7 +298,7 @@ class SeoService
     }
 
     /**
-     * Article structured data
+     * Article structured data.
      */
     private function getArticleStructuredData(Article $article): array
     {
@@ -310,27 +310,27 @@ class SeoService
             'image' => URL::to('/images/sekaijin_logo.png'),
             'author' => [
                 '@type' => 'Person',
-                'name' => $article->author->name ?? 'Sekaijin'
+                'name' => $article->author->name ?? 'Sekaijin',
             ],
             'publisher' => [
                 '@type' => 'Organization',
                 'name' => 'Sekaijin',
                 'logo' => [
                     '@type' => 'ImageObject',
-                    'url' => URL::to('/images/sekaijin_logo.png')
-                ]
+                    'url' => URL::to('/images/sekaijin_logo.png'),
+                ],
             ],
             'datePublished' => $article->published_at?->toISOString(),
             'dateModified' => $article->updated_at?->toISOString() ?? now()->toISOString(),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
-                '@id' => URL::to("/article/{$article->id}")
-            ]
+                '@id' => URL::to("/article/{$article->id}"),
+            ],
         ];
     }
 
     /**
-     * News structured data
+     * News structured data.
      */
     private function getNewsStructuredData(News $news): array
     {
@@ -342,27 +342,27 @@ class SeoService
             'image' => URL::to('/images/sekaijin_logo.png'),
             'author' => [
                 '@type' => 'Person',
-                'name' => $news->author->name ?? 'Sekaijin'
+                'name' => $news->author->name ?? 'Sekaijin',
             ],
             'publisher' => [
                 '@type' => 'Organization',
                 'name' => 'Sekaijin',
                 'logo' => [
                     '@type' => 'ImageObject',
-                    'url' => URL::to('/images/sekaijin_logo.png')
-                ]
+                    'url' => URL::to('/images/sekaijin_logo.png'),
+                ],
             ],
             'datePublished' => $news->published_at?->toISOString(),
             'dateModified' => $news->updated_at?->toISOString() ?? now()->toISOString(),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
-                '@id' => URL::to("/news/{$news->id}")
-            ]
+                '@id' => URL::to("/news/{$news->id}"),
+            ],
         ];
     }
 
     /**
-     * Event structured data
+     * Event structured data.
      */
     private function getEventStructuredData(Event $event): array
     {
@@ -375,21 +375,21 @@ class SeoService
             'endDate' => $event->end_date?->toISOString(),
             'organizer' => [
                 '@type' => 'Person',
-                'name' => $event->organizer->name ?? 'Sekaijin'
+                'name' => $event->organizer->name ?? 'Sekaijin',
             ],
-            'url' => URL::to("/event/{$event->id}")
+            'url' => URL::to("/event/{$event->id}"),
         ];
 
-        if ($event->location && !$event->is_online) {
+        if ($event->location && ! $event->is_online) {
             $data['location'] = [
                 '@type' => 'Place',
                 'name' => $event->location,
-                'address' => $event->address
+                'address' => $event->address,
             ];
         } elseif ($event->is_online) {
             $data['location'] = [
                 '@type' => 'VirtualLocation',
-                'url' => $event->online_link
+                'url' => $event->online_link,
             ];
         }
 
@@ -397,7 +397,7 @@ class SeoService
             $data['offers'] = [
                 '@type' => 'Offer',
                 'price' => $event->price,
-                'priceCurrency' => 'EUR'
+                'priceCurrency' => 'EUR',
             ];
         }
 
@@ -405,7 +405,7 @@ class SeoService
     }
 
     /**
-     * Profile structured data
+     * Profile structured data.
      */
     private function getProfileStructuredData(User $user): array
     {
@@ -415,7 +415,7 @@ class SeoService
             'name' => $user->name,
             'description' => $user->bio,
             'image' => $user->avatar ? URL::to("/storage/{$user->avatar}") : URL::to('/images/default-avatar.png'),
-            'url' => URL::to("/membre/{$user->name}")
+            'url' => URL::to("/membre/{$user->name}"),
         ];
     }
 }

@@ -32,14 +32,14 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
                 'first_name',
-                'last_name', 
+                'last_name',
                 'birth_date',
                 'phone',
                 'country_residence',
                 'city_residence',
                 'bio',
                 'is_verified',
-                'last_login'
+                'last_login',
             ]);
         });
     }

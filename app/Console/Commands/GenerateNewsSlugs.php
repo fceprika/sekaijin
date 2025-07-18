@@ -28,29 +28,29 @@ class GenerateNewsSlugs extends Command
     public function handle()
     {
         $this->info('Generating slugs for news items...');
-        
+
         $newsItems = News::whereNull('slug')->orWhere('slug', '')->get();
         $count = 0;
-        
+
         foreach ($newsItems as $news) {
             $baseSlug = Str::slug($news->title);
             $slug = $baseSlug;
             $counter = 1;
-            
+
             // Ensure unique slug
             while (News::where('slug', $slug)->where('id', '!=', $news->id)->exists()) {
                 $slug = $baseSlug . '-' . $counter;
                 $counter++;
             }
-            
+
             $news->update(['slug' => $slug]);
             $count++;
-            
+
             $this->line("Generated slug for: {$news->title} -> {$slug}");
         }
-        
+
         $this->info("Generated {$count} slugs successfully!");
-        
+
         return 0;
     }
 }

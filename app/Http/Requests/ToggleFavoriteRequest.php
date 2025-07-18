@@ -30,7 +30,7 @@ class ToggleFavoriteRequest extends FormRequest
                 'min:1',
                 function ($attribute, $value, $fail) {
                     $type = $this->input('type');
-                    
+
                     if ($type === 'article') {
                         $exists = \App\Models\Article::where('id', $value)
                             ->where('is_published', true)
@@ -42,12 +42,12 @@ class ToggleFavoriteRequest extends FormRequest
                     } else {
                         $exists = false;
                     }
-                    
-                    if (!$exists) {
+
+                    if (! $exists) {
                         $fail('Le contenu sélectionné n\'existe pas ou n\'est pas publié.');
                     }
-                }
-            ]
+                },
+            ],
         ];
     }
 
@@ -72,8 +72,8 @@ class ToggleFavoriteRequest extends FormRequest
      */
     public function getModelClass(): string
     {
-        return $this->input('type') === 'article' 
-            ? \App\Models\Article::class 
+        return $this->input('type') === 'article'
+            ? \App\Models\Article::class
             : \App\Models\News::class;
     }
 
@@ -83,7 +83,7 @@ class ToggleFavoriteRequest extends FormRequest
     public function getContentItem()
     {
         $modelClass = $this->getModelClass();
-        
+
         return $modelClass::where('id', $this->input('id'))
             ->where('is_published', true)
             ->firstOrFail();

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AnnouncementStatusChanged;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\AnnouncementStatusChanged;
 
 class AnnouncementController extends Controller
 {
@@ -32,11 +32,11 @@ class AnnouncementController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                  });
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -47,7 +47,7 @@ class AnnouncementController extends Controller
             'pending' => Announcement::pending()->count(),
             'active' => Announcement::active()->count(),
             'refused' => Announcement::refused()->count(),
-            'total' => Announcement::count()
+            'total' => Announcement::count(),
         ];
 
         return view('admin.announcements.index', compact('announcements', 'stats'));
@@ -56,6 +56,7 @@ class AnnouncementController extends Controller
     public function show(Announcement $announcement)
     {
         $announcement->load('user');
+
         return view('admin.announcements.show', compact('announcement'));
     }
 
@@ -76,12 +77,12 @@ class AnnouncementController extends Controller
     public function refuse(Request $request, Announcement $announcement)
     {
         $request->validate([
-            'reason' => 'nullable|string|max:500'
+            'reason' => 'nullable|string|max:500',
         ]);
 
         $announcement->update([
             'status' => 'refused',
-            'refusal_reason' => $request->reason
+            'refusal_reason' => $request->reason,
         ]);
 
         // Envoyer un email de notification
@@ -99,7 +100,7 @@ class AnnouncementController extends Controller
         $request->validate([
             'action' => 'required|in:approve,refuse,delete',
             'announcement_ids' => 'required|array',
-            'announcement_ids.*' => 'exists:announcements,id'
+            'announcement_ids.*' => 'exists:announcements,id',
         ]);
 
         $announcements = Announcement::whereIn('id', $request->announcement_ids)->get();
@@ -109,14 +110,14 @@ class AnnouncementController extends Controller
                 foreach ($announcements as $announcement) {
                     $announcement->update(['status' => 'active']);
                 }
-                $message = count($announcements) . " annonce(s) approuvée(s).";
+                $message = count($announcements) . ' annonce(s) approuvée(s).';
                 break;
 
             case 'refuse':
                 foreach ($announcements as $announcement) {
                     $announcement->update(['status' => 'refused']);
                 }
-                $message = count($announcements) . " annonce(s) refusée(s).";
+                $message = count($announcements) . ' annonce(s) refusée(s).';
                 break;
 
             case 'delete':
@@ -129,7 +130,7 @@ class AnnouncementController extends Controller
                     }
                     $announcement->delete();
                 }
-                $message = count($announcements) . " annonce(s) supprimée(s).";
+                $message = count($announcements) . ' annonce(s) supprimée(s).';
                 break;
         }
 

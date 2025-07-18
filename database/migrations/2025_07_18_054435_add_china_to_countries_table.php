@@ -1,9 +1,7 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use App\Models\Country;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -13,22 +11,22 @@ return new class extends Migration
     public function up(): void
     {
         // Ajouter la Chine si elle n'existe pas déjà
-        if (!Country::where('slug', 'chine')->exists()) {
+        if (! Country::where('slug', 'chine')->exists()) {
             Country::create([
                 'name_fr' => 'Chine',
                 'slug' => 'chine',
                 'emoji' => '🇨🇳',
-                'description' => 'République populaire de Chine - Découvrez la vie d\'expatrié en Chine'
+                'description' => 'République populaire de Chine - Découvrez la vie d\'expatrié en Chine',
             ]);
         }
 
         // Vérifier que le Vietnam existe (il devrait déjà être là)
-        if (!Country::where('slug', 'vietnam')->exists()) {
+        if (! Country::where('slug', 'vietnam')->exists()) {
             Country::create([
                 'name_fr' => 'Vietnam',
-                'slug' => 'vietnam', 
+                'slug' => 'vietnam',
                 'emoji' => '🇻🇳',
-                'description' => 'République socialiste du Vietnam - Découvrez la vie d\'expatrié au Vietnam'
+                'description' => 'République socialiste du Vietnam - Découvrez la vie d\'expatrié au Vietnam',
             ]);
         }
     }

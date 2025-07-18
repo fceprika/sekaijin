@@ -45,7 +45,11 @@
       "Bash(gh pr merge:*)",
       "Bash(git restore:*)",
       "Bash(gh pr list:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(composer test:*)",
+      "Bash(composer pint-test:*)",
+      "Bash(composer pint:*)"
     ],
     "deny": []
   }

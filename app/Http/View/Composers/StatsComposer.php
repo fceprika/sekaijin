@@ -13,7 +13,7 @@ class StatsComposer
     public function compose(View $view): void
     {
         $stats = CommunityStatsService::getCommunityStats();
-        
+
         $view->with([
             'totalMembers' => number_format($stats['totalMembers']) . '+',
             'totalCountries' => $stats['countriesCovered'] . '+',

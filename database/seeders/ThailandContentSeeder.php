@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Country;
-use App\Models\User;
-use App\Models\News;
 use App\Models\Article;
+use App\Models\Country;
 use App\Models\Event;
+use App\Models\News;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class ThailandContentSeeder extends Seeder
 {
@@ -26,7 +26,7 @@ class ThailandContentSeeder extends Seeder
 
         // Créer un utilisateur admin pour être l'auteur du contenu
         $admin = User::firstOrCreate([
-            'email' => 'admin@sekaijin.fr'
+            'email' => 'admin@sekaijin.fr',
         ], [
             'name' => 'Admin',
             'first_name' => 'Équipe',

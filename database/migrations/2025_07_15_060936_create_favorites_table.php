@@ -17,11 +17,11 @@ return new class extends Migration
             $table->string('favoritable_type'); // 'App\Models\Article' ou 'App\Models\News'
             $table->unsignedBigInteger('favoritable_id'); // ID de l'article ou actualité
             $table->timestamps();
-            
+
             // Index pour les performances
             $table->index(['favoritable_type', 'favoritable_id']);
             $table->index(['user_id', 'favoritable_type']);
-            
+
             // Éviter les doublons
             $table->unique(['user_id', 'favoritable_type', 'favoritable_id']);
         });

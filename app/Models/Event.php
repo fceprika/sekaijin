@@ -49,7 +49,7 @@ class Event extends Model
     }
 
     /**
-     * Get the country that owns the event
+     * Get the country that owns the event.
      */
     public function country()
     {
@@ -57,7 +57,7 @@ class Event extends Model
     }
 
     /**
-     * Get the organizer of the event
+     * Get the organizer of the event.
      */
     public function organizer()
     {
@@ -65,7 +65,7 @@ class Event extends Model
     }
 
     /**
-     * Scope for published events
+     * Scope for published events.
      */
     public function scopePublished($query)
     {
@@ -73,7 +73,7 @@ class Event extends Model
     }
 
     /**
-     * Scope for featured events
+     * Scope for featured events.
      */
     public function scopeFeatured($query)
     {
@@ -81,7 +81,7 @@ class Event extends Model
     }
 
     /**
-     * Scope for upcoming events
+     * Scope for upcoming events.
      */
     public function scopeUpcoming($query)
     {
@@ -89,7 +89,7 @@ class Event extends Model
     }
 
     /**
-     * Scope for a specific country
+     * Scope for a specific country.
      */
     public function scopeForCountry($query, $countryId)
     {
@@ -97,7 +97,7 @@ class Event extends Model
     }
 
     /**
-     * Check if event is free
+     * Check if event is free.
      */
     public function isFree()
     {
@@ -105,16 +105,19 @@ class Event extends Model
     }
 
     /**
-     * Check if event has available spots
+     * Check if event has available spots.
      */
     public function hasAvailableSpots()
     {
-        if (!$this->max_participants) return true;
+        if (! $this->max_participants) {
+            return true;
+        }
+
         return $this->current_participants < $this->max_participants;
     }
 
     /**
-     * Get formatted price
+     * Get formatted price.
      */
     public function getFormattedPriceAttribute()
     {

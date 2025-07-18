@@ -28,7 +28,7 @@ return new class extends Migration
             $table->date('expiration_date')->nullable();
             $table->integer('views')->default(0);
             $table->timestamps();
-            
+
             // Indexes
             $table->index(['status', 'country', 'city']);
             $table->index(['type', 'status']);

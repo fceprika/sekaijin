@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Event;
-use App\Models\Country;
 use App\Http\Requests\StoreEventRequest;
+use App\Models\Country;
+use App\Models\Event;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -24,13 +24,13 @@ class EventController extends Controller
     {
         $countrySlug = $request->query('country');
         $country = null;
-        
+
         if ($countrySlug) {
             $country = Country::where('slug', $countrySlug)->first();
         }
-        
+
         $countries = Country::orderBy('name_fr')->get();
-        
+
         return view('events.create', compact('countries', 'country'));
     }
 
@@ -40,18 +40,18 @@ class EventController extends Controller
     public function store(StoreEventRequest $request)
     {
         $validated = $request->validated();
-        
+
         // Generate unique slug
         $validated['slug'] = $this->generateUniqueSlug($validated['title']);
-        
+
         // Set organizer to current user
         $validated['organizer_id'] = Auth::id();
-        
+
         // Handle checkbox values (default to false if not present)
         $validated['is_online'] = $request->has('is_online');
         $validated['is_published'] = $request->has('is_published');
         $validated['is_featured'] = $request->has('is_featured');
-        
+
         // Handle online event logic
         if ($validated['is_online']) {
             $validated['location'] = null;
@@ -59,9 +59,9 @@ class EventController extends Controller
         } else {
             $validated['online_link'] = null;
         }
-        
+
         $event = Event::create($validated);
-        
+
         return redirect()
             ->route('country.event.show', [$event->country->slug, $event->slug])
             ->with('success', 'Événement créé avec succès !');
@@ -73,7 +73,7 @@ class EventController extends Controller
     public function edit(Event $event)
     {
         $countries = Country::orderBy('name_fr')->get();
-        
+
         return view('events.edit', compact('event', 'countries'));
     }
 
@@ -83,17 +83,17 @@ class EventController extends Controller
     public function update(StoreEventRequest $request, Event $event)
     {
         $validated = $request->validated();
-        
+
         // Update slug if title changed
         if ($validated['title'] !== $event->title) {
             $validated['slug'] = $this->generateUniqueSlug($validated['title'], $event->id);
         }
-        
+
         // Handle checkbox values (default to false if not present)
         $validated['is_online'] = $request->has('is_online');
         $validated['is_published'] = $request->has('is_published');
         $validated['is_featured'] = $request->has('is_featured');
-        
+
         // Handle online event logic
         if ($validated['is_online']) {
             $validated['location'] = null;
@@ -101,9 +101,9 @@ class EventController extends Controller
         } else {
             $validated['online_link'] = null;
         }
-        
+
         $event->update($validated);
-        
+
         return redirect()
             ->route('country.event.show', [$event->country->slug, $event->slug])
             ->with('success', 'Événement mis à jour avec succès !');
@@ -116,42 +116,42 @@ class EventController extends Controller
     {
         $countrySlug = $event->country->slug;
         $event->delete();
-        
+
         return redirect()
             ->route('country.evenements', $countrySlug)
             ->with('success', 'Événement supprimé avec succès !');
     }
-    
+
     /**
-     * Generate unique slug for event with optimized approach
+     * Generate unique slug for event with optimized approach.
      */
     private function generateUniqueSlug(string $title, ?int $excludeId = null): string
     {
         $baseSlug = Str::slug($title);
-        
+
         // First, try the base slug
         $query = Event::where('slug', $baseSlug);
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
-        
-        if (!$query->exists()) {
+
+        if (! $query->exists()) {
             return $baseSlug;
         }
-        
+
         // If base slug exists, get all similar slugs in one query for efficiency
         $existingSlugs = Event::where('slug', 'LIKE', $baseSlug . '%')
-            ->when($excludeId, fn($query) => $query->where('id', '!=', $excludeId))
+            ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
             ->pluck('slug')
             ->toArray();
-        
+
         // Find the next available number
         $counter = 1;
         do {
             $candidateSlug = $baseSlug . '-' . $counter;
             $counter++;
         } while (in_array($candidateSlug, $existingSlugs));
-        
+
         return $candidateSlug;
     }
 }

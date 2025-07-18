@@ -12,6 +12,7 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
+
         return view('profile.show', compact('user'));
     }
 
@@ -24,12 +25,12 @@ class ProfileController extends Controller
         if ($request->has('changed_fields')) {
             $changedFields = json_decode($request->input('changed_fields'), true) ?: [];
         }
-        
+
         // Si aucun changement détecté côté client, vérifier côté serveur
         if (empty($changedFields)) {
             $changedFields = $this->detectServerSideChanges($request, $user);
         }
-        
+
         // Si vraiment aucun changement, retourner avec un message
         if (empty($changedFields)) {
             return back()->with('info', 'Aucun changement détecté. Profil non modifié.');
@@ -39,18 +40,18 @@ class ProfileController extends Controller
         \Log::info('Profile update - Changed fields', [
             'user_id' => $user->id,
             'changed_fields' => $changedFields,
-            'client_detected' => $request->has('changed_fields')
+            'client_detected' => $request->has('changed_fields'),
         ]);
 
         // Déterminer si on utilise le mode automatique ou manuel AVANT la validation
         $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
-        
+
         // Préparer les données pour la validation (seulement les champs modifiés + champs requis)
         $validationData = $this->prepareValidationData($request, $changedFields, $useAutoMode);
 
         // Construire les règles de validation dynamiquement selon les champs modifiés
         $validationRules = $this->buildValidationRules($changedFields, $user);
-        
+
         $validator = Validator::make($validationData, $validationRules, [
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
@@ -75,20 +76,19 @@ class ProfileController extends Controller
         }
 
         // Validation de sécurité : vérifier que les champs cachés correspondent aux données actuelles
-        if ($request->filled('current_country_residence') && 
+        if ($request->filled('current_country_residence') &&
             $request->input('current_country_residence') !== $user->country_residence) {
             return back()->withErrors(['security' => 'Données de formulaire invalides détectées.'])->withInput();
         }
-        
-        if ($request->filled('current_city_residence') && 
+
+        if ($request->filled('current_city_residence') &&
             $request->input('current_city_residence') !== $user->city_residence) {
             return back()->withErrors(['security' => 'Données de formulaire invalides détectées.'])->withInput();
         }
 
-
         // Gérer l'avatar avec gestion d'erreurs sécurisée
         $avatarPath = $user->avatar; // Conserver l'avatar actuel par défaut
-        
+
         try {
             // Si l'utilisateur veut supprimer l'avatar
             if ($request->boolean('remove_avatar')) {
@@ -97,7 +97,7 @@ class ProfileController extends Controller
                 }
                 $avatarPath = null;
             }
-            
+
             // Si un nouvel avatar est uploadé
             if ($request->hasFile('avatar')) {
                 // Supprimer l'ancien avatar s'il existe
@@ -116,10 +116,10 @@ class ProfileController extends Controller
         $updateData = $this->buildUpdateData($request, $changedFields, $user, $avatarPath, $useAutoMode);
 
         // Récupérer les coordonnées seulement si les champs de localisation ont été modifiés
-        if (in_array('location_coordinates', $changedFields) || 
-            in_array('country_residence', $changedFields) || 
+        if (in_array('location_coordinates', $changedFields) ||
+            in_array('country_residence', $changedFields) ||
             in_array('city_residence', $changedFields)) {
-            
+
             if ($useAutoMode && $request->filled('detected_latitude') && $request->filled('detected_longitude')) {
                 // Mode automatique : utiliser les coordonnées détectées directement
                 $updateData['latitude'] = $request->detected_latitude;
@@ -131,21 +131,21 @@ class ProfileController extends Controller
                     $this->updateLocationCoordinates($updateData, $request->country_residence, $request->city_residence);
                 } catch (\Exception $e) {
                     // Messages d'erreur spécifiques selon le type d'erreur
-                    $errorMessage = match($e->getMessage()) {
+                    $errorMessage = match ($e->getMessage()) {
                         'Cities data file not found' => 'Service de géolocalisation temporairement indisponible.',
                         'Failed to decode cities JSON: Syntax error' => 'Erreur de configuration géographique.',
                         default => 'Erreur de localisation. Veuillez réessayer.'
                     };
-                    
+
                     // Log détaillé pour debugging
                     \Log::warning('Location coordinates update failed', [
                         'country' => $request->country_residence,
                         'city' => $request->city_residence,
                         'error' => $e->getMessage(),
                         'user_id' => $user->id,
-                        'user_message' => $errorMessage
+                        'user_message' => $errorMessage,
                     ]);
-                    
+
                     // Ajouter un message flash pour informer l'utilisateur
                     session()->flash('location_warning', $errorMessage);
                 }
@@ -153,16 +153,16 @@ class ProfileController extends Controller
         }
 
         // Effectuer la mise à jour seulement s'il y a des données à mettre à jour
-        if (!empty($updateData)) {
+        if (! empty($updateData)) {
             $user->update($updateData);
-            
+
             // Log de la mise à jour réussie
             \Log::info('Profile updated successfully', [
                 'user_id' => $user->id,
                 'updated_fields' => array_keys($updateData),
-                'changed_fields_count' => count($changedFields)
+                'changed_fields_count' => count($changedFields),
             ]);
-            
+
             return back()->with('success', 'Votre profil a été mis à jour avec succès !');
         } else {
             // Aucune donnée à mettre à jour
@@ -171,13 +171,13 @@ class ProfileController extends Controller
     }
 
     /**
-     * Clear user location data
+     * Clear user location data.
      */
     public function clearLocation(Request $request)
     {
         try {
             $user = Auth::user();
-            
+
             // Vider les données de localisation
             $user->update([
                 'latitude' => null,
@@ -186,51 +186,51 @@ class ProfileController extends Controller
                 'city_detected' => null,
                 'is_visible_on_map' => false,
             ]);
-            
+
             return response()->json([
                 'success' => true,
-                'message' => 'Données de localisation supprimées avec succès.'
+                'message' => 'Données de localisation supprimées avec succès.',
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Failed to clear location data', [
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la suppression des données de localisation.'
+                'message' => 'Erreur lors de la suppression des données de localisation.',
             ], 500);
         }
     }
 
     /**
-     * Upload and optimize avatar image
+     * Upload and optimize avatar image.
      */
     private function uploadAvatar($file): string
     {
         // Additional security validation
         $this->validateImageFile($file);
-        
+
         // Generate unique filename with proper extension
         $extension = $file->getClientOriginalExtension();
         $filename = uniqid() . '_' . time() . '.' . $extension;
-        
+
         // Ensure avatars directory exists
         $avatarPath = public_path('storage/avatars');
-        if (!file_exists($avatarPath)) {
+        if (! file_exists($avatarPath)) {
             mkdir($avatarPath, 0755, true);
         }
-        
+
         // Move the file
         $file->move($avatarPath, $filename);
-        
+
         return $filename;
     }
-    
+
     /**
-     * Validate image file content and headers
+     * Validate image file content and headers.
      */
     private function validateImageFile($file): void
     {
@@ -238,61 +238,61 @@ class ProfileController extends Controller
         if ($file->getSize() > 100 * 1024) {
             throw new \InvalidArgumentException('Le fichier est trop volumineux. Maximum 100KB autorisé.');
         }
-        
+
         // Validate MIME type
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+        if (! in_array($file->getMimeType(), $allowedMimeTypes)) {
             throw new \InvalidArgumentException('Type de fichier non autorisé. Seuls JPEG, PNG et WebP sont acceptés.');
         }
-        
+
         // Validate file headers (magic bytes)
         $fileContent = file_get_contents($file->getPathname());
         $validHeaders = [
             'jpeg' => ["\xFF\xD8\xFF"],
             'png' => ["\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"],
-            'webp' => ["RIFF", "WEBP"]
+            'webp' => ['RIFF', 'WEBP'],
         ];
-        
+
         $isValidHeader = false;
         foreach ($validHeaders as $type => $headers) {
             foreach ($headers as $header) {
-                if (strpos($fileContent, $header) === 0 || 
+                if (strpos($fileContent, $header) === 0 ||
                     ($type === 'webp' && strpos($fileContent, 'RIFF') === 0 && strpos($fileContent, 'WEBP') !== false)) {
                     $isValidHeader = true;
                     break 2;
                 }
             }
         }
-        
-        if (!$isValidHeader) {
+
+        if (! $isValidHeader) {
             throw new \InvalidArgumentException('Fichier image corrompu ou invalide.');
         }
-        
+
         // Additional server-side image validation using getimagesize()
         $imageInfo = getimagesize($file->getPathname());
-        if (!$imageInfo) {
+        if (! $imageInfo) {
             throw new \InvalidArgumentException('Fichier image non valide ou corrompu.');
         }
-        
+
         // Validate image dimensions (optional but recommended)
-        list($width, $height) = $imageInfo;
+        [$width, $height] = $imageInfo;
         if ($width < 32 || $height < 32) {
             throw new \InvalidArgumentException('L\'image doit faire au minimum 32x32 pixels.');
         }
-        
+
         if ($width > 2048 || $height > 2048) {
             throw new \InvalidArgumentException('L\'image ne doit pas dépasser 2048x2048 pixels.');
         }
-        
+
         // Verify MIME type consistency between getimagesize and file extension
         $allowedImageTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP];
-        if (!in_array($imageInfo[2], $allowedImageTypes)) {
+        if (! in_array($imageInfo[2], $allowedImageTypes)) {
             throw new \InvalidArgumentException('Format d\'image non supporté.');
         }
     }
-    
+
     /**
-     * Securely delete avatar file with path validation
+     * Securely delete avatar file with path validation.
      */
     private function deleteAvatarFile(string $filename): void
     {
@@ -300,43 +300,43 @@ class ProfileController extends Controller
         if (empty($filename) || strpos($filename, '..') !== false || strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
             throw new \InvalidArgumentException('Nom de fichier invalide.');
         }
-        
+
         // Construct safe file path
         $avatarPath = public_path('storage/avatars/' . basename($filename));
-        
+
         // Additional security: verify file is within avatars directory
         $realPath = realpath($avatarPath);
         $avatarsDir = realpath(public_path('storage/avatars'));
-        
+
         if ($realPath && $avatarsDir && strpos($realPath, $avatarsDir) === 0 && file_exists($realPath)) {
             unlink($realPath);
         }
     }
-    
+
     /**
-     * Update location coordinates based on city and country selection
+     * Update location coordinates based on city and country selection.
      */
     private function updateLocationCoordinates(array &$updateData, string $country, string $city): void
     {
         // Load local cities data from JSON file
         $jsonPath = database_path('data/cities_data.json');
-        
-        if (!file_exists($jsonPath)) {
+
+        if (! file_exists($jsonPath)) {
             throw new \Exception('Cities data file not found');
         }
-        
+
         $jsonContent = file_get_contents($jsonPath);
         $citiesData = json_decode($jsonContent, true);
-        
+
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Exception('Failed to decode cities JSON: ' . json_last_error_msg());
         }
-        
+
         // Check if country exists in our data
-        if (!isset($citiesData[$country])) {
+        if (! isset($citiesData[$country])) {
             throw new \Exception("Country '{$country}' not found in cities data");
         }
-        
+
         // Find the city
         $cityFound = false;
         foreach ($citiesData[$country] as $cityData) {
@@ -349,35 +349,37 @@ class ProfileController extends Controller
                 break;
             }
         }
-        
-        if (!$cityFound) {
+
+        if (! $cityFound) {
             throw new \Exception("City '{$city}' not found in country '{$country}'");
         }
     }
-    
+
     /**
-     * Add privacy offset to coordinates (similar to User model's randomizeCoordinates)
+     * Add privacy offset to coordinates (similar to User model's randomizeCoordinates).
      */
     private function addPrivacyOffset(float $coordinate): float
     {
         // Add small random offset for privacy (approximately 10km radius)
         $offset = (random_int(-500, 500) / 10000); // Cryptographically secure random offset between -0.05 and 0.05 degrees
+
         return round($coordinate + $offset, 6);
     }
 
     /**
-     * Détecter les changements côté serveur en comparant avec les données actuelles
+     * Détecter les changements côté serveur en comparant avec les données actuelles.
      */
     private function detectServerSideChanges(Request $request, $user): array
     {
         // Si le client a déjà détecté des changements, valider et utiliser cette liste
         if ($request->has('changed_fields')) {
             $clientChanges = json_decode($request->input('changed_fields'), true) ?: [];
+
             return $this->validateClientChanges($clientChanges, $request, $user);
         }
-        
+
         $changedFields = [];
-        
+
         // Mapping des champs à vérifier
         $fieldsToCheck = [
             'name' => $user->name,
@@ -411,17 +413,17 @@ class ProfileController extends Controller
         // Comparer chaque champ
         foreach ($fieldsToCheck as $field => $currentValue) {
             $newValue = $request->input($field);
-            
+
             // Gestion spéciale pour les booléens
             if (in_array($field, ['is_public_profile'])) {
                 $newValue = $request->boolean($field, false);
                 $currentValue = (bool) $currentValue;
             }
-            
+
             // Normaliser les valeurs pour la comparaison
             $normalizedNew = $newValue === null ? '' : (string) $newValue;
             $normalizedCurrent = $currentValue === null ? '' : (string) $currentValue;
-            
+
             if ($normalizedNew !== $normalizedCurrent) {
                 $changedFields[] = $field;
             }
@@ -445,23 +447,23 @@ class ProfileController extends Controller
     }
 
     /**
-     * Préparer les données de validation en incluant seulement les champs nécessaires
+     * Préparer les données de validation en incluant seulement les champs nécessaires.
      */
     private function prepareValidationData(Request $request, array $changedFields, bool $useAutoMode): array
     {
         $validationData = [];
-        
+
         // Toujours inclure le token CSRF
         $validationData['_token'] = $request->input('_token');
-        
+
         // Toujours inclure les champs requis pour éviter les erreurs de validation
         $alwaysInclude = ['name', 'email'];
-        
+
         // Le pays d'intérêt est maintenant indépendant du pays de résidence
-        
+
         // Inclure les champs modifiés + champs toujours requis
         $fieldsToInclude = array_unique(array_merge($changedFields, $alwaysInclude));
-        
+
         foreach ($fieldsToInclude as $field) {
             if ($request->has($field)) {
                 $validationData[$field] = $request->input($field);
@@ -517,7 +519,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Construire les données de mise à jour en utilisant seulement les champs modifiés
+     * Construire les données de mise à jour en utilisant seulement les champs modifiés.
      */
     private function buildUpdateData(Request $request, array $changedFields, $user, $avatarPath, bool $useAutoMode): array
     {
@@ -526,14 +528,14 @@ class ProfileController extends Controller
         // Debug log pour voir les champs modifiés
         \Log::debug('Building update data', [
             'changed_fields' => $changedFields,
-            'use_auto_mode' => $useAutoMode
+            'use_auto_mode' => $useAutoMode,
         ]);
 
         // Mapping des champs simples
         $simpleFields = [
             'name', 'email', 'first_name', 'last_name', 'birth_date', 'phone', 'bio',
             'youtube_username', 'instagram_username', 'tiktok_username', 'linkedin_username',
-            'twitter_username', 'facebook_username', 'telegram_username', 'interest_country'
+            'twitter_username', 'facebook_username', 'telegram_username', 'interest_country',
         ];
 
         foreach ($simpleFields as $field) {
@@ -587,7 +589,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Construire les règles de validation dynamiquement selon les champs modifiés
+     * Construire les règles de validation dynamiquement selon les champs modifiés.
      */
     private function buildValidationRules(array $changedFields, $user): array
     {
@@ -629,9 +631,9 @@ class ProfileController extends Controller
             'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
             'country_residence' => 'nullable|string|max:255',
             'interest_country' => [
-                'nullable', 
-                'string', 
-                'max:255'
+                'nullable',
+                'string',
+                'max:255',
             ],
             'city_residence' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
@@ -665,11 +667,11 @@ class ProfileController extends Controller
         // Ajouter seulement les règles des champs qui sont présents dans les données
         foreach ($conditionalRules as $field => $rule) {
             // Inclure la règle si le champ est modifié OU si c'est un champ spécial toujours nécessaire
-            if (in_array($field, $changedFields) || 
+            if (in_array($field, $changedFields) ||
                 in_array($field, ['current_country_residence', 'current_city_residence', 'country_residence_auto', 'city_residence_auto', 'detected_latitude', 'detected_longitude'])) {
-                
+
                 // Le pays d'intérêt est maintenant indépendant du pays de résidence
-                
+
                 $rules[$field] = $rule;
             }
         }
@@ -678,12 +680,12 @@ class ProfileController extends Controller
     }
 
     /**
-     * Valider les changements détectés côté client contre les données réelles
+     * Valider les changements détectés côté client contre les données réelles.
      */
     private function validateClientChanges(array $clientChanges, Request $request, $user): array
     {
         $validatedChanges = [];
-        
+
         // Mapping des champs à vérifier pour validation
         $fieldsToValidate = [
             'name' => $user->name,
@@ -711,17 +713,17 @@ class ProfileController extends Controller
             if (array_key_exists($field, $fieldsToValidate)) {
                 $newValue = $request->input($field);
                 $currentValue = $fieldsToValidate[$field];
-                
+
                 // Gestion spéciale pour les booléens
                 if (in_array($field, ['is_public_profile'])) {
                     $newValue = $request->boolean($field, false);
                     $currentValue = (bool) $currentValue;
                 }
-                
+
                 // Normaliser pour comparaison
                 $normalizedNew = $newValue === null ? '' : (string) $newValue;
                 $normalizedCurrent = $currentValue === null ? '' : (string) $currentValue;
-                
+
                 if ($normalizedNew !== $normalizedCurrent) {
                     $validatedChanges[] = $field;
                 }

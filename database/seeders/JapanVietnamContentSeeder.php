@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Article;
 use App\Models\Country;
 use App\Models\News;
-use App\Models\Article;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class JapanVietnamContentSeeder extends Seeder
 {
@@ -19,12 +18,12 @@ class JapanVietnamContentSeeder extends Seeder
         // Get countries
         $japan = Country::where('slug', 'japon')->first();
         $vietnam = Country::where('slug', 'vietnam')->first();
-        
+
         // Get admin user or create one
         $admin = User::where('role', 'admin')->first();
-        if (!$admin) {
+        if (! $admin) {
             $admin = User::where('email', 'admin@sekaijin.com')->first();
-            if (!$admin) {
+            if (! $admin) {
                 $admin = User::create([
                     'name' => 'Admin Sekaijin',
                     'email' => 'admin@sekaijin.com',

@@ -18,7 +18,7 @@ class Favorite extends Model
     ];
 
     /**
-     * Relation polymorphe vers l'élément favori (Article ou News)
+     * Relation polymorphe vers l'élément favori (Article ou News).
      */
     public function favoritable(): MorphTo
     {
@@ -26,7 +26,7 @@ class Favorite extends Model
     }
 
     /**
-     * Relation vers l'utilisateur propriétaire du favori
+     * Relation vers l'utilisateur propriétaire du favori.
      */
     public function user(): BelongsTo
     {
@@ -34,7 +34,7 @@ class Favorite extends Model
     }
 
     /**
-     * Scope pour récupérer les favoris d'un utilisateur
+     * Scope pour récupérer les favoris d'un utilisateur.
      */
     public function scopeForUser($query, $userId)
     {
@@ -42,7 +42,7 @@ class Favorite extends Model
     }
 
     /**
-     * Scope pour récupérer les favoris d'un type spécifique
+     * Scope pour récupérer les favoris d'un type spécifique.
      */
     public function scopeOfType($query, $type)
     {

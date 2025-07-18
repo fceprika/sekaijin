@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class CleanupPreviewImages extends Command
 {
@@ -62,7 +62,7 @@ class CleanupPreviewImages extends Command
         }
 
         $this->info("Cleanup completed. Deleted {$deletedCount} preview images.");
-        
+
         return Command::SUCCESS;
     }
 }

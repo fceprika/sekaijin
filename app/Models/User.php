@@ -46,7 +46,7 @@ class User extends Authenticatable
         'is_verified',
         'last_login',
         'is_visible_on_map', // Needed for map
-        'latitude', // Needed for map  
+        'latitude', // Needed for map
         'longitude', // Needed for map
         'city_detected', // Needed for map
         'is_public_profile',
@@ -80,7 +80,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Available user roles
+     * Available user roles.
      */
     public const ROLES = [
         'free' => 'free',
@@ -90,7 +90,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Check if user has a specific role
+     * Check if user has a specific role.
      */
     public function isRole(string $role): bool
     {
@@ -98,7 +98,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is admin
+     * Check if user is admin.
      */
     public function isAdmin(): bool
     {
@@ -106,7 +106,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is premium
+     * Check if user is premium.
      */
     public function isPremium(): bool
     {
@@ -114,7 +114,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is ambassador
+     * Check if user is ambassador.
      */
     public function isAmbassador(): bool
     {
@@ -122,7 +122,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is free member
+     * Check if user is free member.
      */
     public function isFree(): bool
     {
@@ -130,11 +130,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get user role display name
+     * Get user role display name.
      */
     public function getRoleDisplayName(): string
     {
-        return match($this->role) {
+        return match ($this->role) {
             'free' => 'Membre',
             'premium' => 'Membre Premium',
             'ambassador' => 'Ambassadeur Sekaijin',
@@ -144,7 +144,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the country relationship using proper foreign key
+     * Get the country relationship using proper foreign key.
      */
     public function country()
     {
@@ -152,7 +152,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get articles authored by this user
+     * Get articles authored by this user.
      */
     public function articles()
     {
@@ -160,7 +160,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get news authored by this user
+     * Get news authored by this user.
      */
     public function news()
     {
@@ -168,7 +168,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get events organized by this user
+     * Get events organized by this user.
      */
     public function events()
     {
@@ -176,7 +176,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get announcements created by this user
+     * Get announcements created by this user.
      */
     public function announcements()
     {
@@ -184,7 +184,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get favorites for this user
+     * Get favorites for this user.
      */
     public function favorites()
     {
@@ -192,7 +192,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get favorite articles for this user
+     * Get favorite articles for this user.
      */
     public function favoriteArticles()
     {
@@ -200,7 +200,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get favorite news for this user
+     * Get favorite news for this user.
      */
     public function favoriteNews()
     {
@@ -208,7 +208,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user has favorited a specific item
+     * Check if user has favorited a specific item.
      */
     public function hasFavorited($item): bool
     {
@@ -219,7 +219,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user has enabled location sharing
+     * Check if user has enabled location sharing.
      */
     public function hasLocationSharing(): bool
     {
@@ -227,17 +227,17 @@ class User extends Authenticatable
     }
 
     /**
-     * Get display location (city, country) - always in French with Latin characters
+     * Get display location (city, country) - always in French with Latin characters.
      */
     public function getDisplayLocation(): string
     {
         // Utiliser le nom français du pays via la relation
         $countryName = $this->country ? $this->country->name_fr : $this->country_residence;
-        
+
         // Privilégier city_residence (saisi manuellement) sur city_detected (auto-détecté)
         // Et vérifier que le nom contient des caractères latins
         $cityName = null;
-        
+
         if ($this->city_residence && $this->isLatinText($this->city_residence)) {
             $cityName = $this->city_residence;
         } elseif ($this->city_detected && $this->isLatinText($this->city_detected)) {
@@ -247,16 +247,16 @@ class User extends Authenticatable
         } elseif ($this->city_detected) {
             $cityName = $this->city_detected; // Fallback même si non-latin
         }
-        
+
         if ($cityName && $countryName) {
             return "{$cityName}, {$countryName}";
         }
-        
+
         return $countryName ?? 'Non renseigné';
     }
-    
+
     /**
-     * Check if text contains only Latin characters (including French accents)
+     * Check if text contains only Latin characters (including French accents).
      */
     private function isLatinText(string $text): bool
     {
@@ -265,18 +265,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Update user location with privacy protection (randomize within ~10km radius)
+     * Update user location with privacy protection (randomize within ~10km radius).
      */
     public function updateLocation(float $latitude, float $longitude, ?string $city = null): void
     {
         $randomizedCoords = $this->randomizeCoordinates($latitude, $longitude);
-        
+
         // Ne stocker la ville que si elle contient des caractères latins
         $cityToStore = null;
         if ($city && $this->isLatinText($city)) {
             $cityToStore = $city;
         }
-        
+
         $this->update([
             'latitude' => $randomizedCoords['latitude'],
             'longitude' => $randomizedCoords['longitude'],
@@ -285,15 +285,15 @@ class User extends Authenticatable
     }
 
     /**
-     * Randomize coordinates within approximately 10km radius for privacy
+     * Randomize coordinates within approximately 10km radius for privacy.
      */
     private function randomizeCoordinates(float $latitude, float $longitude): array
     {
         $radius = 0.09; // Approximately 10km in decimal degrees
-        
+
         $randomLat = $latitude + (mt_rand(-100, 100) / 100) * $radius;
         $randomLng = $longitude + (mt_rand(-100, 100) / 100) * $radius;
-        
+
         return [
             'latitude' => round($randomLat, 6),
             'longitude' => round($randomLng, 6),
@@ -301,20 +301,20 @@ class User extends Authenticatable
     }
 
     /**
-     * Get avatar URL or default avatar
+     * Get avatar URL or default avatar.
      */
     public function getAvatarUrl(): string
     {
         if ($this->avatar && file_exists(public_path('storage/avatars/' . $this->avatar))) {
             return asset('storage/avatars/' . $this->avatar);
         }
-        
+
         // Default avatar - using a placeholder service
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=3B82F6&color=fff&size=200';
     }
 
     /**
-     * Get the URL-safe slug for this user
+     * Get the URL-safe slug for this user.
      */
     public function getSlug(): string
     {
@@ -322,7 +322,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the public profile URL for this user
+     * Get the public profile URL for this user.
      */
     public function getPublicProfileUrl(): string
     {
@@ -330,7 +330,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Generate URL-safe slug from username
+     * Generate URL-safe slug from username.
      */
     public static function generateSlug(string $name): string
     {
@@ -338,17 +338,17 @@ class User extends Authenticatable
         $cleaned = trim($name);
         $cleaned = preg_replace('/[^a-zA-Z0-9._-]/', '', $cleaned);
         $cleaned = strtolower($cleaned);
-        
+
         // Ensure slug is not empty after cleaning
         if (empty($cleaned)) {
             throw new \InvalidArgumentException('Username cannot be converted to a valid slug');
         }
-        
+
         return $cleaned;
     }
 
     /**
-     * Boot method to automatically generate slug
+     * Boot method to automatically generate slug.
      */
     protected static function boot()
     {

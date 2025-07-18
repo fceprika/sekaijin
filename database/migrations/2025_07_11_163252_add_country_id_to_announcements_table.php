@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('announcements', function (Blueprint $table) {
             $table->foreignId('country_id')->nullable()->constrained()->onDelete('cascade')->after('user_id');
-            
+
             // Index pour améliorer les performances des requêtes par pays
             $table->index(['country_id', 'status', 'type']);
         });

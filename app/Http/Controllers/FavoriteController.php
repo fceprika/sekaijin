@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
+use App\Http\Requests\ToggleFavoriteRequest;
 use App\Models\Favorite;
 use App\Models\News;
-use App\Http\Requests\ToggleFavoriteRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class FavoriteController extends Controller
@@ -17,12 +15,12 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Toggle favorite status for an item
+     * Toggle favorite status for an item.
      */
     public function toggle(ToggleFavoriteRequest $request)
     {
         $user = Auth::user();
-        
+
         // Check authorization
         $this->authorize('toggle', Favorite::class);
         $type = $request->input('type');
@@ -58,7 +56,7 @@ class FavoriteController extends Controller
             return response()->json([
                 'success' => true,
                 'favorited' => $isFavorited,
-                'message' => $message
+                'message' => $message,
             ]);
         }
 
@@ -66,12 +64,12 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Display user's favorites
+     * Display user's favorites.
      */
     public function index()
     {
         $user = Auth::user();
-        
+
         // Check authorization
         $this->authorize('viewAny', Favorite::class);
 
@@ -93,12 +91,12 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Get favorites count for user
+     * Get favorites count for user.
      */
     public function count()
     {
         $user = Auth::user();
-        
+
         $articlesCount = $user->favoriteArticles()->count();
         $newsCount = $user->favoriteNews()->count();
         $totalCount = $articlesCount + $newsCount;
@@ -106,7 +104,7 @@ class FavoriteController extends Controller
         return response()->json([
             'articles' => $articlesCount,
             'news' => $newsCount,
-            'total' => $totalCount
+            'total' => $totalCount,
         ]);
     }
 }
