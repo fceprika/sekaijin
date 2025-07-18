@@ -32,7 +32,7 @@
         <div class="mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="rounded-lg h-64 overflow-hidden">
-                    <img src="{{ asset('images/nos-debuts.png') }}" alt="Nos débuts - Sekaijin" class="w-full h-full object-cover">
+                    <img src="{{ asset('images/nos-debuts.webp') }}" alt="Nos débuts - Sekaijin" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Nos débuts</h2>
@@ -80,7 +80,7 @@
                     </p>
                 </div>
                 <div class="order-1 lg:order-2 rounded-lg h-64 overflow-hidden">
-                    <img src="{{ asset('images/notre-mission.png') }}" alt="Notre mission - Sekaijin" class="w-full h-full object-cover">
+                    <img src="{{ asset('images/notre-mission.webp') }}" alt="Notre mission - Sekaijin" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>
@@ -89,7 +89,7 @@
         <div class="mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="rounded-lg h-64 overflow-hidden">
-                    <img src="{{ asset('images/notre-communaute.png') }}" alt="Notre communauté - Sekaijin" class="w-full h-full object-cover">
+                    <img src="{{ asset('images/notre-communaute.webp') }}" alt="Notre communauté - Sekaijin" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h2 class="text-3xl font-semibold mb-6 text-gray-800">Notre communauté aujourd'hui</h2>
