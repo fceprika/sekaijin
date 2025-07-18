@@ -130,12 +130,24 @@ class ProfileController extends Controller
                 try {
                     $this->updateLocationCoordinates($updateData, $request->country_residence, $request->city_residence);
                 } catch (\Exception $e) {
-                    // Log l'erreur mais ne pas faire échouer la mise à jour du profil
-                    \Log::warning('Failed to update location coordinates', [
+                    // Messages d'erreur spécifiques selon le type d'erreur
+                    $errorMessage = match($e->getMessage()) {
+                        'Cities data file not found' => 'Service de géolocalisation temporairement indisponible.',
+                        'Failed to decode cities JSON: Syntax error' => 'Erreur de configuration géographique.',
+                        default => 'Erreur de localisation. Veuillez réessayer.'
+                    };
+                    
+                    // Log détaillé pour debugging
+                    \Log::warning('Location coordinates update failed', [
                         'country' => $request->country_residence,
                         'city' => $request->city_residence,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
+                        'user_id' => $user->id,
+                        'user_message' => $errorMessage
                     ]);
+                    
+                    // Ajouter un message flash pour informer l'utilisateur
+                    session()->flash('location_warning', $errorMessage);
                 }
             }
         }
@@ -151,12 +163,7 @@ class ProfileController extends Controller
                 'changed_fields_count' => count($changedFields)
             ]);
             
-            $changedCount = count($changedFields);
-            $message = $changedCount === 1 
-                ? 'Votre profil a été mis à jour avec succès ! (1 champ modifié)'
-                : "Votre profil a été mis à jour avec succès ! ({$changedCount} champs modifiés)";
-                
-            return back()->with('success', $message);
+            return back()->with('success', 'Votre profil a été mis à jour avec succès !');
         } else {
             // Aucune donnée à mettre à jour
             return back()->with('info', 'Aucune modification détectée. Votre profil n\'a pas été changé.');
@@ -260,6 +267,28 @@ class ProfileController extends Controller
         if (!$isValidHeader) {
             throw new \InvalidArgumentException('Fichier image corrompu ou invalide.');
         }
+        
+        // Additional server-side image validation using getimagesize()
+        $imageInfo = getimagesize($file->getPathname());
+        if (!$imageInfo) {
+            throw new \InvalidArgumentException('Fichier image non valide ou corrompu.');
+        }
+        
+        // Validate image dimensions (optional but recommended)
+        list($width, $height) = $imageInfo;
+        if ($width < 32 || $height < 32) {
+            throw new \InvalidArgumentException('L\'image doit faire au minimum 32x32 pixels.');
+        }
+        
+        if ($width > 2048 || $height > 2048) {
+            throw new \InvalidArgumentException('L\'image ne doit pas dépasser 2048x2048 pixels.');
+        }
+        
+        // Verify MIME type consistency between getimagesize and file extension
+        $allowedImageTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP];
+        if (!in_array($imageInfo[2], $allowedImageTypes)) {
+            throw new \InvalidArgumentException('Format d\'image non supporté.');
+        }
     }
     
     /**
@@ -341,6 +370,12 @@ class ProfileController extends Controller
      */
     private function detectServerSideChanges(Request $request, $user): array
     {
+        // Si le client a déjà détecté des changements, valider et utiliser cette liste
+        if ($request->has('changed_fields')) {
+            $clientChanges = json_decode($request->input('changed_fields'), true) ?: [];
+            return $this->validateClientChanges($clientChanges, $request, $user);
+        }
+        
         $changedFields = [];
         
         // Mapping des champs à vérifier
@@ -640,5 +675,72 @@ class ProfileController extends Controller
         }
 
         return $rules;
+    }
+
+    /**
+     * Valider les changements détectés côté client contre les données réelles
+     */
+    private function validateClientChanges(array $clientChanges, Request $request, $user): array
+    {
+        $validatedChanges = [];
+        
+        // Mapping des champs à vérifier pour validation
+        $fieldsToValidate = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'birth_date' => $user->birth_date,
+            'phone' => $user->phone,
+            'bio' => $user->bio,
+            'youtube_username' => $user->youtube_username,
+            'instagram_username' => $user->instagram_username,
+            'tiktok_username' => $user->tiktok_username,
+            'linkedin_username' => $user->linkedin_username,
+            'twitter_username' => $user->twitter_username,
+            'facebook_username' => $user->facebook_username,
+            'telegram_username' => $user->telegram_username,
+            'is_public_profile' => $user->is_public_profile,
+            'interest_country' => $user->interest_country,
+            'country_residence' => $user->country_residence,
+            'city_residence' => $user->city_residence,
+        ];
+
+        // Valider chaque changement déclaré par le client
+        foreach ($clientChanges as $field) {
+            if (array_key_exists($field, $fieldsToValidate)) {
+                $newValue = $request->input($field);
+                $currentValue = $fieldsToValidate[$field];
+                
+                // Gestion spéciale pour les booléens
+                if (in_array($field, ['is_public_profile'])) {
+                    $newValue = $request->boolean($field, false);
+                    $currentValue = (bool) $currentValue;
+                }
+                
+                // Normaliser pour comparaison
+                $normalizedNew = $newValue === null ? '' : (string) $newValue;
+                $normalizedCurrent = $currentValue === null ? '' : (string) $currentValue;
+                
+                if ($normalizedNew !== $normalizedCurrent) {
+                    $validatedChanges[] = $field;
+                }
+            }
+        }
+
+        // Ajouter les changements spéciaux toujours détectés côté serveur
+        if ($request->hasFile('avatar') || $request->boolean('remove_avatar')) {
+            $validatedChanges[] = 'avatar';
+        }
+
+        if ($request->filled('new_password')) {
+            $validatedChanges[] = 'password';
+        }
+
+        if ($request->filled('detected_latitude') || $request->filled('detected_longitude')) {
+            $validatedChanges[] = 'location_coordinates';
+        }
+
+        return array_unique($validatedChanges);
     }
 }

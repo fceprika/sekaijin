@@ -3,6 +3,32 @@
  * Handles location-related functionality for user profile forms
  */
 
+// Configuration des états des boutons pour éviter la duplication CSS
+const BUTTON_STATES = {
+    active: {
+        auto: 'w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-green-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-blue-300',
+        manual: 'w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-orange-300'
+    },
+    inactive: {
+        auto: 'w-full bg-gradient-to-r from-blue-400 to-green-400 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-500 hover:to-green-500 transition duration-200 flex items-center justify-center shadow-md opacity-75',
+        manual: 'w-full bg-gradient-to-r from-orange-400 to-red-400 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition duration-200 flex items-center justify-center shadow-md opacity-75'
+    }
+};
+
+// Configuration des icônes et états
+const BUTTON_ICONS = {
+    auto: {
+        loading: '🔍',
+        success: '✅', 
+        error: '❌',
+        default: '🌍'
+    },
+    manual: {
+        active: '✏️',
+        default: '📝'
+    }
+};
+
 class ProfileLocationManager {
     constructor() {
         this.currentController = null; // Pour l'annulation des requêtes
@@ -332,14 +358,15 @@ class ProfileLocationManager {
         const isManualMode = !this.elements.manualLocationSection?.classList.contains('hidden');
 
         if (isAutoMode) {
-            this.elements.autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-green-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-blue-300';
-            this.elements.manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-400 to-red-400 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-500 hover:to-red-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
+            this.elements.autoLocationBtn.className = BUTTON_STATES.active.auto;
+            this.elements.manualLocationBtn.className = BUTTON_STATES.inactive.manual;
         } else if (isManualMode) {
-            this.elements.autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-400 to-green-400 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-500 hover:to-green-500 transition duration-200 flex items-center justify-center shadow-md opacity-75';
-            this.elements.manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-red-700 transition duration-200 flex items-center justify-center shadow-lg ring-2 ring-orange-300';
+            this.elements.autoLocationBtn.className = BUTTON_STATES.inactive.auto;
+            this.elements.manualLocationBtn.className = BUTTON_STATES.active.manual;
         } else {
-            this.elements.autoLocationBtn.className = 'w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-green-600 transition duration-200 flex items-center justify-center shadow-md';
-            this.elements.manualLocationBtn.className = 'w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition duration-200 flex items-center justify-center shadow-md';
+            // État neutre - les deux boutons inactifs
+            this.elements.autoLocationBtn.className = BUTTON_STATES.inactive.auto;
+            this.elements.manualLocationBtn.className = BUTTON_STATES.inactive.manual;
         }
     }
 
