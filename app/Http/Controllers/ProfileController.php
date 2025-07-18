@@ -116,6 +116,17 @@ class ProfileController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Validation de sécurité : vérifier que les champs cachés correspondent aux données actuelles
+        if ($request->filled('current_country_residence') && 
+            $request->input('current_country_residence') !== $user->country_residence) {
+            return back()->withErrors(['security' => 'Données de formulaire invalides détectées.'])->withInput();
+        }
+        
+        if ($request->filled('current_city_residence') && 
+            $request->input('current_city_residence') !== $user->city_residence) {
+            return back()->withErrors(['security' => 'Données de formulaire invalides détectées.'])->withInput();
+        }
+
 
         // Gérer l'avatar avec gestion d'erreurs sécurisée
         $avatarPath = $user->avatar; // Conserver l'avatar actuel par défaut
