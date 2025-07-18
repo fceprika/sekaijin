@@ -7,7 +7,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css', 
                 'resources/js/app.js',
-                'resources/js/profile-location.js'
+                'resources/js/profile-location.js',
+                'resources/js/form-change-tracker.js'
             ],
             refresh: true,
         }),

@@ -30,10 +30,21 @@
                 </div>
             </div>
 
-            <!-- Messages de succès/erreur -->
+            <!-- Messages de succès/erreur/info -->
             @if (session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 m-6 rounded-lg">
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('info'))
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-4 m-6 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        {{ session('info') }}
+                    </div>
                 </div>
             @endif
 
@@ -288,15 +299,22 @@
                             </div>
                         </div>
                         
-                        <!-- Pays de destination (si résidence en France) -->
-                        <div id="destination-country-container" class="mt-6" style="display: none;">
-                            <label for="destination_country" class="block text-sm font-medium text-gray-700 mb-2">Pays de destination souhaité</label>
-                            <select id="destination_country" name="destination_country"
+                        <!-- Pays d'intérêt -->
+                        <div id="interest-country-container" class="mt-6">
+                            <label for="interest_country" class="block text-sm font-medium text-gray-700 mb-2">
+                                Pays d'intérêt <span class="text-gray-500 text-xs">(optionnel)</span>
+                            </label>
+                            <select id="interest_country" name="interest_country"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                <option value="">Sélectionnez votre pays de destination</option>
-                                @include('partials.countries', ['selected' => old('destination_country', $user->destination_country), 'exclude' => 'France'])
+                                <option value="">Sélectionnez un pays qui vous intéresse</option>
+                                @foreach(\App\Models\Country::orderBy('name_fr')->get() as $country)
+                                    <option value="{{ $country->name_fr }}" 
+                                        {{ old('interest_country', $user->interest_country) == $country->name_fr ? 'selected' : '' }}>
+                                        {{ $country->emoji }} {{ $country->name_fr }}
+                                    </option>
+                                @endforeach
                             </select>
-                            <p class="text-xs text-gray-500 mt-1">Où souhaitez-vous vous expatrier ?</p>
+                            <p class="text-xs text-gray-500 mt-1">Quel pays vous intéresse le plus pour votre expatriation ?</p>
                         </div>
                     </div>
 
@@ -597,196 +615,198 @@
     </div>
 </div>
 
-<script src="/js/geolocation.js" nonce="{{ $csp_nonce ?? '' }}"></script>
-<script src="/js/profile-location.js" nonce="{{ $csp_nonce ?? '' }}"></script>
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser le gestionnaire de localisation
-    const locationManager = new ProfileLocationManager();
-    
-    
-    // Gestion de l'aperçu de l'avatar dans le profil
-    const avatarInput = document.getElementById('avatar');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const removeAvatarCheckbox = document.querySelector('input[name="remove_avatar"]');
-    const originalAvatarSrc = avatarPreview.src;
-    
-    // Prévisualiser l'image uploadée
-    if (avatarInput) {
-        avatarInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // Vérifier la taille du fichier (100KB max)
-                if (file.size > 100 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
-                    this.value = '';
-                    return;
-                }
-                
-                // Vérifier le type de fichier
-                if (!file.type.match('image.*')) {
-                    alert('Veuillez sélectionner un fichier image.');
-                    this.value = '';
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    avatarPreview.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-                
-                // Décocher la suppression si un nouveau fichier est sélectionné
-                if (removeAvatarCheckbox) {
-                    removeAvatarCheckbox.checked = false;
-                }
-            } else {
-                // Revenir à l'avatar original
-                avatarPreview.src = originalAvatarSrc;
-            }
+    // Attendre que les modules soient chargés
+    function initializeComponents() {
+        if (typeof ProfileLocationManager === 'undefined' || typeof FormChangeTracker === 'undefined') {
+            setTimeout(initializeComponents, 100);
+            return;
+        }
+        
+        // Initialiser le gestionnaire de localisation
+        const locationManager = new ProfileLocationManager();
+        
+        // Initialiser le tracker de changements
+        const changeTracker = new FormChangeTracker('form[action="{{ route('profile.update') }}"]', {
+            excludeFields: ['_token', 'avatar', 'remove_avatar'],
+            showVisualIndicators: true
         });
-    }
-    
-    // Gérer la case à cocher "Supprimer l'avatar"
-    if (removeAvatarCheckbox) {
-        removeAvatarCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                // Afficher un aperçu de l'avatar par défaut
-                const userName = document.getElementById('name').value || 'Avatar';
-                avatarPreview.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3B82F6&color=fff&size=80`;
-                // Vider l'input file
-                if (avatarInput) {
-                    avatarInput.value = '';
-                }
-            } else {
-                // Revenir à l'avatar original
-                avatarPreview.src = originalAvatarSrc;
-            }
-        });
-    }
-    
-    // Gestion interactive du upload d'avatar (réutilise avatarInput déjà déclaré)
-    const avatarUploadDiv = avatarInput?.parentNode;
-    
-    if (avatarInput && avatarUploadDiv) {
-        // Mettre à jour le texte quand un fichier est sélectionné
-        avatarInput.addEventListener('change', function() {
-            const file = this.files[0];
-            const fileName = file?.name;
-            const textElement = avatarUploadDiv.querySelector('p.text-sm');
+        
+        // Écouter les changements du formulaire
+        const form = document.querySelector('form[action="{{ route('profile.update') }}"]');
+        if (form) {
+            form.addEventListener('formChanged', function(e) {
+                const { hasChanges, changedFields, changedCount } = e.detail;
+                // Les changements sont maintenant détectés silencieusement
+            });
             
-            if (file) {
-                // Vérifier la taille du fichier (100KB max)
-                if (file.size > 100 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
-                    this.value = '';
-                    // Revenir à l'apparence normale
-                    if (textElement) {
-                        textElement.textContent = 'Choisir une image';
-                        textElement.classList.remove('text-green-600');
-                        textElement.classList.add('text-blue-600');
-                    }
-                    const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-                    if (uploadDiv) {
-                        uploadDiv.classList.remove('border-green-300', 'bg-green-50');
-                        uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
-                    }
-                    return;
+            // Intercepter la soumission pour ne traiter que les champs modifiés
+            form.addEventListener('submit', function(e) {
+                if (!changeTracker.hasChanges()) {
+                    e.preventDefault();
+                    alert('Aucun changement détecté. Rien à sauvegarder.');
+                    return false;
                 }
                 
-                // Vérifier le type de fichier
-                if (!file.type.match('image.*')) {
-                    alert('Veuillez sélectionner un fichier image.');
-                    this.value = '';
-                    return;
+                // Ajouter les champs modifiés en tant que données cachées
+                const changedFields = changeTracker.getChangedFields();
+                
+                // Créer un champ caché avec la liste des champs modifiés
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'changed_fields';
+                hiddenInput.value = JSON.stringify(changedFields);
+                form.appendChild(hiddenInput);
+            });
+        }
+        
+        // Hook avec le gestionnaire de localisation pour détecter les changements de localisation
+        if (window.ProfileLocationManager) {
+            // Surcharger les méthodes de changement de mode pour trigger le change tracker
+            const originalSwitchToAutoMode = locationManager.switchToAutoMode;
+            const originalSwitchToManualMode = locationManager.switchToManualMode;
+            
+            locationManager.switchToAutoMode = function(...args) {
+                const result = originalSwitchToAutoMode.apply(this, args);
+                // Donner un délai pour que les champs soient remplis
+                setTimeout(() => changeTracker.checkAllFields(), 100);
+                return result;
+            };
+            
+            locationManager.switchToManualMode = function(...args) {
+                const result = originalSwitchToManualMode.apply(this, args);
+                // Donner un délai pour que les champs soient remplis
+                setTimeout(() => changeTracker.checkAllFields(), 100);
+                return result;
+            };
+        }
+        
+        // Gestion de l'aperçu de l'avatar dans le profil
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const removeAvatarCheckbox = document.querySelector('input[name="remove_avatar"]');
+        const originalAvatarSrc = avatarPreview.src;
+        
+        // Prévisualiser l'image uploadée
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // Vérifier la taille du fichier (100KB max)
+                    if (file.size > 100 * 1024) {
+                        alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    // Vérifier le type de fichier
+                    if (!file.type.match('image.*')) {
+                        alert('Veuillez sélectionner un fichier image.');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    // Décocher la suppression si un nouveau fichier est sélectionné
+                    if (removeAvatarCheckbox) {
+                        removeAvatarCheckbox.checked = false;
+                    }
+                } else {
+                    // Remettre l'image originale si aucun fichier
+                    avatarPreview.src = originalAvatarSrc;
                 }
+            });
+        }
+
+        // Gérer la case à cocher de suppression d'avatar
+        if (removeAvatarCheckbox) {
+            removeAvatarCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Montrer une image par défaut ou vide
+                    avatarPreview.src = '/images/default-avatar.svg';
+                    // Vider le champ de fichier
+                    if (avatarInput) {
+                        avatarInput.value = '';
+                    }
+                } else {
+                    // Remettre l'image originale
+                    avatarPreview.src = originalAvatarSrc;
+                }
+            });
+        }
+
+        // Support drag & drop pour l'avatar
+        const avatarUploadDiv = document.getElementById('avatar-upload');
+        if (avatarUploadDiv) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                avatarUploadDiv.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
             
-            if (fileName) {
-                if (textElement) {
-                    textElement.textContent = fileName;
-                    textElement.classList.remove('text-blue-600');
-                    textElement.classList.add('text-green-600');
-                }
-                // Changer l'apparence pour montrer qu'un fichier est sélectionné
+            ['dragenter', 'dragover'].forEach(eventName => {
+                avatarUploadDiv.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                avatarUploadDiv.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
                 const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
                 if (uploadDiv) {
-                    uploadDiv.classList.remove('border-blue-300', 'bg-blue-50');
-                    uploadDiv.classList.add('border-green-300', 'bg-green-50');
+                    uploadDiv.classList.add('border-blue-500', 'bg-blue-200');
                 }
-            } else {
-                if (textElement) {
-                    textElement.textContent = 'Choisir une image';
-                    textElement.classList.remove('text-green-600');
-                    textElement.classList.add('text-blue-600');
-                }
-                // Revenir à l'apparence normale
+            }
+            
+            function unhighlight() {
                 const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
                 if (uploadDiv) {
-                    uploadDiv.classList.remove('border-green-300', 'bg-green-50');
-                    uploadDiv.classList.add('border-blue-300', 'bg-blue-50');
+                    uploadDiv.classList.remove('border-blue-500', 'bg-blue-200');
                 }
             }
-        });
-        
-        // Effet de survol drag & drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            avatarUploadDiv.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            avatarUploadDiv.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            avatarUploadDiv.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-            if (uploadDiv) {
-                uploadDiv.classList.add('border-blue-500', 'bg-blue-200');
-            }
-        }
-        
-        function unhighlight() {
-            const uploadDiv = avatarUploadDiv.querySelector('div.border-dashed');
-            if (uploadDiv) {
-                uploadDiv.classList.remove('border-blue-500', 'bg-blue-200');
-            }
-        }
-        
-        avatarUploadDiv.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
             
-            if (files.length > 0) {
-                const file = files[0];
+            avatarUploadDiv.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
                 
-                // Vérification immédiate pour le drag & drop
-                if (file.size > 100 * 1024) {
-                    alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
-                    return;
+                if (files.length > 0) {
+                    const file = files[0];
+                    
+                    // Vérification immédiate pour le drag & drop
+                    if (file.size > 100 * 1024) {
+                        alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                        return;
+                    }
+                    
+                    if (!file.type.match('image.*')) {
+                        alert('Veuillez sélectionner un fichier image.');
+                        return;
+                    }
+                    
+                    avatarInput.files = files;
+                    avatarInput.dispatchEvent(new Event('change'));
                 }
-                
-                if (!file.type.match('image.*')) {
-                    alert('Veuillez sélectionner un fichier image.');
-                    return;
-                }
-                
-                avatarInput.files = files;
-                avatarInput.dispatchEvent(new Event('change'));
             }
         }
     }
+    
+    // Initialiser les composants
+    initializeComponents();
 });
 </script>
+
+@vite(['resources/js/profile-location.js', 'resources/js/form-change-tracker.js'])
 
 @endsection

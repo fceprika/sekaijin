@@ -150,7 +150,7 @@ The application uses a MySQL database named `sekaijin`. The User model includes 
 
 // Optional fields (nullable) for enhanced profile
 'first_name', 'last_name', 'birth_date', 'phone',
-'city_residence', 'destination_country', 'bio', 'youtube_username', 'is_verified', 'last_login', 'role'
+'city_residence', 'interest_country', 'bio', 'youtube_username', 'is_verified', 'last_login', 'role'
 ```
 
 Migration files:
@@ -159,7 +159,9 @@ Migration files:
 - `2025_07_01_154430_add_youtube_username_to_users_table.php` - YouTube integration field
 - `2025_07_01_160225_add_unique_index_to_users_name_column.php` - Unique index on name for performance and data integrity
 - `2025_07_02_073153_add_role_to_users_table.php` - User role system implementation
-- `2025_07_03_165927_add_destination_country_to_users_table.php` - Destination country field for French residents
+- `2025_07_03_165927_add_destination_country_to_users_table.php` - Destination country field for French residents (now renamed to interest_country)
+- `2025_07_18_053222_rename_destination_country_to_interest_country_in_users_table.php` - Rename destination_country to interest_country
+- `2025_07_18_054435_add_china_to_countries_table.php` - Add China and ensure Vietnam exists for production
 
 ### Environment Configuration
 
@@ -260,9 +262,10 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - Simplified registration form to essential fields only (pseudo, email, country, password)
 - Added comprehensive user profile management system
 - Complete world country list (195 countries) organized by continent using reusable partial
-- **Destination Country for French Residents**: Conditional field that appears when France is selected as residence country
-- **Smart Country Exclusion**: France automatically excluded from destination options to prevent confusion
-- **Conditional Validation**: `required_if:country_residence,France` ensures proper data collection for French users
+- **Interest Country Field**: Optional field available for all users to select a country of interest
+- **Dynamic Country Selection**: Both registration and profile pages use a select dropdown showing only available countries from the site
+- **Available Countries**: Currently supports Thaïlande 🇹🇭, Japon 🇯🇵, Vietnam 🇻🇳, and Chine 🇨🇳
+- **Non-restrictive**: Interest country can be same as residence country and is completely optional
 - Secure password change functionality with enhanced validation (current_password rule)
 - Made personal information fields optional for flexible user experience
 - Added phone number regex validation for international formats

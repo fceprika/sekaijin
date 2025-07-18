@@ -17,8 +17,8 @@ class ProfileLocationManager {
             countryResidence: document.getElementById('country_residence'),
             cityResidence: document.getElementById('city_residence'),
             cityLoading: document.getElementById('city-loading'),
-            destinationContainer: document.getElementById('destination-country-container'),
-            destinationCountry: document.getElementById('destination_country'),
+            destinationContainer: document.getElementById('interest-country-container'),
+            destinationCountry: document.getElementById('interest_country'),
             autoLocationBtn: document.getElementById('auto-location-btn'),
             manualLocationBtn: document.getElementById('manual-location-btn'),
             autoLocationIcon: document.getElementById('auto-location-icon'),
@@ -43,7 +43,7 @@ class ProfileLocationManager {
         // Écouter les changements de pays
         if (this.elements.countryResidence) {
             this.elements.countryResidence.addEventListener('change', (e) => {
-                this.toggleDestinationCountry();
+                // Plus besoin de gérer l'affichage conditionnel
                 this.loadCitiesForCountryDebounced(e.target.value);
             });
         }
@@ -76,7 +76,7 @@ class ProfileLocationManager {
     }
 
     initializeState() {
-        this.toggleDestinationCountry();
+        // Plus besoin de gérer l'affichage conditionnel
         this.updateButtonStates();
         this.initializeRequiredState();
         
@@ -88,17 +88,9 @@ class ProfileLocationManager {
         }
     }
 
+    // Le champ pays d'intérêt est maintenant toujours visible
     toggleDestinationCountry() {
-        if (!this.elements.countryResidence || !this.elements.destinationContainer) return;
-        
-        if (this.elements.countryResidence.value === 'France') {
-            this.elements.destinationContainer.style.display = 'block';
-        } else {
-            this.elements.destinationContainer.style.display = 'none';
-            if (this.elements.destinationCountry) {
-                this.elements.destinationCountry.value = '';
-            }
-        }
+        // Plus besoin de logique conditionnelle
     }
 
     loadCitiesForCountryDebounced(countryName) {

@@ -43,7 +43,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'destination_country' => 'required|string|in:Thaïlande',
+            'interest_country' => 'nullable|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'password' => [
                 'required',
                 'string',
@@ -57,8 +57,7 @@ class AuthController extends Controller
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
-            'destination_country.required' => 'Veuillez sélectionner un pays d\'intérêt.',
-            'destination_country.in' => 'Seule la Thaïlande est disponible pour le moment.'
+            'interest_country.in' => 'Veuillez sélectionner un pays d\'intérêt valide.'
         ]);
 
         if ($validator->fails()) {
@@ -76,7 +75,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'destination_country' => $request->destination_country,
+            'interest_country' => $request->interest_country,
             'password' => Hash::make($request->password),
         ]);
 
@@ -106,7 +105,7 @@ class AuthController extends Controller
             'user' => [
                 'name' => $user->name,
                 'email' => $user->email,
-                'destination_country' => $user->destination_country
+                'interest_country' => $user->interest_country
             ]
         ]);
     }
