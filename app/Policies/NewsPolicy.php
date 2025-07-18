@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\News;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class NewsPolicy
 {
@@ -26,7 +25,7 @@ class NewsPolicy
         if ($news->is_published) {
             return true;
         }
-        
+
         // Only admins and ambassadors can view unpublished news
         return $user && ($user->isAdmin() || $user->isAmbassador());
     }
@@ -49,7 +48,7 @@ class NewsPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Ambassadors can only update their own news
         return $user->isAmbassador() && $news->author_id === $user->id;
     }
@@ -63,7 +62,7 @@ class NewsPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Ambassadors can only delete their own news
         return $user->isAmbassador() && $news->author_id === $user->id;
     }
@@ -104,7 +103,7 @@ class NewsPolicy
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Ambassadors can publish/unpublish their own news
         return $user->isAmbassador() && $news->author_id === $user->id;
     }

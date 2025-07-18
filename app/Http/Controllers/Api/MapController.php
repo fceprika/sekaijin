@@ -5,86 +5,86 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 class MapController extends Controller
 {
     /**
-     * Proxy for Mapbox API to hide access token
+     * Proxy for Mapbox API to hide access token.
      */
     public function getMapConfig(): JsonResponse
     {
         $accessToken = config('services.mapbox.access_token');
-        
-        if (!$accessToken) {
+
+        if (! $accessToken) {
             return response()->json([
-                'error' => 'Map service not configured'
+                'error' => 'Map service not configured',
             ], 503);
         }
-        
+
         // Return limited public token or use restricted token
         return response()->json([
             'mapStyle' => 'mapbox://styles/mapbox/streets-v12',
             'accessToken' => $accessToken, // In production, use a restricted public token
             'center' => [100.5018, 13.7563], // Thailand center
-            'zoom' => 3
+            'zoom' => 3,
         ]);
     }
-    
+
     /**
      * Geocoding and reverse geocoding API
-     * Supports both text queries (?q=...) and coordinate-based reverse geocoding (?lat=...&lng=...)
+     * Supports both text queries (?q=...) and coordinate-based reverse geocoding (?lat=...&lng=...).
      */
     public function geocode(Request $request): JsonResponse
     {
         $query = $request->input('q');
         $lat = $request->input('lat');
         $lng = $request->input('lng');
-        
+
         // Check if this is a reverse geocoding request (coordinates to address)
         if ($lat && $lng) {
             return $this->reverseGeocode((float) $lat, (float) $lng);
         }
-        
+
         // Forward geocoding (text query to coordinates)
-        if (!$query) {
+        if (! $query) {
             return response()->json(['error' => 'Query parameter (q) or coordinates (lat, lng) required'], 400);
         }
-        
+
         $accessToken = config('services.mapbox.access_token');
-        
-        if (!$accessToken) {
+
+        if (! $accessToken) {
             return response()->json(['error' => 'Service not available'], 503);
         }
-        
+
         // Cache geocoding results for 1 hour
         $cacheKey = 'geocode.' . md5($query);
-        
+
         $result = Cache::remember($cacheKey, 3600, function () use ($query, $accessToken) {
             $response = Http::get("https://api.mapbox.com/geocoding/v5/mapbox.places/{$query}.json", [
                 'access_token' => $accessToken,
                 'limit' => 5,
-                'types' => 'place,locality,neighborhood'
+                'types' => 'place,locality,neighborhood',
             ]);
-            
+
             if ($response->successful()) {
                 return $response->json();
             }
-            
+
             return null;
         });
-        
+
         if ($result) {
             return response()->json($result);
         }
-        
+
         return response()->json(['error' => 'Geocoding failed'], 500);
     }
-    
+
     /**
      * Reverse geocoding using OpenStreetMap Nominatim API
-     * Converts coordinates to address information
+     * Converts coordinates to address information.
      */
     private function reverseGeocode(float $lat, float $lng): JsonResponse
     {
@@ -92,16 +92,16 @@ class MapController extends Controller
         if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
             return response()->json(['error' => 'Invalid coordinates'], 400);
         }
-        
+
         // Cache reverse geocoding results for 1 hour
         $cacheKey = 'reverse_geocode.' . md5("{$lat},{$lng}");
-        
+
         $result = Cache::remember($cacheKey, 3600, function () use ($lat, $lng) {
             try {
                 // Use OpenStreetMap Nominatim for reverse geocoding (free and reliable)
                 $response = Http::timeout(10)
                     ->withHeaders([
-                        'User-Agent' => 'Sekaijin/1.0 (contact@sekaijin.com)'
+                        'User-Agent' => 'Sekaijin/1.0 (contact@sekaijin.com)',
                     ])
                     ->get('https://nominatim.openstreetmap.org/reverse', [
                         'format' => 'json',
@@ -109,37 +109,37 @@ class MapController extends Controller
                         'lon' => $lng,
                         'zoom' => 10,
                         'addressdetails' => 1,
-                        'accept-language' => 'en,fr'
+                        'accept-language' => 'en,fr',
                     ]);
-                
-                if (!$response->successful()) {
+
+                if (! $response->successful()) {
                     return null;
                 }
-                
+
                 $data = $response->json();
-                
-                if (!$data || !isset($data['address'])) {
+
+                if (! $data || ! isset($data['address'])) {
                     return null;
                 }
-                
+
                 $address = $data['address'];
-                
+
                 // Extract city name from various possible fields, preferring Latin characters
-                $city = $address['city'] ?? 
-                       $address['town'] ?? 
-                       $address['village'] ?? 
-                       $address['county'] ?? 
-                       $address['state'] ?? 
+                $city = $address['city'] ??
+                       $address['town'] ??
+                       $address['village'] ??
+                       $address['county'] ??
+                       $address['state'] ??
                        'Ville inconnue';
-                
+
                 // Get country code and name
                 $countryCode = $address['country_code'] ?? '';
                 $countryName = $address['country'] ?? '';
-                
+
                 // Map some common country codes to French names
                 $countryMappings = [
                     'fr' => 'France',
-                    'th' => 'Thaïlande', 
+                    'th' => 'Thaïlande',
                     'jp' => 'Japon',
                     'us' => 'États-Unis',
                     'ca' => 'Canada',
@@ -152,11 +152,11 @@ class MapController extends Controller
                     'au' => 'Australie',
                     'nl' => 'Pays-Bas',
                     'pt' => 'Portugal',
-                    'at' => 'Autriche'
+                    'at' => 'Autriche',
                 ];
-                
+
                 $countryDisplayName = $countryMappings[strtolower($countryCode)] ?? $countryName;
-                
+
                 return [
                     'success' => true,
                     'city' => $city,
@@ -165,27 +165,28 @@ class MapController extends Controller
                     'full_address' => $data['display_name'] ?? '',
                     'coordinates' => [
                         'lat' => $lat,
-                        'lng' => $lng
-                    ]
+                        'lng' => $lng,
+                    ],
                 ];
-                
+
             } catch (\Exception $e) {
                 \Log::warning('Reverse geocoding failed', [
                     'lat' => $lat,
                     'lng' => $lng,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
+
                 return null;
             }
         });
-        
+
         if ($result) {
             return response()->json($result);
         }
-        
+
         return response()->json([
             'success' => false,
-            'error' => 'Unable to determine location from coordinates'
+            'error' => 'Unable to determine location from coordinates',
         ], 500);
     }
 }

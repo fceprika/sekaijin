@@ -25,7 +25,7 @@ class Country extends Model
     }
 
     /**
-     * Get users living in this country (using proper foreign key)
+     * Get users living in this country (using proper foreign key).
      */
     public function users()
     {
@@ -33,7 +33,8 @@ class Country extends Model
     }
 
     /**
-     * Get users living in this country (legacy method for backward compatibility)
+     * Get users living in this country (legacy method for backward compatibility).
+     *
      * @deprecated Use users() instead
      */
     public function usersLegacy()
@@ -42,7 +43,7 @@ class Country extends Model
     }
 
     /**
-     * Get the banner image path for this country
+     * Get the banner image path for this country.
      */
     public function getBannerImage(): ?string
     {

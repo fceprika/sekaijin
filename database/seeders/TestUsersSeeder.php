@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class TestUsersSeeder extends Seeder
@@ -22,7 +21,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Tokyo',
                 'first_name' => 'Pierre',
                 'last_name' => 'Martin',
-                'bio' => 'Expatrié depuis 5 ans au Japon, passionné de culture japonaise.'
+                'bio' => 'Expatrié depuis 5 ans au Japon, passionné de culture japonaise.',
             ],
             [
                 'name' => 'Marie_NYC',
@@ -31,7 +30,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'New York',
                 'first_name' => 'Marie',
                 'last_name' => 'Dupont',
-                'bio' => 'Consultante en finance à Manhattan.'
+                'bio' => 'Consultante en finance à Manhattan.',
             ],
             [
                 'name' => 'Julien_Bangkok',
@@ -40,7 +39,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Bangkok',
                 'first_name' => 'Julien',
                 'last_name' => 'Leroy',
-                'bio' => 'Entrepreneur digital nomade en Asie du Sud-Est.'
+                'bio' => 'Entrepreneur digital nomade en Asie du Sud-Est.',
             ],
             [
                 'name' => 'Sophie_Berlin',
@@ -49,7 +48,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Berlin',
                 'first_name' => 'Sophie',
                 'last_name' => 'Bernard',
-                'bio' => 'Ingénieure logiciel dans une startup berlinoise.'
+                'bio' => 'Ingénieure logiciel dans une startup berlinoise.',
             ],
             [
                 'name' => 'Antoine_Sydney',
@@ -58,7 +57,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Sydney',
                 'first_name' => 'Antoine',
                 'last_name' => 'Moreau',
-                'bio' => 'Chef cuisinier, découvre la gastronomie australienne.'
+                'bio' => 'Chef cuisinier, découvre la gastronomie australienne.',
             ],
             [
                 'name' => 'Camille_Montreal',
@@ -67,7 +66,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Montréal',
                 'first_name' => 'Camille',
                 'last_name' => 'Rousseau',
-                'bio' => 'Étudiante en master à McGill University.'
+                'bio' => 'Étudiante en master à McGill University.',
             ],
             [
                 'name' => 'Lucas_Madrid',
@@ -76,7 +75,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Madrid',
                 'first_name' => 'Lucas',
                 'last_name' => 'Garcia',
-                'bio' => 'Professeur de français dans une école internationale.'
+                'bio' => 'Professeur de français dans une école internationale.',
             ],
             [
                 'name' => 'Emma_Singapore',
@@ -85,7 +84,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Singapour',
                 'first_name' => 'Emma',
                 'last_name' => 'Lefebvre',
-                'bio' => 'Analyste financière dans le secteur bancaire asiatique.'
+                'bio' => 'Analyste financière dans le secteur bancaire asiatique.',
             ],
             [
                 'name' => 'Thomas_London',
@@ -94,7 +93,7 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Londres',
                 'first_name' => 'Thomas',
                 'last_name' => 'Dubois',
-                'bio' => 'Journaliste freelance couvrant l\'actualité européenne.'
+                'bio' => 'Journaliste freelance couvrant l\'actualité européenne.',
             ],
             [
                 'name' => 'Chloé_Tokyo',
@@ -103,8 +102,8 @@ class TestUsersSeeder extends Seeder
                 'city_residence' => 'Osaka',
                 'first_name' => 'Chloé',
                 'last_name' => 'Petit',
-                'bio' => 'Traductrice et guide touristique au Japon.'
-            ]
+                'bio' => 'Traductrice et guide touristique au Japon.',
+            ],
         ];
 
         foreach ($testUsers as $userData) {

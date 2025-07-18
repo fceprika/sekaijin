@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Models\Country;
 use App\Models\Article;
-use App\Models\News;
+use App\Models\Country;
 use App\Models\Event;
+use App\Models\News;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class SitemapController extends Controller
 {
     /**
-     * Generate sitemap.xml
+     * Generate sitemap.xml.
      */
     public function index(): Response
     {
@@ -26,29 +25,29 @@ class SitemapController extends Controller
 
             return response($sitemap, 200, [
                 'Content-Type' => 'application/xml',
-                'Cache-Control' => 'public, max-age=3600'
+                'Cache-Control' => 'public, max-age=3600',
             ]);
         } catch (\Exception $e) {
             \Log::error('Sitemap generation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             // Return a minimal sitemap in case of error
             $fallbackSitemap = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
             $fallbackSitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
             $fallbackSitemap .= '    <url><loc>' . url('/') . '</loc><changefreq>daily</changefreq><priority>1.0</priority></url>' . "\n";
             $fallbackSitemap .= '</urlset>';
-            
+
             return response($fallbackSitemap, 200, [
                 'Content-Type' => 'application/xml',
-                'Cache-Control' => 'public, max-age=300' // Shorter cache for fallback
+                'Cache-Control' => 'public, max-age=300', // Shorter cache for fallback
             ]);
         }
     }
 
     /**
-     * Generate the sitemap XML content
+     * Generate the sitemap XML content.
      */
     private function generateSitemap(): string
     {
@@ -79,7 +78,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * Add static pages to sitemap
+     * Add static pages to sitemap.
      */
     private function addStaticPages(): string
     {
@@ -88,38 +87,38 @@ class SitemapController extends Controller
                 'url' => url('/'),
                 'lastmod' => Carbon::now()->toISOString(),
                 'changefreq' => 'daily',
-                'priority' => '1.0'
+                'priority' => '1.0',
             ],
             [
                 'url' => url('/about'),
                 'lastmod' => Carbon::now()->subDays(7)->toISOString(),
                 'changefreq' => 'monthly',
-                'priority' => '0.8'
+                'priority' => '0.8',
             ],
             [
                 'url' => url('/contact'),
                 'lastmod' => Carbon::now()->subDays(30)->toISOString(),
                 'changefreq' => 'monthly',
-                'priority' => '0.6'
+                'priority' => '0.6',
             ],
             [
                 'url' => url('/conditions-utilisation'),
                 'lastmod' => Carbon::now()->subDays(90)->toISOString(),
                 'changefreq' => 'yearly',
-                'priority' => '0.3'
+                'priority' => '0.3',
             ],
             [
                 'url' => url('/politique-confidentialite'),
                 'lastmod' => Carbon::now()->subDays(90)->toISOString(),
                 'changefreq' => 'yearly',
-                'priority' => '0.3'
+                'priority' => '0.3',
             ],
             [
                 'url' => url('/mentions-legales'),
                 'lastmod' => Carbon::now()->subDays(90)->toISOString(),
                 'changefreq' => 'yearly',
-                'priority' => '0.3'
-            ]
+                'priority' => '0.3',
+            ],
         ];
 
         $xml = '';
@@ -131,7 +130,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * Add countries to sitemap
+     * Add countries to sitemap.
      */
     private function addCountries(): string
     {
@@ -144,7 +143,7 @@ class SitemapController extends Controller
                 'url' => url("/{$country->slug}"),
                 'lastmod' => $country->updated_at->toISOString(),
                 'changefreq' => 'daily',
-                'priority' => '0.9'
+                'priority' => '0.9',
             ]);
 
             // Country sub-pages
@@ -154,7 +153,7 @@ class SitemapController extends Controller
                     'url' => url("/{$country->slug}/{$subPage}"),
                     'lastmod' => $country->updated_at->toISOString(),
                     'changefreq' => 'daily',
-                    'priority' => '0.8'
+                    'priority' => '0.8',
                 ]);
             }
         }
@@ -163,7 +162,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * Add articles to sitemap
+     * Add articles to sitemap.
      */
     private function addArticles(): string
     {
@@ -181,7 +180,7 @@ class SitemapController extends Controller
                 'url' => url("/{$countrySlug}/blog/{$article->slug}"),
                 'lastmod' => $article->updated_at->toISOString(),
                 'changefreq' => 'monthly',
-                'priority' => '0.7'
+                'priority' => '0.7',
             ]);
         }
 
@@ -189,7 +188,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * Add news to sitemap
+     * Add news to sitemap.
      */
     private function addNews(): string
     {
@@ -207,7 +206,7 @@ class SitemapController extends Controller
                 'url' => url("/{$countrySlug}/actualites/{$newsItem->slug}"),
                 'lastmod' => $newsItem->updated_at->toISOString(),
                 'changefreq' => 'monthly',
-                'priority' => '0.7'
+                'priority' => '0.7',
             ]);
         }
 
@@ -215,7 +214,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * Add events to sitemap
+     * Add events to sitemap.
      */
     private function addEvents(): string
     {
@@ -234,7 +233,7 @@ class SitemapController extends Controller
                 'url' => url("/{$countrySlug}/evenements/{$event->slug}"),
                 'lastmod' => $event->updated_at->toISOString(),
                 'changefreq' => 'weekly',
-                'priority' => '0.6'
+                'priority' => '0.6',
             ]);
         }
 
@@ -242,24 +241,24 @@ class SitemapController extends Controller
     }
 
     /**
-     * Add user profiles to sitemap
+     * Add user profiles to sitemap.
      */
     private function addUserProfiles(): string
     {
         try {
             // Only include verified users or users with significant activity
             $users = User::select('name', 'name_slug', 'updated_at')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('is_verified', true)
-                          ->orWhereHas('articles', function($q) {
-                              $q->where('is_published', true);
-                          })
-                          ->orWhereHas('news', function($q) {
-                              $q->where('is_published', true);
-                          })
-                          ->orWhereHas('events', function($q) {
-                              $q->where('is_published', true);
-                          });
+                        ->orWhereHas('articles', function ($q) {
+                            $q->where('is_published', true);
+                        })
+                        ->orWhereHas('news', function ($q) {
+                            $q->where('is_published', true);
+                        })
+                        ->orWhereHas('events', function ($q) {
+                            $q->where('is_published', true);
+                        });
                 })
                 ->orderBy('updated_at', 'desc')
                 ->limit(1000) // Limit to avoid too many URLs
@@ -273,43 +272,44 @@ class SitemapController extends Controller
                     'url' => url("/membre/{$slug}"),
                     'lastmod' => $user->updated_at->toISOString(),
                     'changefreq' => 'weekly',
-                    'priority' => '0.5'
+                    'priority' => '0.5',
                 ]);
             }
 
             return $xml;
         } catch (\Exception $e) {
             \Log::warning('Failed to add user profiles to sitemap', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return '';
         }
     }
 
     /**
-     * Create a URL entry for the sitemap
+     * Create a URL entry for the sitemap.
      */
     private function createUrlEntry(array $data): string
     {
         $xml = "    <url>\n";
-        $xml .= "        <loc>" . htmlspecialchars($data['url']) . "</loc>\n";
-        $xml .= "        <lastmod>" . $data['lastmod'] . "</lastmod>\n";
-        $xml .= "        <changefreq>" . $data['changefreq'] . "</changefreq>\n";
-        $xml .= "        <priority>" . $data['priority'] . "</priority>\n";
+        $xml .= '        <loc>' . htmlspecialchars($data['url']) . "</loc>\n";
+        $xml .= '        <lastmod>' . $data['lastmod'] . "</lastmod>\n";
+        $xml .= '        <changefreq>' . $data['changefreq'] . "</changefreq>\n";
+        $xml .= '        <priority>' . $data['priority'] . "</priority>\n";
         $xml .= "    </url>\n";
 
         return $xml;
     }
 
     /**
-     * Clear sitemap cache
+     * Clear sitemap cache.
      */
     public function clearCache()
     {
         Cache::forget('sitemap.xml');
-        
+
         return response()->json([
-            'message' => 'Sitemap cache cleared successfully'
+            'message' => 'Sitemap cache cleared successfully',
         ]);
     }
 }

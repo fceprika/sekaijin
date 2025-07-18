@@ -2,16 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Country;
-use App\Models\News;
-use App\Models\Article;
-use App\Models\Event;
 use App\Models\User;
 use App\Services\CommunityStatsService;
 use App\Services\ContentCacheService;
 use App\Services\SeoService;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
@@ -21,17 +16,17 @@ class HomeController extends Controller
             // Cache configuration - 15 minutes for content, 5 minutes for stats
             $contentCacheTime = 15 * 60; // 15 minutes
             $statsCacheTime = 5 * 60; // 5 minutes
-            
+
             // Get Thailand content using optimized cache service
             $thailandContent = ContentCacheService::getThailandContent();
-            
-            if (!$thailandContent['country']) {
+
+            if (! $thailandContent['country']) {
                 throw new \Exception('Thailand country not found');
             }
-            
+
             // Get cached community stats
             $communityStats = CommunityStatsService::getCommunityStats();
-            
+
             // Cache recent members (short cache for freshness)
             $recentMembers = Cache::remember('members.recent', $statsCacheTime, function () {
                 return User::select('id', 'name', 'avatar', 'country_residence', 'city_residence', 'created_at')
@@ -39,12 +34,12 @@ class HomeController extends Controller
                     ->take(3)
                     ->get();
             });
-            
+
             // Generate SEO data for homepage
-            $seoService = new SeoService();
+            $seoService = new SeoService;
             $seoData = $seoService->generateSeoData('home');
             $structuredData = $seoService->generateStructuredData('home');
-            
+
             return view('home', [
                 'thailand' => $thailandContent['country'],
                 'thailandNews' => $thailandContent['news'],
@@ -56,11 +51,11 @@ class HomeController extends Controller
                 'seoData' => $seoData,
                 'structuredData' => $structuredData,
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('HomeController error: ' . $e->getMessage());
-            
-            // Return fallback data 
+
+            // Return fallback data
             $fallbackData = [
                 'thailand' => null,
                 'thailandNews' => collect(),
@@ -70,28 +65,28 @@ class HomeController extends Controller
                 'thailandMembers' => 0,
                 'recentMembers' => collect(),
             ];
-            
+
             // Add SEO data even for fallback
-            $seoService = new SeoService();
+            $seoService = new SeoService;
             $fallbackData['seoData'] = $seoService->generateSeoData('home');
             $fallbackData['structuredData'] = $seoService->generateStructuredData('home');
-            
+
             return view('home', $fallbackData);
         }
     }
-    
+
     /**
-     * Clear homepage cache (useful for admin actions)
+     * Clear homepage cache (useful for admin actions).
      */
     public function clearCache()
     {
         // Clear all cache services
         ContentCacheService::clearCache();
         CommunityStatsService::clearCache();
-        
+
         // Clear remaining specific caches
         Cache::forget('members.recent');
-        
+
         return response()->json(['message' => 'All homepage caches cleared successfully']);
     }
 }

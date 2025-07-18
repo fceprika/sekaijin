@@ -28,13 +28,13 @@ class SyncAnnouncementCountries extends Command
     public function handle()
     {
         $this->info('Synchronisation des country_id pour les annonces...');
-        
+
         $announcements = Announcement::whereNull('country_id')->get();
         $updated = 0;
-        
+
         foreach ($announcements as $announcement) {
             $country = Country::where('name_fr', $announcement->country)->first();
-            
+
             if ($country) {
                 $announcement->update(['country_id' => $country->id]);
                 $updated++;
@@ -42,9 +42,9 @@ class SyncAnnouncementCountries extends Command
                 $this->warn("Pays non trouvé pour l'annonce {$announcement->id}: {$announcement->country}");
             }
         }
-        
+
         $this->info("Synchronisation terminée. {$updated} annonce(s) mise(s) à jour.");
-        
+
         return 0;
     }
 }

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Event;
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Services\SeoService;
 
 class PublicProfileController extends Controller
@@ -14,21 +13,21 @@ class PublicProfileController extends Controller
         // Recherche optimisée avec le champ indexé name_slug
         $slug = strtolower(trim($name));
         $user = User::where('name_slug', $slug)->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             abort(404, 'Membre introuvable');
         }
-        
+
         // Vérifier si le profil est public ou si l'utilisateur est connecté
-        if (!$user->is_public_profile && !auth()->check()) {
+        if (! $user->is_public_profile && ! auth()->check()) {
             return redirect()->route('member.invitation');
         }
-        
+
         // Redirection canonique vers l'URL en minuscules si nécessaire
         if ($name !== $user->name_slug) {
             return redirect()->route(User::ROUTE_PUBLIC_PROFILE, $user->name_slug, 301);
         }
-        
+
         // Get user's created events (upcoming and past)
         $upcomingEvents = Event::where('organizer_id', $user->id)
             ->published()
@@ -36,7 +35,7 @@ class PublicProfileController extends Controller
             ->with(['country'])
             ->orderBy('start_date', 'asc')
             ->get();
-            
+
         $pastEvents = Event::where('organizer_id', $user->id)
             ->published()
             ->where('start_date', '<', now())
@@ -44,12 +43,12 @@ class PublicProfileController extends Controller
             ->orderBy('start_date', 'desc')
             ->take(5)
             ->get();
-        
+
         // Generate SEO data for profile page
-        $seoService = new SeoService();
+        $seoService = new SeoService;
         $seoData = $seoService->generateSeoData('profile', $user);
         $structuredData = $seoService->generateStructuredData('profile', $user);
-        
+
         return view('profile.public', compact('user', 'upcomingEvents', 'pastEvents', 'seoData', 'structuredData'));
     }
 }

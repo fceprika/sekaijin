@@ -8,22 +8,22 @@ use Psr\Log\LoggerInterface;
 class CityDataService
 {
     /**
-     * Logger instance
+     * Logger instance.
      */
     private LoggerInterface $logger;
 
     /**
-     * Cache key for the complete cities dataset
+     * Cache key for the complete cities dataset.
      */
     private const CITIES_CACHE_KEY = 'cities_dataset_complete';
 
     /**
-     * Cache duration in seconds (24 hours)
+     * Cache duration in seconds (24 hours).
      */
     private const CACHE_DURATION = 86400;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct(LoggerInterface $logger)
     {
@@ -31,9 +31,7 @@ class CityDataService
     }
 
     /**
-     * Get the complete cities dataset from cache or load it
-     * 
-     * @return array
+     * Get the complete cities dataset from cache or load it.
      */
     public function getCitiesDataset(): array
     {
@@ -43,17 +41,15 @@ class CityDataService
     }
 
     /**
-     * Get cities for a specific country
-     * 
-     * @param string $country
+     * Get cities for a specific country.
+     *
      * @param bool $withCoordinates Whether to include coordinates in the response
-     * @return array
      */
     public function getCitiesForCountry(string $country, bool $withCoordinates = false): array
     {
         $dataset = $this->getCitiesDataset();
-        
-        if (!isset($dataset[$country])) {
+
+        if (! isset($dataset[$country])) {
             return [];
         }
 
@@ -63,23 +59,19 @@ class CityDataService
         }
 
         // Extract just the city names from the objects
-        return array_map(function($city) {
+        return array_map(function ($city) {
             return $city['name'];
         }, $dataset[$country]);
     }
 
     /**
-     * Get coordinates for a specific city in a country
-     * 
-     * @param string $country
-     * @param string $city
-     * @return array|null
+     * Get coordinates for a specific city in a country.
      */
     public function getCityCoordinates(string $country, string $city): ?array
     {
         $dataset = $this->getCitiesDataset();
-        
-        if (!isset($dataset[$country])) {
+
+        if (! isset($dataset[$country])) {
             return null;
         }
 
@@ -88,7 +80,7 @@ class CityDataService
             if ($cityData['name'] === $city) {
                 return [
                     'lat' => $cityData['lat'],
-                    'lng' => $cityData['lng']
+                    'lng' => $cityData['lng'],
                 ];
             }
         }
@@ -97,20 +89,17 @@ class CityDataService
     }
 
     /**
-     * Get list of supported countries
-     * 
-     * @return array
+     * Get list of supported countries.
      */
     public function getSupportedCountries(): array
     {
         $dataset = $this->getCitiesDataset();
+
         return array_keys($dataset);
     }
 
     /**
-     * Clear the cities dataset cache
-     * 
-     * @return void
+     * Clear the cities dataset cache.
      */
     public function clearCache(): void
     {
@@ -118,34 +107,35 @@ class CityDataService
     }
 
     /**
-     * Load cities data from JSON file
-     * 
-     * @return array
+     * Load cities data from JSON file.
      */
     private function loadCitiesFromFile(): array
     {
         try {
             $jsonPath = database_path('data/cities_data.json');
-            
-            if (!file_exists($jsonPath)) {
+
+            if (! file_exists($jsonPath)) {
                 $this->logger->warning('Cities data file not found: ' . $jsonPath);
+
                 return [];
             }
-            
+
             $jsonContent = file_get_contents($jsonPath);
             $citiesData = json_decode($jsonContent, true);
-            
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->logger->warning('Failed to decode cities JSON: ' . json_last_error_msg());
+
                 return [];
             }
-            
+
             return $citiesData;
-            
+
         } catch (\Exception $e) {
             $this->logger->warning('Failed to load cities dataset', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }

@@ -9,23 +9,23 @@ return new class extends Migration
     public function up()
     {
         // Add slug to news table (if not already exists)
-        if (!Schema::hasColumn('news', 'slug')) {
+        if (! Schema::hasColumn('news', 'slug')) {
             Schema::table('news', function (Blueprint $table) {
                 $table->string('slug')->unique()->after('title');
             });
         }
-        
+
         // Add slug to articles table (if not already exists)
-        if (!Schema::hasColumn('articles', 'slug')) {
+        if (! Schema::hasColumn('articles', 'slug')) {
             Schema::table('articles', function (Blueprint $table) {
                 $table->string('slug')->unique()->after('title');
             });
         }
-        
+
         // Populate slugs for existing records
         $this->populateSlugs();
     }
-    
+
     private function populateSlugs()
     {
         // Populate news slugs in chunks for better memory management
@@ -35,7 +35,7 @@ return new class extends Migration
                 $item->update(['slug' => $slug]);
             }
         });
-        
+
         // Populate article slugs in chunks for better memory management
         \App\Models\Article::whereNull('slug')->orWhere('slug', '')->chunk(100, function ($articlesChunk) {
             foreach ($articlesChunk as $item) {
@@ -44,31 +44,32 @@ return new class extends Migration
             }
         });
     }
-    
+
     private function generateSlug($title, $table, $excludeId = null)
     {
         $baseSlug = \Illuminate\Support\Str::slug($title);
         if (empty($baseSlug)) {
             $baseSlug = 'item-' . time();
         }
-        
+
         $slug = $baseSlug;
         $counter = 1;
-        
+
         while ($this->slugExists($slug, $table, $excludeId)) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
         }
-        
+
         return $slug;
     }
-    
+
     private function slugExists($slug, $table, $excludeId = null)
     {
         $query = \Illuminate\Support\Facades\DB::table($table)->where('slug', $slug);
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
+
         return $query->exists();
     }
 
@@ -77,7 +78,7 @@ return new class extends Migration
         Schema::table('news', function (Blueprint $table) {
             $table->dropColumn('slug');
         });
-        
+
         if (Schema::hasColumn('articles', 'slug')) {
             Schema::table('articles', function (Blueprint $table) {
                 $table->dropColumn('slug');

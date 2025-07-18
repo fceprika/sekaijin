@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Country;
-use App\Models\User;
-use App\Models\News;
 use App\Models\Article;
+use App\Models\Country;
 use App\Models\Event;
+use App\Models\News;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class ContentSeeder extends Seeder
 {
@@ -20,12 +19,13 @@ class ContentSeeder extends Seeder
     {
         // Get Thailand only for focused content
         $thailand = Country::where('slug', 'thailande')->first();
-        
-        if (!$thailand) {
+
+        if (! $thailand) {
             $this->command->warn('Thailand country not found. Please run the countries seeder first.');
+
             return;
         }
-        
+
         // Get or create sample users
         $admin = User::updateOrCreate(
             ['email' => 'admin@sekaijin.fr'],

@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'name_slug')) {
+            if (! Schema::hasColumn('users', 'name_slug')) {
                 $table->string('name_slug')->nullable()->after('name');
             }
         });
-        
+
         // Add index separately with try-catch
         try {
             Schema::table('users', function (Blueprint $table) {
@@ -38,7 +38,7 @@ return new class extends Migration
             } catch (\Exception $e) {
                 // Index might not exist, ignore error
             }
-            
+
             if (Schema::hasColumn('users', 'name_slug')) {
                 $table->dropColumn('name_slug');
             }

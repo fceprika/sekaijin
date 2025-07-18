@@ -23,20 +23,22 @@ Route::get('/sitemap/clear', [App\Http\Controllers\SitemapController::class, 'cl
 Route::get('/maintenance-status', function () {
     return response()->json([
         'maintenance_mode' => config('app.maintenance_mode', false),
-        'message' => config('app.maintenance_mode', false) ? 'Site en maintenance' : 'Site disponible'
+        'message' => config('app.maintenance_mode', false) ? 'Site en maintenance' : 'Site disponible',
     ]);
 })->name('maintenance.status');
 
 // Temporary cache clear route
 Route::get('/clear-cache', function () {
     \Illuminate\Support\Facades\Cache::flush();
+
     return response()->json(['message' => 'Cache cleared']);
 });
 
 Route::get('/about', function () {
-    $seoService = new \App\Services\SeoService();
+    $seoService = new \App\Services\SeoService;
     $seoData = $seoService->generateSeoData('about');
     $structuredData = $seoService->generateStructuredData('about');
+
     return view('about', compact('seoData', 'structuredData'));
 });
 
@@ -45,9 +47,10 @@ Route::get('/services', function () {
 });
 
 Route::get('/contact', function () {
-    $seoService = new \App\Services\SeoService();
+    $seoService = new \App\Services\SeoService;
     $seoData = $seoService->generateSeoData('contact');
     $structuredData = $seoService->generateStructuredData('contact');
+
     return view('contact', compact('seoData', 'structuredData'));
 })->name('contact');
 
@@ -102,7 +105,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profil', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/clear-location', [App\Http\Controllers\ProfileController::class, 'clearLocation'])->name('profile.clear-location');
-    
+
     // Articles management routes
     Route::get('/mes-articles', [App\Http\Controllers\ArticleController::class, 'myArticles'])->name('articles.my-articles');
     Route::get('/articles/create', [App\Http\Controllers\ArticleController::class, 'create'])->name('articles.create');
@@ -117,7 +120,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function () {
     // Dashboard admin
     Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
-    
+
     // Gestion des articles
     Route::get('/articles', [App\Http\Controllers\AdminController::class, 'articles'])->name('articles');
     Route::get('/articles/create', [App\Http\Controllers\AdminController::class, 'createArticle'])->name('articles.create');
@@ -128,7 +131,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::get('/articles/drafts', [App\Http\Controllers\AdminController::class, 'drafts'])->name('articles.drafts');
     Route::delete('/articles/{article:id}', [App\Http\Controllers\AdminController::class, 'destroyArticle'])->name('articles.destroy');
     Route::post('/articles/bulk', [App\Http\Controllers\AdminController::class, 'bulkArticleAction'])->name('articles.bulk');
-    
+
     // Gestion des actualités
     Route::get('/news', [App\Http\Controllers\AdminController::class, 'news'])->name('news');
     Route::get('/news/create', [App\Http\Controllers\AdminController::class, 'createNews'])->name('news.create');
@@ -137,14 +140,14 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->grou
     Route::put('/news/{news:id}', [App\Http\Controllers\AdminController::class, 'updateNews'])->name('news.update');
     Route::delete('/news/{news:id}', [App\Http\Controllers\AdminController::class, 'destroyNews'])->name('news.destroy');
     Route::post('/news/bulk', [App\Http\Controllers\AdminController::class, 'bulkNewsAction'])->name('news.bulk');
-    
+
     // Upload d'images pour TinyMCE
     Route::post('/upload-image', [App\Http\Controllers\AdminController::class, 'uploadImage'])->name('upload.image');
-    
+
     // Preview routes
     Route::post('/articles/preview', [App\Http\Controllers\AdminController::class, 'previewArticle'])->name('articles.preview');
     Route::post('/news/preview', [App\Http\Controllers\AdminController::class, 'previewNews'])->name('news.preview');
-    
+
     // Gestion des annonces
     Route::get('/announcements', [App\Http\Controllers\Admin\AnnouncementController::class, 'index'])->name('announcements');
     Route::get('/announcements/{announcement}', [App\Http\Controllers\Admin\AnnouncementController::class, 'show'])->name('announcements.show');
@@ -190,7 +193,7 @@ Route::prefix('{country}')->middleware('country')->group(function () {
     Route::get('/communaute', [App\Http\Controllers\CountryController::class, 'communaute'])->name('country.communaute');
     Route::get('/evenements', [App\Http\Controllers\CountryController::class, 'evenements'])->name('country.evenements');
     Route::get('/evenements/{event}', [App\Http\Controllers\CountryController::class, 'showEvent'])->name('country.event.show');
-    
+
     // Routes des annonces par pays
     Route::get('/annonces', [App\Http\Controllers\CountryController::class, 'annonces'])->name('country.annonces');
     Route::get('/annonces/create', [App\Http\Controllers\CountryController::class, 'createAnnouncement'])->name('country.announcements.create')->middleware('auth');

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserArticleRequest;
 use App\Models\Article;
 use App\Models\Country;
-use App\Http\Requests\StoreUserArticleRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
@@ -20,7 +18,7 @@ class ArticleController extends Controller
         $categories = collect(config('content.article_categories'))->mapWithKeys(function ($category, $key) {
             return [$key => $category['label']];
         })->all();
-        
+
         return view('articles.create', compact('countries', 'categories'));
     }
 
@@ -52,7 +50,7 @@ class ArticleController extends Controller
     public function edit(Article $article)
     {
         // Vérifier que l'utilisateur est l'auteur ou un admin
-        if ($article->author_id !== Auth::id() && !Auth::user()->isAdmin()) {
+        if ($article->author_id !== Auth::id() && ! Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à modifier cet article.');
         }
 
@@ -70,7 +68,7 @@ class ArticleController extends Controller
     public function update(StoreUserArticleRequest $request, Article $article)
     {
         // Vérifier que l'utilisateur est l'auteur ou un admin
-        if ($article->author_id !== Auth::id() && !Auth::user()->isAdmin()) {
+        if ($article->author_id !== Auth::id() && ! Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à modifier cet article.');
         }
 
@@ -93,7 +91,7 @@ class ArticleController extends Controller
     public function preview(Article $article)
     {
         // Vérifier que l'utilisateur est l'auteur ou un admin
-        if ($article->author_id !== Auth::id() && !Auth::user()->isAdmin()) {
+        if ($article->author_id !== Auth::id() && ! Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à prévisualiser cet article.');
         }
 
@@ -119,7 +117,7 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         // Vérifier que l'utilisateur est l'auteur ou un admin
-        if ($article->author_id !== Auth::id() && !Auth::user()->isAdmin()) {
+        if ($article->author_id !== Auth::id() && ! Auth::user()->isAdmin()) {
             abort(403, 'Vous n\'êtes pas autorisé à supprimer cet article.');
         }
 
@@ -136,6 +134,7 @@ class ArticleController extends Controller
     {
         $wordCount = str_word_count(strip_tags($content));
         $readingTime = ceil($wordCount / 200); // 200 mots par minute
+
         return max(1, min($readingTime, 60)); // Entre 1 et 60 minutes
     }
 }

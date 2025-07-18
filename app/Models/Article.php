@@ -41,7 +41,7 @@ class Article extends Model
     }
 
     /**
-     * Get the country that owns the article
+     * Get the country that owns the article.
      */
     public function country()
     {
@@ -49,7 +49,7 @@ class Article extends Model
     }
 
     /**
-     * Get the author of the article
+     * Get the author of the article.
      */
     public function author()
     {
@@ -57,17 +57,17 @@ class Article extends Model
     }
 
     /**
-     * Scope for published articles
+     * Scope for published articles.
      */
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
-                     ->whereNotNull('published_at')
-                     ->where('published_at', '<=', now());
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
     }
 
     /**
-     * Scope for featured articles
+     * Scope for featured articles.
      */
     public function scopeFeatured($query)
     {
@@ -75,7 +75,7 @@ class Article extends Model
     }
 
     /**
-     * Scope for a specific country
+     * Scope for a specific country.
      */
     public function scopeForCountry($query, $countryId)
     {
@@ -83,83 +83,87 @@ class Article extends Model
     }
 
     /**
-     * Get reading time in human readable format
+     * Get reading time in human readable format.
      */
     public function getReadingTimeAttribute($value)
     {
-        if (!$value) return null;
+        if (! $value) {
+            return null;
+        }
+
         return $value . ' min de lecture';
     }
 
     /**
-     * Generate a unique slug from title
+     * Generate a unique slug from title.
      */
     public static function generateSlug($title, $id = null)
     {
         $baseSlug = \Illuminate\Support\Str::slug($title);
         $slug = $baseSlug;
         $counter = 1;
-        
-        while (self::where('slug', $slug)->when($id, function($query, $id) {
+
+        while (self::where('slug', $slug)->when($id, function ($query, $id) {
             return $query->where('id', '!=', $id);
         })->exists()) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
         }
-        
+
         return $slug;
     }
 
     /**
-     * Boot the model events
+     * Boot the model events.
      */
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($article) {
             if (empty($article->slug)) {
                 $article->slug = self::generateSlug($article->title);
             }
         });
-        
+
         static::updating(function ($article) {
             // Regenerate slug if title changed OR if slug is empty OR if force update is requested
             if ($article->isDirty('title') && (empty($article->slug) || $article->shouldForceSlugUpdate())) {
                 $article->slug = self::generateSlug($article->title, $article->id);
             }
         });
-        
+
         // Invalidate content cache when article is created, updated, or deleted
         static::created(function ($article) {
             \App\Services\ContentCacheService::invalidateContentCache();
         });
-        
+
         static::updated(function ($article) {
             \App\Services\ContentCacheService::invalidateContentCache();
         });
-        
+
         static::deleted(function ($article) {
             \App\Services\ContentCacheService::invalidateContentCache();
         });
     }
-    
+
     /**
-     * Temporary flag for forcing slug update (not persisted to DB)
+     * Temporary flag for forcing slug update (not persisted to DB).
      */
     private $forceSlugUpdateFlag = false;
-    
+
     /**
-     * Force slug regeneration on next save
+     * Force slug regeneration on next save.
      */
     public function forceSlugUpdate()
     {
         $this->forceSlugUpdateFlag = true;
+
         return $this;
     }
-    
+
     /**
-     * Check if force slug update is requested
+     * Check if force slug update is requested.
      */
     public function shouldForceSlugUpdate()
     {
@@ -167,7 +171,7 @@ class Article extends Model
     }
 
     /**
-     * Get users who favorited this article
+     * Get users who favorited this article.
      */
     public function favoritedBy()
     {
@@ -175,7 +179,7 @@ class Article extends Model
     }
 
     /**
-     * Get favorites for this article
+     * Get favorites for this article.
      */
     public function favorites()
     {
@@ -183,12 +187,14 @@ class Article extends Model
     }
 
     /**
-     * Check if this article is favorited by a specific user
+     * Check if this article is favorited by a specific user.
      */
     public function isFavoritedBy(?\App\Models\User $user): bool
     {
-        if (!$user) return false;
-        
+        if (! $user) {
+            return false;
+        }
+
         return $this->favorites()
             ->where('user_id', $user->id)
             ->exists();

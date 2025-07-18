@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Announcement;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -18,13 +17,15 @@ class AnnouncementSeeder extends Seeder
         // Ne pas exécuter en production
         if (app()->environment('production')) {
             $this->command->warn('Les annonces de test ne sont pas exécutées en production.');
+
             return;
         }
 
         $users = User::all();
-        
+
         if ($users->isEmpty()) {
             $this->command->warn('Aucun utilisateur trouvé. Veuillez d\'abord créer des utilisateurs.');
+
             return;
         }
 
@@ -94,7 +95,7 @@ class AnnouncementSeeder extends Seeder
 
         foreach ($announcements as $announcementData) {
             $user = $users->random();
-            
+
             Announcement::create(array_merge($announcementData, [
                 'user_id' => $user->id,
                 'slug' => Str::slug($announcementData['title']),

@@ -10,8 +10,6 @@ class MaintenanceMode
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -22,22 +20,22 @@ class MaintenanceMode
             if (auth()->check() && auth()->user()->isAdmin()) {
                 return $next($request);
             }
-            
+
             // Allow access to certain routes (login, logout, etc.)
             $allowedRoutes = [
                 'login',
                 'logout',
-                'maintenance.status'
+                'maintenance.status',
             ];
-            
+
             if (in_array($request->route()->getName(), $allowedRoutes)) {
                 return $next($request);
             }
-            
+
             // Show maintenance page
             return response()->view('maintenance', [], 503);
         }
-        
+
         return $next($request);
     }
 }

@@ -31,7 +31,7 @@ class StoreEventRequest extends FormRequest
                 'string',
                 'max:255',
                 'regex:/^[a-z0-9-]+$/',
-                Rule::unique('events', 'slug')->ignore($this->event)
+                Rule::unique('events', 'slug')->ignore($this->event),
             ],
             'description' => 'required|string|max:500',
             'full_description' => 'nullable|string|min:100',

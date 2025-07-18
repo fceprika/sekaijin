@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Services\SeoService;
+use Illuminate\Support\ServiceProvider;
 
 class SeoServiceProvider extends ServiceProvider
 {
@@ -13,7 +13,7 @@ class SeoServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SeoService::class, function ($app) {
-            return new SeoService();
+            return new SeoService;
         });
     }
 

@@ -25,14 +25,14 @@ class Announcement extends Model
         'status',
         'refusal_reason',
         'expiration_date',
-        'views'
+        'views',
     ];
 
     protected $casts = [
         'images' => 'array',
         'price' => 'decimal:2',
         'expiration_date' => 'date',
-        'views' => 'integer'
+        'views' => 'integer',
     ];
 
     protected static function boot()
@@ -50,6 +50,7 @@ class Announcement extends Model
     {
         $slug = Str::slug($title);
         $count = static::whereRaw("slug RLIKE '^{$slug}(-[0-9]+)?$'")->count();
+
         return $count ? "{$slug}-{$count}" : $slug;
     }
 
@@ -66,10 +67,10 @@ class Announcement extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active')
-                    ->where(function ($q) {
-                        $q->whereNull('expiration_date')
-                          ->orWhere('expiration_date', '>=', now());
-                    });
+            ->where(function ($q) {
+                $q->whereNull('expiration_date')
+                    ->orWhere('expiration_date', '>=', now());
+            });
     }
 
     public function scopePending($query)
@@ -99,9 +100,10 @@ class Announcement extends Model
 
     public function getFormattedPriceAttribute()
     {
-        if (!$this->price) {
+        if (! $this->price) {
             return 'Gratuit';
         }
+
         return number_format($this->price, 2, ',', ' ') . ' ' . $this->currency;
     }
 
@@ -111,8 +113,9 @@ class Announcement extends Model
             'vente' => 'Vente',
             'location' => 'Location',
             'colocation' => 'Colocation',
-            'service' => 'Service'
+            'service' => 'Service',
         ];
+
         return $types[$this->type] ?? $this->type;
     }
 
@@ -121,15 +124,16 @@ class Announcement extends Model
         $statuses = [
             'pending' => 'En attente',
             'active' => 'Active',
-            'refused' => 'Refusée'
+            'refused' => 'Refusée',
         ];
+
         return $statuses[$this->status] ?? $this->status;
     }
 
     public function isActive()
     {
-        return $this->status === 'active' && 
-               (!$this->expiration_date || $this->expiration_date->isFuture());
+        return $this->status === 'active' &&
+               (! $this->expiration_date || $this->expiration_date->isFuture());
     }
 
     public function isPending()
