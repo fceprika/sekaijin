@@ -50,6 +50,7 @@ class Country extends Model
             'thailande' => 'images/banners/thailand-banner.jpg',
             'vietnam' => 'images/banners/vietnam_banner.jpg',
             'japon' => 'images/banners/banner_japan.jpg',
+            'chine' => 'images/banners/chine_banner.webp',
         ];
 
         return $bannerMapping[$this->slug] ?? null;
