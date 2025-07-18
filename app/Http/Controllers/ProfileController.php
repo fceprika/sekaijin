@@ -92,6 +92,8 @@ class ProfileController extends Controller
             'city_residence_auto' => 'nullable|string|max:255',
             'detected_latitude' => 'nullable|numeric',
             'detected_longitude' => 'nullable|numeric',
+            'current_country_residence' => 'nullable|string|max:255',
+            'current_city_residence' => 'nullable|string|max:255',
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
@@ -146,15 +148,18 @@ class ProfileController extends Controller
         $city = null;
         
         if ($useAutoMode && $request->filled('country_residence_auto')) {
+            // Mode automatique avec nouvelles données
             $country = $request->country_residence_auto;
             $city = $request->city_residence_auto;
         } elseif ($request->filled('country_residence')) {
+            // Mode manuel avec nouvelles données
             $country = $request->country_residence;
             $city = $request->city_residence;
         } else {
-            // Garder les valeurs actuelles si aucun nouveau pays n'est spécifié
-            $country = $user->country_residence;
-            $city = $user->city_residence;
+            // Aucune nouvelle donnée fournie - utiliser les valeurs cachées de fallback
+            // Ceci préserve les données même si les sections sont masquées
+            $country = $request->input('current_country_residence', $user->country_residence);
+            $city = $request->input('current_city_residence', $user->city_residence);
         }
         
         // Gérer la logique de la checkbox share_location (peut être désactivée)

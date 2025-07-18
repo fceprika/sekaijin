@@ -169,6 +169,30 @@
                             Localisation
                         </h2>
                         
+                        <!-- Champs cachés pour préserver les valeurs actuelles -->
+                        <input type="hidden" name="current_country_residence" value="{{ $user->country_residence }}">
+                        <input type="hidden" name="current_city_residence" value="{{ $user->city_residence }}">
+                        
+                        <!-- Affichage de la localisation actuelle si elle existe -->
+                        @if($user->country_residence || $user->city_residence)
+                            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">📍 Localisation actuelle :</p>
+                                        <p class="text-blue-700 mt-1">
+                                            @if($user->city_residence)
+                                                {{ $user->city_residence }}, 
+                                            @endif
+                                            {{ $user->country_residence ?? 'Non défini' }}
+                                        </p>
+                                    </div>
+                                    <p class="text-xs text-blue-600">
+                                        Cliquez sur un bouton ci-dessous pour modifier
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
+                        
                         <!-- Message de géolocalisation -->
                         <div id="geolocation-message" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                             <div class="flex items-center">
@@ -603,58 +627,63 @@ document.addEventListener('DOMContentLoaded', function() {
         const citySelect = document.getElementById('city_residence');
         const cityLoading = document.getElementById('city-loading');
         
-        if (!countryName) {
-            citySelect.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
-            citySelect.disabled = true;
-            cityLoading.classList.add('hidden');
-            updateLocationSharingState();
-            return;
-        }
-        
-        // Activer le champ ville et afficher le loading
-        citySelect.disabled = false;
-        citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
-        cityLoading.classList.remove('hidden');
-        
-        // Appel AJAX pour récupérer les villes
-        fetch('/api/cities', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ country: countryName })
-        })
-        .then(response => response.json())
-        .then(data => {
-            cityLoading.classList.add('hidden');
-            citySelect.innerHTML = '<option value="">Choisissez une ville</option>';
-            
-            if (data.success && data.cities && data.cities.length > 0) {
-                data.cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    citySelect.appendChild(option);
-                });
-                
-                // Restaurer la valeur sélectionnée si elle existe
-                const currentCity = '{{ old('city_residence', $user->city_residence) }}';
-                if (currentCity) {
-                    citySelect.value = currentCity;
-                }
-            } else {
-                citySelect.innerHTML = '<option value="">Aucune ville trouvée</option>';
+        return new Promise((resolve, reject) => {
+            if (!countryName) {
+                citySelect.innerHTML = '<option value="">Sélectionnez d\'abord un pays</option>';
+                citySelect.disabled = true;
+                cityLoading.classList.add('hidden');
+                updateLocationSharingState();
+                resolve();
+                return;
             }
             
-            // Vérifier l'état de la checkbox après chargement
-            updateLocationSharingState();
-        })
-        .catch(error => {
-            console.error('Erreur lors du chargement des villes:', error);
-            cityLoading.classList.add('hidden');
-            citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
-            updateLocationSharingState();
+            // Activer le champ ville et afficher le loading
+            citySelect.disabled = false;
+            citySelect.innerHTML = '<option value="">Chargement des villes...</option>';
+            cityLoading.classList.remove('hidden');
+            
+            // Appel AJAX pour récupérer les villes
+            fetch('/api/cities', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ country: countryName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                cityLoading.classList.add('hidden');
+                citySelect.innerHTML = '<option value="">Choisissez une ville</option>';
+                
+                if (data.success && data.cities && data.cities.length > 0) {
+                    data.cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                    
+                    // Restaurer la valeur sélectionnée si elle existe
+                    const currentCity = '{{ old('city_residence', $user->city_residence) }}';
+                    if (currentCity) {
+                        citySelect.value = currentCity;
+                    }
+                } else {
+                    citySelect.innerHTML = '<option value="">Aucune ville trouvée</option>';
+                }
+                
+                // Vérifier l'état de la checkbox après chargement
+                updateLocationSharingState();
+                resolve();
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement des villes:', error);
+                cityLoading.classList.add('hidden');
+                citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+                updateLocationSharingState();
+                reject(error);
+            });
         });
     }
     
@@ -829,6 +858,13 @@ document.addEventListener('DOMContentLoaded', function() {
         manualLocationBtn.addEventListener('click', function() {
             switchToManualMode();
             updateButtonStates();
+            
+            // Si une fonction de préchargement existe, l'appeler
+            if (typeof window.preloadExistingLocation === 'function') {
+                setTimeout(() => {
+                    window.preloadExistingLocation();
+                }, 100); // Petit délai pour s'assurer que le DOM est mis à jour
+            }
         });
     }
     
@@ -1173,6 +1209,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialiser l'état au chargement
     initializeRequiredState();
+    
+    // Si l'utilisateur a déjà une localisation, l'afficher par défaut
+    @if($user->country_residence && $user->city_residence)
+        // L'utilisateur a déjà une localisation complète
+        // On pourrait afficher le mode manuel pré-rempli, mais pour éviter la confusion,
+        // on laisse les boutons visibles et l'utilisateur peut choisir de modifier s'il le souhaite
+        
+        // S'assurer que si le pays est déjà sélectionné, les villes sont chargées au bon moment
+        const existingCountry = '{{ $user->country_residence }}';
+        const existingCity = '{{ $user->city_residence }}';
+        
+        // Cette fonction sera appelée si l'utilisateur clique sur "Saisir manuellement"
+        window.preloadExistingLocation = function() {
+            if (existingCountry && document.getElementById('country_residence').value === existingCountry) {
+                // Le pays est déjà sélectionné, s'assurer que la ville est chargée
+                loadCitiesForCountry(existingCountry).then(() => {
+                    // Une fois les villes chargées, sélectionner la ville existante
+                    const citySelect = document.getElementById('city_residence');
+                    if (citySelect && existingCity) {
+                        // Chercher si la ville existe dans les options
+                        for (let option of citySelect.options) {
+                            if (option.value === existingCity) {
+                                citySelect.value = existingCity;
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        };
+    @endif
 });
 </script>
 
