@@ -53,7 +53,8 @@
       "Bash(composer require:*)",
       "Bash(chmod:*)",
       "Bash(./vendor/bin/pint)",
-      "Bash(./vendor/bin/pint:*)"
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }

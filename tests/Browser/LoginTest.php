@@ -26,10 +26,13 @@ class LoginTest extends DuskTestCase
      */
     public function test_user_can_login(): void
     {
+        // Supprimer les utilisateurs existants avec cet email
+        User::where('email', 'test@example.com')->delete();
+        
         // Créer un utilisateur test
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => bcrypt('Password123!'),
+            'password' => 'Password123!',
             'country_residence' => 'Thaïlande',
         ]);
 
@@ -73,7 +76,7 @@ class LoginTest extends DuskTestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => bcrypt('Password123!'),
+            'password' => 'Password123!',
             'country_residence' => 'Thaïlande',
         ]);
 

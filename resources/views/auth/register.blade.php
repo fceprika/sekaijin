@@ -525,7 +525,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(this);
             
             // Ajouter le token CSRF dans la FormData
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfMeta) {
+                throw new Error('CSRF token not found');
+            }
+            const csrfToken = csrfMeta.getAttribute('content');
             formData.append('_token', csrfToken);
             
             // Use explicit URL to avoid route resolution issues in CI
