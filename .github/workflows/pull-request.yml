@@ -199,9 +199,15 @@ jobs:
 
     - name: Setup Dusk environment
       run: |
-        cp .env.example .env
         cp .env.dusk.github .env.dusk.local
-        php artisan key:generate
+        cp .env.dusk.github .env
+        echo "=== VERIFYING ENV FILES ==="
+        echo "Checking .env contents (DB section):"
+        grep -E "^DB_" .env || echo "No DB config found in .env"
+        echo ""
+        echo "Checking .env.dusk.local contents (DB section):"
+        grep -E "^DB_" .env.dusk.local || echo "No DB config found in .env.dusk.local"
+        echo "=== END ENV VERIFICATION ==="
 
     - name: Verify MySQL service
       run: |
@@ -238,10 +244,25 @@ jobs:
     - name: Make ChromeDriver executable
       run: chmod +x vendor/laravel/dusk/bin/chromedriver-linux
 
+    - name: Verify Laravel database configuration
+      run: |
+        echo "=== LARAVEL DB CONFIG CHECK ==="
+        php artisan tinker --execute="
+        echo 'DB Host: ' . config('database.connections.mysql.host');
+        echo ' DB Database: ' . config('database.connections.mysql.database');
+        echo ' DB Username: ' . config('database.connections.mysql.username');
+        echo ' DB Password: ' . (config('database.connections.mysql.password') ? '***SET***' : '***EMPTY***');
+        " --env=dusk.local
+        echo "=== END LARAVEL DB CONFIG ==="
+
     - name: Start Laravel server
       run: php artisan serve --env=dusk.local &
       env:
         APP_URL: http://127.0.0.1:8000
+        DB_HOST: 127.0.0.1
+        DB_DATABASE: sekaijin_dusk
+        DB_USERNAME: root
+        DB_PASSWORD: root
 
     - name: Wait for server to be ready
       run: |
@@ -288,6 +309,10 @@ jobs:
       run: php artisan dusk --env=dusk.local
       env:
         APP_URL: http://127.0.0.1:8000
+        DB_HOST: 127.0.0.1
+        DB_DATABASE: sekaijin_dusk
+        DB_USERNAME: root
+        DB_PASSWORD: root
 
     - name: Upload Dusk screenshots
       uses: actions/upload-artifact@v4
