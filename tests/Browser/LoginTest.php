@@ -28,7 +28,7 @@ class LoginTest extends DuskTestCase
     {
         // Supprimer les utilisateurs existants avec cet email
         User::where('email', 'test@example.com')->delete();
-        
+
         // Créer un utilisateur test
         $user = User::factory()->create([
             'email' => 'test@example.com',
@@ -44,23 +44,23 @@ class LoginTest extends DuskTestCase
                 ->type('password', 'Password123!')
                 ->screenshot('before-login')
                 ->press('Se connecter');
-            
+
             // Wait a bit to see what happens
             $browser->pause(2000);
-            
+
             // Check current URL
             $currentUrl = $browser->driver->getCurrentURL();
             echo "Current URL after login attempt: {$currentUrl}\n";
-            
+
             // Check for any error messages
             if ($browser->element('.bg-red-50') || $browser->element('.text-red-700')) {
                 $errorText = $browser->text('.bg-red-50, .text-red-700');
                 echo "Error message found: {$errorText}\n";
             }
-            
+
             // Take screenshot after login attempt
             $browser->screenshot('after-login-attempt');
-            
+
             // Now continue with assertions
             $this->waitForLocationCI($browser, '/');
             $browser->assertPathIs('/')
