@@ -55,7 +55,7 @@ trait DuskCommonSetup
     protected function waitForElement($browser, string $selector, int $timeout = 5): void
     {
         $browser->waitFor($selector, $timeout)
-                ->waitUntil("document.querySelector('{$selector}') && 
+            ->waitUntil("document.querySelector('{$selector}') && 
                            getComputedStyle(document.querySelector('{$selector}')).display !== 'none'", $timeout);
     }
 

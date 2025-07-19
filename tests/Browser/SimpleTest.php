@@ -14,7 +14,7 @@ class SimpleTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
-                    ->assertSee('Sekaijin');
+                ->assertSee('Sekaijin');
         });
     }
 }

@@ -35,14 +35,14 @@ class LoginTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->visit('/connexion')
-                    ->assertSee('Se connecter')
-                    ->type('email', 'test@example.com')
-                    ->type('password', 'Password123!')
-                    ->press('Se connecter')
-                    ->waitForLocation('/')
-                    ->assertPathIs('/')
-                    ->assertAuthenticated()
-                    ->assertSee($user->name);
+                ->assertSee('Se connecter')
+                ->type('email', 'test@example.com')
+                ->type('password', 'Password123!')
+                ->press('Se connecter')
+                ->waitForLocation('/')
+                ->assertPathIs('/')
+                ->assertAuthenticated()
+                ->assertSee($user->name);
         });
     }
 
@@ -59,14 +59,14 @@ class LoginTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) {
             $browser->logout() // S'assurer qu'on n'est pas connecté
-                    ->visit('/connexion')
-                    ->assertSee('Bon retour !') // Vérifier qu'on est sur la page de connexion
-                    ->type('email', 'test@example.com')
-                    ->type('password', 'WrongPassword')
-                    ->press('Se connecter')
-                    ->waitForText('Les identifiants fournis ne correspondent pas', 5) // More flexible text matching
-                    ->assertPathIs('/connexion') // Doit rester sur la page de connexion
-                    ->assertPresent('.bg-red-50, .text-red-700, [class*="error"]'); // Check for error styling instead of exact text
+                ->visit('/connexion')
+                ->assertSee('Bon retour !') // Vérifier qu'on est sur la page de connexion
+                ->type('email', 'test@example.com')
+                ->type('password', 'WrongPassword')
+                ->press('Se connecter')
+                ->waitForText('Les identifiants fournis ne correspondent pas', 5) // More flexible text matching
+                ->assertPathIs('/connexion') // Doit rester sur la page de connexion
+                ->assertPresent('.bg-red-50, .text-red-700, [class*="error"]'); // Check for error styling instead of exact text
         });
     }
 
@@ -81,10 +81,10 @@ class LoginTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
-                    ->visit('/')
-                    ->assertAuthenticated()
-                    ->assertSee($user->name) // Le nom d'utilisateur est affiché
-                    ->assertPresent('#user-menu-btn'); // Le bouton du menu utilisateur est présent
+                ->visit('/')
+                ->assertAuthenticated()
+                ->assertSee($user->name) // Le nom d'utilisateur est affiché
+                ->assertPresent('#user-menu-btn'); // Le bouton du menu utilisateur est présent
         });
     }
 
@@ -95,8 +95,8 @@ class LoginTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/connexion')
-                    ->assertSeeLink('Mot de passe oublié ?');
-                    // Note: Le lien pointe vers # pour l'instant
+                ->assertSeeLink('Mot de passe oublié ?');
+            // Note: Le lien pointe vers # pour l'instant
         });
     }
 }
