@@ -545,7 +545,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (data.success) {
-                // Compte créé avec succès, passer à l'étape 2
+                // Vérifier si on doit rediriger vers la page de vérification
+                if (data.redirect) {
+                    alert(data.message || 'Compte créé avec succès !');
+                    window.location.href = data.redirect;
+                    return;
+                }
+                
+                // Sinon, passer à l'étape 2 (pour compatibilité)
                 showStep2(data.user);
             } else {
                 // Afficher les erreurs

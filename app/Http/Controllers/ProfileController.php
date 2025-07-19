@@ -551,7 +551,18 @@ class ProfileController extends Controller
         }
 
         if (in_array('is_public_profile', $changedFields)) {
-            $updateData['is_public_profile'] = $request->boolean('is_public_profile', false);
+            $isPublicProfile = $request->boolean('is_public_profile', false);
+            
+            // Vérifier que l'email est vérifié avant de permettre un profil public
+            if ($isPublicProfile && !$user->hasVerifiedEmail()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['is_public_profile' => ['Vous devez vérifier votre email avant de rendre votre profil public.']],
+                    'message' => 'Email non vérifié'
+                ], 422);
+            }
+            
+            $updateData['is_public_profile'] = $isPublicProfile;
         }
 
         // Gestion de la localisation

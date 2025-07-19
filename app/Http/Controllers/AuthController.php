@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -83,7 +85,22 @@ class AuthController extends Controller
         // Connecter l'utilisateur immédiatement
         Auth::login($user);
 
-        // Envoyer l'email de bienvenue (en arrière-plan, ne pas bloquer si échec)
+        // Envoyer l'email de vérification (obligatoire maintenant)
+        try {
+            $user->sendEmailVerificationNotification();
+            \Log::info('Email verification sent successfully', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send verification email', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Envoyer aussi l'email de bienvenue (en arrière-plan, ne pas bloquer si échec)
         try {
             Mail::to($user->email)->send(new WelcomeEmail($user));
             \Log::info('Welcome email sent successfully', [
@@ -96,13 +113,13 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
-            // Ne pas échouer l'inscription si l'email ne peut pas être envoyé
         }
 
-        // Retourner une réponse JSON pour l'étape 2
+        // Retourner une réponse JSON redirigeant vers la page de vérification
         return response()->json([
             'success' => true,
-            'message' => 'Compte créé avec succès !',
+            'message' => 'Compte créé avec succès ! Vérifiez votre email pour activer votre compte.',
+            'redirect' => route('verification.notice'),
             'user' => [
                 'name' => $user->name,
                 'email' => $user->email,
@@ -595,5 +612,41 @@ class AuthController extends Controller
         $offset = (rand(-500, 500) / 10000); // Random offset between -0.05 and 0.05 degrees
 
         return round($coordinate + $offset, 6);
+    }
+
+    /**
+     * Show the email verification notice.
+     */
+    public function showVerifyEmail(Request $request)
+    {
+        return $request->user()->hasVerifiedEmail()
+            ? redirect()->intended('/')
+            : view('auth.verify-email');
+    }
+
+    /**
+     * Verify the user's email address.
+     */
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+
+        event(new Verified($request->user()));
+
+        return redirect('/')->with('status', 'verified');
+    }
+
+    /**
+     * Resend the email verification notification.
+     */
+    public function resendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return back()->with('message', 'Votre email est déjà vérifié.');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('message', 'Email de vérification renvoyé !');
     }
 }

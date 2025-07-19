@@ -3,6 +3,32 @@
 @section('title', 'Accueil - Sekaijin')
 
 @section('content')
+<!-- Email Verification Success Message -->
+@if(session('status') === 'verified')
+    <div class="bg-green-500 text-white relative">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="flex p-2 rounded-lg bg-green-600">
+                        <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </span>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium">🎉 Félicitations !</h3>
+                        <p class="text-green-100 text-sm">Votre email est maintenant vérifié ! Vous avez accès à toutes les fonctionnalités de Sekaijin.</p>
+                    </div>
+                </div>
+                <button type="button" class="flex p-2 rounded-md hover:bg-green-600 focus:outline-none" onclick="this.parentElement.parentElement.parentElement.style.display='none'">
+                    <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+@endif
+
 <!-- Hero Container - Full Height (minus navbar) -->
 <div class="h-screen flex flex-col" style="height: calc(100vh - 80px);">
     <!-- Hero Section with Wallpaper - 70% de la hauteur -->
