@@ -30,13 +30,13 @@ abstract class DuskTestCase extends BaseTestCase
     protected function driver(): RemoteWebDriver
     {
         $isCI = env('CI', false) || env('GITHUB_ACTIONS', false);
-        
+
         $baseArguments = collect([
             $this->shouldStartMaximized() ? '--start-maximized' : '--window-size=1920,1080',
             '--disable-search-engine-choice-screen',
             '--disable-smooth-scrolling',
         ]);
-        
+
         // Add CI-specific Chrome arguments for GitHub Actions
         if ($isCI) {
             $baseArguments = $baseArguments->merge([

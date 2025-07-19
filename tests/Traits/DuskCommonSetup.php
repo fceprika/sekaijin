@@ -55,6 +55,7 @@ trait DuskCommonSetup
     protected function getTimeout(int $default = 5): int
     {
         $isCI = env('CI', false) || env('GITHUB_ACTIONS', false);
+
         return $isCI ? $default * 3 : $default; // Triple timeout for CI
     }
 
