@@ -50,13 +50,23 @@ trait DuskCommonSetup
     }
 
     /**
+     * Get timeout value adjusted for CI environment.
+     */
+    protected function getTimeout(int $default = 5): int
+    {
+        $isCI = env('CI', false) || env('GITHUB_ACTIONS', false);
+        return $isCI ? $default * 3 : $default; // Triple timeout for CI
+    }
+
+    /**
      * Wait for an element to be visible and interactable.
      */
     protected function waitForElement($browser, string $selector, int $timeout = 5): void
     {
-        $browser->waitFor($selector, $timeout)
+        $adjustedTimeout = $this->getTimeout($timeout);
+        $browser->waitFor($selector, $adjustedTimeout)
             ->waitUntil("document.querySelector('{$selector}') && 
-                           getComputedStyle(document.querySelector('{$selector}')).display !== 'none'", $timeout);
+                           getComputedStyle(document.querySelector('{$selector}')).display !== 'none'", $adjustedTimeout);
     }
 
     /**
@@ -64,6 +74,25 @@ trait DuskCommonSetup
      */
     protected function waitForPageLoad($browser, int $timeout = 10): void
     {
-        $browser->waitUntil('document.readyState === "complete"', $timeout);
+        $adjustedTimeout = $this->getTimeout($timeout);
+        $browser->waitUntil('document.readyState === "complete"', $adjustedTimeout);
+    }
+
+    /**
+     * Wait for text to appear with CI-adjusted timeout.
+     */
+    protected function waitForTextCI($browser, string $text, int $timeout = 5): void
+    {
+        $adjustedTimeout = $this->getTimeout($timeout);
+        $browser->waitForText($text, $adjustedTimeout);
+    }
+
+    /**
+     * Wait for location with CI-adjusted timeout.
+     */
+    protected function waitForLocationCI($browser, string $location, int $timeout = 5): void
+    {
+        $adjustedTimeout = $this->getTimeout($timeout);
+        $browser->waitForLocation($location, $adjustedTimeout);
     }
 }

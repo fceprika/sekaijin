@@ -26,19 +26,20 @@ class RegistrationTest extends DuskTestCase
     public function test_user_can_register(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/inscription')
-                ->assertSee('Rejoignez Sekaijin')
-                ->waitFor('#name', 5)
-                ->type('#name', $this->generateTestUsername())
+            $browser->visit('/inscription');
+            $this->waitForPageLoad($browser);
+            $browser->assertSee('Rejoignez Sekaijin');
+            $this->waitForElement($browser, '#name');
+            $browser->type('#name', $this->generateTestUsername())
                 ->type('#email', $this->generateTestEmail())
                 ->type('#password_step1', 'Password123!')
-                ->type('#password_confirmation_step1', 'Password123!')
-                ->waitFor('#terms_step1', 2)
-                ->check('#terms_step1')
-                ->waitFor('#create-account-btn', 2)
-                ->press('Créer mon compte')
-                ->waitFor('#step2', 10) // Attendre l'étape 2
-                ->assertSee('Compte créé avec succès !'); // Test simplifié
+                ->type('#password_confirmation_step1', 'Password123!');
+            $this->waitForElement($browser, '#terms_step1');
+            $browser->check('#terms_step1');
+            $this->waitForElement($browser, '#create-account-btn');
+            $browser->press('Créer mon compte');
+            $this->waitForElement($browser, '#step2', 10);
+            $browser->assertSee('Compte créé avec succès !'); // Test simplifié
         });
     }
 
@@ -54,14 +55,15 @@ class RegistrationTest extends DuskTestCase
         ]);
 
         $this->browse(function (Browser $browser) {
-            $browser->visit('/inscription')
-                ->waitFor('#name', 5)
-                ->type('#name', 'NewUser')
+            $browser->visit('/inscription');
+            $this->waitForPageLoad($browser);
+            $this->waitForElement($browser, '#name');
+            $browser->type('#name', 'NewUser')
                 ->type('#email', 'existing@example.com')
                 ->type('#password_step1', 'Password123!')
-                ->type('#password_confirmation_step1', 'Password123!')
-                ->waitFor('#terms_step1', 2)
-                ->check('#terms_step1')
+                ->type('#password_confirmation_step1', 'Password123!');
+            $this->waitForElement($browser, '#terms_step1');
+            $browser->check('#terms_step1')
                 ->press('Créer mon compte')
                 ->pause(2000) // Wait for form processing
                 ->assertPathIs('/inscription'); // Reste sur la page d'inscription avec erreurs
