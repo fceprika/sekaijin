@@ -189,7 +189,7 @@
                     @auth
                         <div class="relative ml-4">
                             <!-- User Menu Button -->
-                            <button id="user-menu-btn" class="flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition duration-300">
+                            <button id="user-menu-btn" class="flex items-center space-x-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition duration-300" dusk="user-menu">
                                 <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-blue-600">
                                     <img src="{{ Auth::user()->getAvatarUrl() }}" 
                                          alt="Avatar de {{ Auth::user()->name }}"
@@ -236,7 +236,7 @@
                                         @csrf
                                         <button type="submit" class="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition duration-200 text-left">
                                             <i class="fas fa-sign-out-alt mr-3 w-4"></i>
-                                            Se déconnecter
+                                            Déconnexion
                                         </button>
                                     </form>
                                 </div>

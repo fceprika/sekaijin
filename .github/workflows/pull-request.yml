@@ -131,10 +131,114 @@ jobs:
         fi
         echo "✅ No sensitive files found"
 
+  e2e-tests:
+    runs-on: ubuntu-latest
+    name: End-to-End Tests (Dusk)
+    needs: quick-checks
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sekaijin_dusk
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, dom, fileinfo, mysql, gd, zip
+        tools: composer:v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Cache composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.composer/cache
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+
+    - name: Install dependencies
+      run: |
+        composer install --no-progress --prefer-dist --optimize-autoloader
+        npm ci
+
+    - name: Build frontend assets
+      run: npm run build
+
+    - name: Setup Dusk environment
+      run: |
+        cp .env.example .env.dusk.local
+        php artisan key:generate
+        echo "APP_ENV=testing" >> .env.dusk.local
+        echo "DB_HOST=127.0.0.1" >> .env.dusk.local
+        echo "DB_PORT=3306" >> .env.dusk.local
+        echo "DB_DATABASE=sekaijin_dusk" >> .env.dusk.local
+        echo "DB_USERNAME=root" >> .env.dusk.local
+        echo "DB_PASSWORD=root" >> .env.dusk.local
+        echo "SESSION_DRIVER=file" >> .env.dusk.local
+        echo "CACHE_DRIVER=array" >> .env.dusk.local
+        echo "MAIL_MAILER=array" >> .env.dusk.local
+        echo "MAPBOX_ACCESS_TOKEN=" >> .env.dusk.local
+        echo "GOOGLE_ANALYTICS_ID=" >> .env.dusk.local
+        echo "TINYMCE_API_KEY=" >> .env.dusk.local
+
+    - name: Create Dusk database
+      run: |
+        mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS sekaijin_dusk;"
+        mysql -h 127.0.0.1 -u root -proot -e "GRANT ALL PRIVILEGES ON sekaijin_dusk.* TO 'root'@'%';"
+
+    - name: Run Dusk migrations
+      run: php artisan migrate --env=dusk.local --force
+
+    - name: Install ChromeDriver
+      run: php artisan dusk:chrome-driver
+
+    - name: Make ChromeDriver executable
+      run: chmod +x vendor/laravel/dusk/bin/chromedriver-linux
+
+    - name: Start Laravel server
+      run: php artisan serve --env=dusk.local &
+      env:
+        APP_URL: http://127.0.0.1:8000
+
+    - name: Wait for server
+      run: sleep 10
+
+    - name: Run Dusk tests
+      run: php artisan dusk --env=dusk.local
+      env:
+        APP_URL: http://127.0.0.1:8000
+
+    - name: Upload Dusk screenshots
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: dusk-screenshots
+        path: tests/Browser/screenshots/
+
+    - name: Upload Dusk console logs
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: dusk-console-logs
+        path: tests/Browser/console/
+
   pr-summary:
     runs-on: ubuntu-latest
     name: PR Summary
-    needs: [quick-checks, unit-tests, security-check]
+    needs: [quick-checks, unit-tests, security-check, e2e-tests]
     if: always()
     
     steps:
@@ -145,10 +249,11 @@ jobs:
         echo "### Test Results" >> $GITHUB_STEP_SUMMARY
         echo "- **Quick Checks**: ${{ needs.quick-checks.result }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Unit Tests**: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **E2E Tests (Dusk)**: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Security Check**: ${{ needs.security-check.result }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
-        if [[ "${{ needs.quick-checks.result }}" == "success" && "${{ needs.unit-tests.result }}" == "success" && "${{ needs.security-check.result }}" == "success" ]]; then
+        if [[ "${{ needs.quick-checks.result }}" == "success" && "${{ needs.unit-tests.result }}" == "success" && "${{ needs.e2e-tests.result }}" == "success" && "${{ needs.security-check.result }}" == "success" ]]; then
           echo "### ✅ All checks passed! Ready for review." >> $GITHUB_STEP_SUMMARY
         else
           echo "### ❌ Some checks failed. Please review and fix." >> $GITHUB_STEP_SUMMARY

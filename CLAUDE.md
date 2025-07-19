@@ -99,6 +99,15 @@ php artisan test
 
 # Run specific test
 php artisan test --filter TestClassName
+
+# Run End-to-End Tests with Laravel Dusk
+php artisan dusk
+
+# Run specific Dusk test
+php artisan dusk --filter=test_name
+
+# Run Dusk tests for specific file
+php artisan dusk tests/Browser/LoginTest.php
 ```
 
 ### Code Quality
@@ -255,6 +264,35 @@ The Mapbox token is configured in `config/services.php` and used in the interact
   - New migration: `2025_07_12_043816_create_sessions_table.php`
   - Enhanced security and scalability for user sessions
   - Proper session cleanup and management
+
+### End-to-End Testing Implementation (July 19, 2025)
+- **Laravel Dusk Configuration**: Complete E2E testing setup
+  - Configured separate test database (`sekaijin_dusk`) for browser tests
+  - Environment configuration in `.env.dusk.local` with isolated settings
+  - ChromeDriver setup for headless browser automation
+  - Session management configuration for CSRF token handling
+- **Authentication Test Suite**: Comprehensive login/registration testing
+  - `LoginTest.php`: User login, failed login validation, user menu presence, forgot password link
+  - `RegistrationTest.php`: User registration, email validation, password validation, terms acceptance
+  - Proper error message validation with French localization
+  - Form field targeting using explicit CSS selectors
+- **Test Infrastructure**: Professional E2E testing architecture
+  - `SimpleTest.php`: Basic homepage functionality verification
+  - Database truncation for test isolation using `DatabaseTruncation` trait
+  - Country model setup in test fixtures for proper foreign key relationships
+  - Browser screenshot capture for debugging failed tests
+- **Testing Commands**: Complete test suite execution
+  ```bash
+  php artisan dusk                    # Run all E2E tests
+  php artisan dusk --filter=test_name # Run specific test
+  php artisan dusk tests/Browser/LoginTest.php # Run specific test file
+  ```
+- **Test Coverage**: Core application functionality validated
+  - ✅ User authentication (login/logout/registration)
+  - ✅ Form validation and error handling
+  - ✅ Homepage functionality and navigation
+  - ✅ User interface responsiveness and element interaction
+  - ✅ Integrated into GitHub Actions CI/CD pipeline
 
 ### Enhanced User Experience & Content Management
 
