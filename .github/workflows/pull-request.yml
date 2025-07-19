@@ -194,10 +194,16 @@ jobs:
         echo "GOOGLE_ANALYTICS_ID=" >> .env.dusk.local
         echo "TINYMCE_API_KEY=" >> .env.dusk.local
 
+    - name: Verify MySQL service
+      run: |
+        echo "Checking MySQL service health..."
+        mysql -h 127.0.0.1 -u root -proot -e "SELECT 1 as 'MySQL is ready';"
+
     - name: Create Dusk database
       run: |
         mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS sekaijin_dusk;"
         mysql -h 127.0.0.1 -u root -proot -e "GRANT ALL PRIVILEGES ON sekaijin_dusk.* TO 'root'@'%';"
+        mysql -h 127.0.0.1 -u root -proot -e "SHOW DATABASES LIKE 'sekaijin_dusk';"
 
     - name: Run Dusk migrations
       run: php artisan migrate --env=dusk.local --force
@@ -213,8 +219,14 @@ jobs:
       env:
         APP_URL: http://127.0.0.1:8000
 
-    - name: Wait for server
-      run: sleep 10
+    - name: Wait for server to be ready
+      run: |
+        echo "Waiting for Laravel server to start..."
+        timeout 60 bash -c 'until curl -s http://127.0.0.1:8000 > /dev/null; do 
+          echo "Server not ready yet, waiting..."
+          sleep 2
+        done'
+        echo "✅ Server is ready!"
 
     - name: Run Dusk tests
       run: php artisan dusk --env=dusk.local

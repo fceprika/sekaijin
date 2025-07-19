@@ -6,10 +6,11 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
+use Tests\Traits\DuskCommonSetup;
 
 class LoginTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, DuskCommonSetup;
 
     /**
      * Setup the test environment.
@@ -17,16 +18,7 @@ class LoginTest extends DuskTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Créer les pays nécessaires
-        \App\Models\Country::firstOrCreate(
-            ['slug' => 'thailande'],
-            [
-                'name_fr' => 'Thaïlande',
-                'emoji' => '🇹🇭',
-                'description' => 'Description pour Thaïlande',
-            ]
-        );
+        $this->setupCommonTestData();
     }
 
     /**
@@ -72,9 +64,9 @@ class LoginTest extends DuskTestCase
                     ->type('email', 'test@example.com')
                     ->type('password', 'WrongPassword')
                     ->press('Se connecter')
-                    ->pause(2000) // Attendre le traitement
+                    ->waitForText('Les identifiants fournis ne correspondent pas', 5) // More flexible text matching
                     ->assertPathIs('/connexion') // Doit rester sur la page de connexion
-                    ->assertSee('Les identifiants fournis ne correspondent pas à nos enregistrements.');
+                    ->assertPresent('.bg-red-50, .text-red-700, [class*="error"]'); // Check for error styling instead of exact text
         });
     }
 

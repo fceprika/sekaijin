@@ -5,10 +5,11 @@ namespace Tests\Browser;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
+use Tests\Traits\DuskCommonSetup;
 
 class RegistrationTest extends DuskTestCase
 {
-    use DatabaseTruncation;
+    use DatabaseTruncation, DuskCommonSetup;
 
     /**
      * Setup the test environment.
@@ -16,16 +17,7 @@ class RegistrationTest extends DuskTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Créer les pays nécessaires
-        \App\Models\Country::firstOrCreate(
-            ['slug' => 'thailande'],
-            [
-                'name_fr' => 'Thaïlande',
-                'emoji' => '🇹🇭',
-                'description' => 'Description pour Thaïlande',
-            ]
-        );
+        $this->setupCommonTestData();
     }
     /**
      * Test simple d'inscription d'un nouvel utilisateur.
@@ -36,8 +28,8 @@ class RegistrationTest extends DuskTestCase
             $browser->visit('/inscription')
                     ->assertSee('Rejoignez Sekaijin')
                     ->waitFor('#name', 5)
-                    ->type('#name', 'TestUser' . time())
-                    ->type('#email', 'test' . time() . '@example.com')
+                    ->type('#name', $this->generateTestUsername())
+                    ->type('#email', $this->generateTestEmail())
                     ->type('#password_step1', 'Password123!')
                     ->type('#password_confirmation_step1', 'Password123!')
                     ->waitFor('#terms_step1', 2)
@@ -70,7 +62,7 @@ class RegistrationTest extends DuskTestCase
                     ->waitFor('#terms_step1', 2)
                     ->check('#terms_step1')
                     ->press('Créer mon compte')
-                    ->pause(2000) // Attendre le traitement
+                    ->pause(2000) // Wait for form processing
                     ->assertPathIs('/inscription'); // Reste sur la page d'inscription avec erreurs
         });
     }
@@ -90,7 +82,7 @@ class RegistrationTest extends DuskTestCase
                     ->waitFor('#terms_step1', 2)
                     ->check('#terms_step1')
                     ->press('Créer mon compte')
-                    ->pause(2000) // Attendre le traitement
+                    ->pause(2000) // Wait for form processing
                     ->assertPathIs('/inscription'); // Reste sur la page avec erreurs de validation
         });
     }
@@ -109,7 +101,7 @@ class RegistrationTest extends DuskTestCase
                     ->type('#password_confirmation_step1', 'Password123!')
                     // Ne pas cocher les conditions
                     ->press('Créer mon compte')
-                    ->pause(2000) // Attendre le traitement
+                    ->pause(2000) // Wait for form processing
                     ->assertPathIs('/inscription'); // Reste sur la page avec erreur terms
         });
     }
