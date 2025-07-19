@@ -78,6 +78,43 @@ class DebugTest extends DuskTestCase
             
             $browser->screenshot('debug-registration');
             
+            // Test AJAX registration endpoint
+            echo "\nTesting registration AJAX endpoint...\n";
+            $browser->visit('/inscription');
+            $this->waitForPageLoad($browser);
+            
+            // Execute JavaScript to test AJAX registration
+            $browser->script([
+                "fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content
+                    },
+                    body: JSON.stringify({
+                        name: 'TestDebug',
+                        email: 'debug@test.com',
+                        password: 'Password123!',
+                        password_confirmation: 'Password123!',
+                        terms: true
+                    })
+                })
+                .then(response => response.json())
+                .then(data => console.log('Registration response:', JSON.stringify(data)))
+                .catch(error => console.log('Registration error:', error));"
+            ]);
+            
+            // Wait a bit for the AJAX call
+            $browser->pause(2000);
+            
+            // Check console logs
+            $logs = $browser->driver->manage()->getLog('browser');
+            echo "\nBrowser console logs:\n";
+            foreach ($logs as $log) {
+                echo $log['level'] . ': ' . $log['message'] . "\n";
+            }
+            
             echo "\n=== DEBUG TEST COMPLETED ===\n";
             
             // Force the test to pass so we can see the debug output

@@ -333,15 +333,19 @@ jobs:
         retention-days: 3
         
     - name: Debug Laravel logs
-      if: failure()
+      if: always()
       run: |
         echo "=== LARAVEL LOGS ==="
         if [ -f "storage/logs/laravel.log" ]; then
-          tail -n 50 storage/logs/laravel.log
+          tail -n 100 storage/logs/laravel.log
         else
           echo "No Laravel log file found"
         fi
         echo "=== END LARAVEL LOGS ==="
+        
+        echo "=== CHECKING SESSIONS ==="
+        ls -la storage/framework/sessions/ || echo "No sessions directory"
+        echo "=== END SESSIONS CHECK ===="
 
   deployment-ready:
     runs-on: ubuntu-latest
