@@ -528,7 +528,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             formData.append('_token', csrfToken);
             
-            const response = await fetch(this.action, {
+            // Use explicit URL to avoid route resolution issues in CI
+            const registrationUrl = '{{ url("/inscription") }}';
+            const response = await fetch(registrationUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -959,7 +961,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('initial_longitude', userGeolocation.longitude);
             }
             
-            const response = await fetch(this.action, {
+            // Use explicit URL to avoid route resolution issues in CI
+            const enrichProfileUrl = '{{ route("enrich.profile") }}';
+            const response = await fetch(enrichProfileUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {

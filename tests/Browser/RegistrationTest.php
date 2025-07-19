@@ -55,7 +55,9 @@ class RegistrationTest extends DuskTestCase
         ]);
 
         $this->browse(function (Browser $browser) {
-            $browser->visit('/inscription');
+            // Ensure we start fresh by logging out and visiting inscription
+            $browser->logout()
+                ->visit('/inscription');
             $this->waitForPageLoad($browser);
             $this->waitForElement($browser, '#name');
             $browser->type('#name', 'NewUser')
