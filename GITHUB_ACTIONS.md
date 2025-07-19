@@ -41,12 +41,19 @@ on:
 - Migrations et seeders
 - Arrêt à la première erreur
 
-#### 3. **Security Check** 🔒
+#### 3. **E2E Tests (Dusk)** 🌐
+- **Tests End-to-End avec Laravel Dusk**
+- Tests d'interface utilisateur avec Chrome headless
+- Base de données séparée (`sekaijin_dusk`)
+- Tests d'authentification et de navigation
+- Upload automatique des screenshots en cas d'échec
+
+#### 4. **Security Check** 🔒
 - Audit des dépendances Composer
 - Vérification fichiers sensibles
 - Validation sécurité
 
-#### 4. **PR Summary** 📊
+#### 5. **PR Summary** 📊
 - Résumé automatique des résultats
 - Liens vers les détails
 - Statut global de la PR
@@ -59,6 +66,7 @@ on:
 ### Test Results
 - **Quick Checks**: success ✅
 - **Unit Tests**: success ✅
+- **E2E Tests (Dusk)**: success ✅
 - **Security Check**: success ✅
 
 ### ✅ All checks passed! Ready for review.
@@ -80,6 +88,7 @@ on:
 2. **Développer et tester localement** :
    ```bash
    php artisan test
+   php artisan dusk
    ./vendor/bin/pint --test
    ```
 
@@ -99,7 +108,8 @@ on:
 ## 📈 Avantages
 
 ### Automatisation Complète
-- **222 tests** exécutés automatiquement
+- **222 tests unitaires** exécutés automatiquement
+- **9 tests E2E** avec Laravel Dusk
 - **Validations** code style et sécurité
 - **Feedback** immédiat sur les PR
 
@@ -161,6 +171,9 @@ composer require --dev laravel/pint phpstan/phpstan
 # Tests complets
 php artisan test
 
+# Tests E2E
+php artisan dusk
+
 # Couverture
 php artisan test --coverage
 ```
@@ -174,6 +187,7 @@ php artisan test --coverage
 ### Checks Requis
 - ✅ Quick Checks
 - ✅ Unit Tests (222 tests)
+- ✅ E2E Tests (9 tests Dusk)
 - ✅ Security Check
 - ✅ Code Quality
 
@@ -227,7 +241,7 @@ test: ajouter tests API
 
 ## 🎉 Résultat
 
-**Avec cette configuration, chaque PR est automatiquement testée avec nos 222 tests unitaires, garantissant une qualité de code maximale !**
+**Avec cette configuration, chaque PR est automatiquement testée avec nos 222 tests unitaires + 9 tests E2E, garantissant une qualité de code maximale !**
 
 Les tests couvrent :
 - 🔐 Authentification (15 tests)
@@ -240,4 +254,9 @@ Les tests couvrent :
 - 🔌 APIs (19 tests)
 - 🧪 Autres (2 tests)
 
-**Total : 222 tests - 699 assertions - 3.6 secondes**
+**Total : 231 tests (222 unitaires + 9 E2E) - 716 assertions - ~25 secondes**
+
+### Tests E2E avec Laravel Dusk :
+- 🔐 Authentification (4 tests): Connexion, échec connexion, menu utilisateur, lien mot de passe
+- 📝 Inscription (4 tests): Création compte, email existant, validation mot de passe, conditions d'utilisation  
+- 🏠 Navigation (1 test): Chargement page d'accueil

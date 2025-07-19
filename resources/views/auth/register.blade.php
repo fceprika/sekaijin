@@ -525,10 +525,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(this);
             
             // Ajouter le token CSRF dans la FormData
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfMeta) {
+                throw new Error('CSRF token not found');
+            }
+            const csrfToken = csrfMeta.getAttribute('content');
             formData.append('_token', csrfToken);
             
-            const response = await fetch(this.action, {
+            // Use explicit URL to avoid route resolution issues in CI
+            const registrationUrl = '{{ url("/inscription") }}';
+            const response = await fetch(registrationUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -959,7 +965,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('initial_longitude', userGeolocation.longitude);
             }
             
-            const response = await fetch(this.action, {
+            // Use explicit URL to avoid route resolution issues in CI
+            const enrichProfileUrl = '{{ route("enrich.profile") }}';
+            const response = await fetch(enrichProfileUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {

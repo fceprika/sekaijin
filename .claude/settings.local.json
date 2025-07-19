@@ -49,7 +49,12 @@
       "Bash(./vendor/bin/phpunit:*)",
       "Bash(composer test:*)",
       "Bash(composer pint-test:*)",
-      "Bash(composer pint:*)"
+      "Bash(composer pint:*)",
+      "Bash(composer require:*)",
+      "Bash(chmod:*)",
+      "Bash(./vendor/bin/pint)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }
