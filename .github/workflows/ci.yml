@@ -179,6 +179,26 @@ jobs:
     - name: Build frontend assets
       run: npm run build
 
+    - name: Verify assets compilation
+      run: |
+        echo "=== CHECKING ASSETS COMPILATION ==="
+        echo "Looking for compiled assets..."
+        ls -la public/build/ || echo "No public/build/ directory found"
+        ls -la public/build/assets/ 2>/dev/null || echo "No public/build/assets/ directory found"
+        
+        echo "Checking manifest file..."
+        if [ -f "public/build/manifest.json" ]; then
+          echo "✅ Manifest file exists"
+          head -n 10 public/build/manifest.json
+        else
+          echo "❌ Manifest file missing"
+        fi
+        
+        echo "Checking main CSS/JS files..."
+        find public/build -name "*.css" | head -5
+        find public/build -name "*.js" | head -5
+        echo "=== END ASSETS CHECK ==="
+
     - name: Setup Dusk environment
       run: |
         cp .env.example .env
@@ -198,6 +218,21 @@ jobs:
 
     - name: Run Dusk migrations
       run: php artisan migrate --env=dusk.local --force
+
+    - name: Run Dusk seeders and verify data
+      run: |
+        echo "=== SEEDING DUSK DATABASE ==="
+        php artisan db:seed --env=dusk.local --force
+        
+        echo "=== VERIFYING DATABASE CONTENT ==="
+        php artisan tinker --execute="
+        echo 'Total users: ' . \App\Models\User::count();
+        echo 'Total countries: ' . \App\Models\Country::count();
+        if (\App\Models\Country::count() > 0) {
+          echo 'Countries: ' . \App\Models\Country::pluck('name_fr')->implode(', ');
+        }
+        " --env=dusk.local
+        echo "=== END DATABASE VERIFICATION ==="
 
     - name: Install ChromeDriver
       run: php artisan dusk:chrome-driver
@@ -219,16 +254,37 @@ jobs:
         done'
         echo "✅ Server responds!"
         
-        echo "Verifying Laravel application is ready..."
-        timeout 60 bash -c 'until curl -s http://127.0.0.1:8000 | grep -q "Sekaijin\|DOCTYPE"; do 
-          echo "Laravel app not fully loaded yet, waiting..."
-          sleep 3
-        done'
-        echo "✅ Laravel application is ready!"
+        echo "=== DEBUGGING HOMEPAGE ==="
+        homepage_content=$(curl -s http://127.0.0.1:8000)
+        echo "Homepage status code: $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000)"
+        echo "First 500 chars of homepage:"
+        echo "$homepage_content" | head -c 500
+        echo ""
+        echo "=== END HOMEPAGE DEBUG ==="
+        
+        echo "=== DEBUGGING LOGIN PAGE ==="
+        login_content=$(curl -s http://127.0.0.1:8000/connexion)
+        echo "Login page status code: $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/connexion)"
+        echo "First 500 chars of login page:"
+        echo "$login_content" | head -c 500
+        echo ""
+        echo "=== END LOGIN DEBUG ==="
+        
+        echo "=== DEBUGGING REGISTRATION PAGE ==="
+        register_content=$(curl -s http://127.0.0.1:8000/inscription)
+        echo "Registration page status code: $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/inscription)"
+        echo "First 500 chars of registration page:"
+        echo "$register_content" | head -c 500
+        echo ""
+        echo "=== END REGISTRATION DEBUG ==="
         
         echo "Testing database connectivity..."
         php artisan tinker --execute="echo 'DB test: ' . \App\Models\User::count() . ' users';" --env=dusk.local
         echo "✅ Database is accessible!"
+        
+        echo "Testing countries in database..."
+        php artisan tinker --execute="echo 'Countries: ' . \App\Models\Country::count();" --env=dusk.local
+        echo "✅ Countries check complete!"
 
     - name: Run Dusk tests
       run: php artisan dusk --env=dusk.local
@@ -237,17 +293,30 @@ jobs:
 
     - name: Upload Dusk screenshots
       uses: actions/upload-artifact@v4
-      if: failure()
+      if: always()
       with:
-        name: dusk-screenshots
+        name: dusk-screenshots-ci
         path: tests/Browser/screenshots/
+        retention-days: 3
 
     - name: Upload Dusk console logs
       uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: dusk-console-logs
+        name: dusk-console-logs-ci
         path: tests/Browser/console/
+        retention-days: 3
+        
+    - name: Debug Laravel logs
+      if: failure()
+      run: |
+        echo "=== LARAVEL LOGS ==="
+        if [ -f "storage/logs/laravel.log" ]; then
+          tail -n 50 storage/logs/laravel.log
+        else
+          echo "No Laravel log file found"
+        fi
+        echo "=== END LARAVEL LOGS ==="
 
   deployment-ready:
     runs-on: ubuntu-latest
