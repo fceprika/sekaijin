@@ -138,12 +138,6 @@ class AuthController extends Controller
 
     public function enrichProfile(Request $request)
     {
-        // Verify Turnstile protection
-        $turnstileCheck = $this->verifyTurnstileForRequest($request, 'enrich_profile');
-        if ($turnstileCheck !== null) {
-            return $turnstileCheck;
-        }
-        
         // Validation pour l'étape 2 : enrichissement du profil
         $validator = Validator::make($request->all(), [
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',
