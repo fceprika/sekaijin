@@ -54,7 +54,9 @@
       "Bash(chmod:*)",
       "Bash(./vendor/bin/pint)",
       "Bash(./vendor/bin/pint:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }

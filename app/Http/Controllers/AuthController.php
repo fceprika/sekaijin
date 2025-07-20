@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
 use App\Models\User;
+use App\Services\TurnstileService;
+use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +14,14 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    protected TurnstileService $turnstileService;
+    protected EmailBlacklistService $blacklistService;
+    
+    public function __construct(TurnstileService $turnstileService, EmailBlacklistService $blacklistService)
+    {
+        $this->turnstileService = $turnstileService;
+        $this->blacklistService = $blacklistService;
+    }
     public function showRegister()
     {
         return view('auth.register');
@@ -24,6 +34,32 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Verify Turnstile first (skip in local environment)
+        if ($this->turnstileService->isConfigured() && !app()->environment('local') && !$this->turnstileService->verify($request->input('cf-turnstile-response'), 'register')) {
+            \Log::warning('Turnstile verification failed for registration', [
+                'ip' => $request->ip(),
+                'token_provided' => !empty($request->input('cf-turnstile-response')),
+            ]);
+            
+            // Check if request is AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['turnstile' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
+                ], 422);
+            }
+            
+            return back()->withErrors(['turnstile' => 'Vérification de sécurité échouée. Veuillez réessayer.'])->withInput();
+        }
+        
+        // Check email blacklist
+        if ($this->blacklistService->isBlacklisted($request->input('email'))) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['email' => ['Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.']],
+            ], 422);
+        }
+        
         // Validation pour l'étape 1 : création de compte
         $validator = Validator::make($request->all(), [
             'name' => [
@@ -113,6 +149,14 @@ class AuthController extends Controller
 
     public function enrichProfile(Request $request)
     {
+        // Verify Turnstile (skip in local environment)
+        if ($this->turnstileService->isConfigured() && !app()->environment('local') && !$this->turnstileService->verify($request->input('cf-turnstile-response'), 'enrich_profile')) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['turnstile' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
+            ], 422);
+        }
+        
         // Validation pour l'étape 2 : enrichissement du profil
         $validator = Validator::make($request->all(), [
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',

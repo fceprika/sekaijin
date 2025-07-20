@@ -163,6 +163,15 @@
                                 </div>
                             </div>
 
+                            <!-- Protection anti-spam Turnstile -->
+                            <div class="mt-6">
+                                <x-turnstile 
+                                    data-action="register"
+                                    data-callback="onTurnstileSuccess"
+                                    data-error-callback="onTurnstileError"
+                                />
+                            </div>
+
                             <!-- Bouton Créer le compte -->
                             <div class="mt-8">
                                 <button type="submit" id="create-account-btn" 
@@ -363,6 +372,15 @@
                                     </div>
                                 </div>
 
+                            </div>
+
+                            <!-- Protection anti-spam Turnstile étape 2 -->
+                            <div class="mt-6">
+                                <x-turnstile 
+                                    data-action="enrich_profile"
+                                    data-callback="onTurnstileStep2Success"
+                                    data-error-callback="onTurnstileStep2Error"
+                                />
                             </div>
 
                             <!-- Boutons navigation -->
@@ -1159,6 +1177,28 @@ document.addEventListener('DOMContentLoaded', function() {
             updateButtonStates();
         });
     }
+    
+    // Callbacks Turnstile pour étape 1
+    window.onTurnstileSuccess = function(token) {
+        console.log('Turnstile verification successful for step 1:', token);
+        // Le token sera automatiquement inclus dans le formulaire
+    };
+    
+    window.onTurnstileError = function(error) {
+        console.error('Turnstile error for step 1:', error);
+        alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
+    };
+    
+    // Callbacks Turnstile pour étape 2
+    window.onTurnstileStep2Success = function(token) {
+        console.log('Turnstile verification successful for step 2:', token);
+        // Le token sera automatiquement inclus dans le formulaire
+    };
+    
+    window.onTurnstileStep2Error = function(error) {
+        console.error('Turnstile error for step 2:', error);
+        alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
+    };
 });
 </script>
 @endsection
