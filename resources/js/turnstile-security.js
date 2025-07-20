@@ -62,10 +62,16 @@ class TurnstileSecurityManager {
         // Désactiver les boutons immédiatement
         this.disableSubmitButtons(formId, '🔄 Vérification de sécurité...');
 
-        // Configurer les nouveaux callbacks
+        // Configurer les callbacks (les encapsuler si existants, sinon créer nouveaux)
         const uniqueCallbacks = this.generateUniqueCallbacks(formId);
-        turnstileElement.setAttribute('data-callback', uniqueCallbacks.success);
-        turnstileElement.setAttribute('data-error-callback', uniqueCallbacks.error);
+        
+        // Ne mettre à jour les attributs que si on a créé de nouveaux callbacks
+        if (uniqueCallbacks.success && !initialState.originalCallbacks.success) {
+            turnstileElement.setAttribute('data-callback', uniqueCallbacks.success);
+        }
+        if (uniqueCallbacks.error && !initialState.originalCallbacks.error) {
+            turnstileElement.setAttribute('data-error-callback', uniqueCallbacks.error);
+        }
 
         // Intercepter la soumission du formulaire
         form.addEventListener('submit', (e) => this.handleFormSubmit(e, formId));
@@ -75,16 +81,48 @@ class TurnstileSecurityManager {
     }
 
     generateUniqueCallbacks(formId) {
-        const successCallback = `turnstileSuccess_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
-        const errorCallback = `turnstileError_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        const state = this.formStates.get(formId);
+        const originalSuccessCallback = state.originalCallbacks.success;
+        const originalErrorCallback = state.originalCallbacks.error;
 
-        // Créer les fonctions callback dans window
-        window[successCallback] = (token) => this.handleTurnstileSuccess(formId, token);
-        window[errorCallback] = (error) => this.handleTurnstileError(formId, error);
+        // Si des callbacks existent déjà, les encapsuler plutôt que les remplacer
+        if (originalSuccessCallback && window[originalSuccessCallback]) {
+            const originalSuccess = window[originalSuccessCallback];
+            window[originalSuccessCallback] = (token) => {
+                // Appeler d'abord notre gestionnaire
+                this.handleTurnstileSuccess(formId, token);
+                // Puis l'original
+                originalSuccess(token);
+            };
+        }
 
+        if (originalErrorCallback && window[originalErrorCallback]) {
+            const originalError = window[originalErrorCallback];
+            window[originalErrorCallback] = (error) => {
+                // Appeler d'abord notre gestionnaire
+                this.handleTurnstileError(formId, error);
+                // Puis l'original
+                originalError(error);
+            };
+        }
+
+        // Si pas de callbacks existants, créer les nôtres
+        if (!originalSuccessCallback) {
+            const successCallback = `turnstileSuccess_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            window[successCallback] = (token) => this.handleTurnstileSuccess(formId, token);
+            return { success: successCallback, error: state.originalCallbacks.error };
+        }
+
+        if (!originalErrorCallback) {
+            const errorCallback = `turnstileError_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            window[errorCallback] = (error) => this.handleTurnstileError(formId, error);
+            return { success: state.originalCallbacks.success, error: errorCallback };
+        }
+
+        // Les deux callbacks existent, on garde les noms originaux
         return {
-            success: successCallback,
-            error: errorCallback
+            success: originalSuccessCallback,
+            error: originalErrorCallback
         };
     }
 
@@ -112,29 +150,21 @@ class TurnstileSecurityManager {
         console.log(`✅ Turnstile vérifié avec succès pour ${formId}:`, token);
         
         const state = this.formStates.get(formId);
-        state.isVerified = true;
-        this.verifiedTokens.add(token);
-
-        // Appeler le callback original s'il existe
-        if (state.originalCallbacks.success && window[state.originalCallbacks.success]) {
-            window[state.originalCallbacks.success](token);
+        if (state) {
+            state.isVerified = true;
+            this.verifiedTokens.add(token);
+            this.updateButtonState(formId);
         }
-
-        this.updateButtonState(formId);
     }
 
     handleTurnstileError(formId, error) {
         console.error(`❌ Erreur Turnstile pour ${formId}:`, error);
         
         const state = this.formStates.get(formId);
-        state.isVerified = false;
-
-        // Appeler le callback original s'il existe
-        if (state.originalCallbacks.error && window[state.originalCallbacks.error]) {
-            window[state.originalCallbacks.error](error);
+        if (state) {
+            state.isVerified = false;
+            this.disableSubmitButtons(formId, '❌ Erreur de vérification - Rechargez la page');
         }
-
-        this.disableSubmitButtons(formId, '❌ Erreur de vérification - Rechargez la page');
     }
 
     updateButtonState(formId) {
