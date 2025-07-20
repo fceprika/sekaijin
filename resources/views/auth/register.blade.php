@@ -150,6 +150,19 @@
                                     <div id="password-match-message-step1" class="mt-1 text-sm"></div>
                                 </div>
 
+                                <!-- Pays de résidence -->
+                                <div>
+                                    <label for="country_residence_step1" class="block text-sm font-medium text-gray-700 mb-2">
+                                        🗺️ Pays de résidence *
+                                    </label>
+                                    <select id="country_residence_step1" name="country_residence" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                        <option value="">Sélectionnez votre pays de résidence</option>
+                                        @include('partials.countries', ['selected' => old('country_residence'), 'filter' => 'europe_asia'])
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">🌍 Actuellement disponible pour l'Europe et l'Asie uniquement</p>
+                                </div>
+
                                 <!-- Conditions obligatoires -->
                                 <div class="bg-gray-50 rounded-lg p-4">
                                     <label class="flex items-start cursor-pointer">
@@ -269,16 +282,15 @@
                                     <!-- Mode Manuel (masqué par défaut) -->
                                     <div id="manual-location-section" class="hidden">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <!-- Pays de résidence déjà sélectionné à l'étape 1 -->
                                             <div>
-                                                <label for="country_residence" class="block text-sm font-medium text-gray-700 mb-2">
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">
                                                     🗺️ Pays de résidence
                                                 </label>
-                                                <select id="country_residence" name="country_residence"
-                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                                    <option value="">Sélectionnez un pays</option>
-                                                    @include('partials.countries', ['selected' => old('country_residence'), 'filter' => 'europe_asia'])
-                                                </select>
-                                                <p class="text-xs text-gray-500 mt-1">🌍 Actuellement disponible pour l'Europe et l'Asie uniquement</p>
+                                                <div class="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700">
+                                                    <span id="selected-country-display">Sélectionné à l'étape précédente</span>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1">✅ Défini lors de la création du compte</p>
                                             </div>
                                             <div>
                                                 <label for="city_residence" class="block text-sm font-medium text-gray-700 mb-2">
@@ -1018,9 +1030,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Système de sélection dynamique de ville pour l'inscription
     const countryResidence = document.getElementById('country_residence');
+    const countryResidenceStep1 = document.getElementById('country_residence_step1');
+    const selectedCountryDisplay = document.getElementById('selected-country-display');
     const cityResidence = document.getElementById('city_residence');
     const cityLoading = document.getElementById('city-loading');
     const locationRequirementRegister = document.getElementById('location-requirement-register');
+    
+    // Synchroniser l'affichage du pays sélectionné entre étapes
+    if (countryResidenceStep1 && selectedCountryDisplay) {
+        countryResidenceStep1.addEventListener('change', function() {
+            const selectedText = this.options[this.selectedIndex].text;
+            if (this.value) {
+                selectedCountryDisplay.textContent = selectedText;
+            } else {
+                selectedCountryDisplay.textContent = 'Sélectionné à l\'étape précédente';
+            }
+        });
+    }
     
     // Fonction pour charger les villes dynamiquement
     function loadCitiesForCountryRegister(countryName) {
