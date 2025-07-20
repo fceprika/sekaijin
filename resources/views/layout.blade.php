@@ -77,6 +77,9 @@
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Cloudflare Turnstile Scripts -->
+    @turnstileScripts()
+    
     <!-- Share Component CSS -->
     <link rel="stylesheet" href="/css/share-component.css">
     

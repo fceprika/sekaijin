@@ -43,4 +43,10 @@ return [
         'id' => env('GOOGLE_ANALYTICS_ID'),
     ],
 
+    'turnstile' => [
+        'key' => env('TURNSTILE_SITE_KEY'),
+        'secret' => env('TURNSTILE_SECRET_KEY'),
+        'bypass_local' => env('TURNSTILE_BYPASS_LOCAL', false),
+    ],
+
 ];
