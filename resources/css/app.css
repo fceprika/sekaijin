@@ -211,3 +211,27 @@
 .field-changed {
     animation: field-highlight 1s ease-out;
 }
+
+/* Styles pour les boutons sécurisés par Turnstile */
+.turnstile-pending {
+    @apply cursor-not-allowed opacity-60 transition-all duration-200;
+    pointer-events: auto !important; /* Permet de montrer le curseur not-allowed */
+}
+
+.turnstile-pending:hover {
+    @apply opacity-50;
+    transform: none !important; /* Annule les transformations hover des boutons normaux */
+}
+
+.turnstile-verified {
+    @apply cursor-pointer opacity-100 transition-all duration-200;
+}
+
+.turnstile-error {
+    @apply cursor-not-allowed opacity-60 bg-red-500 transition-all duration-200;
+}
+
+.turnstile-error:hover {
+    @apply opacity-50 bg-red-600;
+    transform: none !important;
+}

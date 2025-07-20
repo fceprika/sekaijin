@@ -163,6 +163,15 @@
                                 </div>
                             </div>
 
+                            <!-- Protection anti-spam Turnstile -->
+                            <div class="mt-6">
+                                <x-turnstile 
+                                    data-action="register"
+                                    data-callback="onTurnstileSuccess"
+                                    data-error-callback="onTurnstileError"
+                                />
+                            </div>
+
                             <!-- Bouton Créer le compte -->
                             <div class="mt-8">
                                 <button type="submit" id="create-account-btn" 
@@ -364,6 +373,7 @@
                                 </div>
 
                             </div>
+
 
                             <!-- Boutons navigation -->
                             <div class="mt-8 space-y-4">
@@ -1166,6 +1176,18 @@ document.addEventListener('DOMContentLoaded', function() {
             updateButtonStates();
         });
     }
+    
+    // Callbacks Turnstile pour étape 1
+    window.onTurnstileSuccess = function(token) {
+        console.log('Turnstile verification successful for step 1:', token);
+        // Le token sera automatiquement inclus dans le formulaire
+    };
+    
+    window.onTurnstileError = function(error) {
+        console.error('Turnstile error for step 1:', error);
+        alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
+    };
+    
 });
 </script>
 @endsection

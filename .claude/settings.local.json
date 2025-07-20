@@ -55,7 +55,10 @@
       "Bash(./vendor/bin/pint)",
       "Bash(./vendor/bin/pint:*)",
       "Bash(pkill:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(echo $APP_URL)"
     ],
     "deny": []
   }

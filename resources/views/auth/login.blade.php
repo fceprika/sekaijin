@@ -62,6 +62,15 @@
                 </div>
             </div>
 
+            <!-- Protection anti-spam Turnstile -->
+            <div class="mt-6">
+                <x-turnstile 
+                    data-action="login"
+                    data-callback="onLoginTurnstileSuccess"
+                    data-error-callback="onLoginTurnstileError"
+                />
+            </div>
+
             <!-- Bouton de connexion -->
             <div>
                 <button type="submit" 
@@ -119,6 +128,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!emailInput.value) {
         emailInput.focus();
     }
+    
+    // Callbacks Turnstile pour connexion
+    window.onLoginTurnstileSuccess = function(token) {
+        console.log('Turnstile verification successful for login:', token);
+        // Le token sera automatiquement inclus dans le formulaire
+    };
+    
+    window.onLoginTurnstileError = function(error) {
+        console.error('Turnstile error for login:', error);
+        alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
+    };
 });
 </script>
 @endsection

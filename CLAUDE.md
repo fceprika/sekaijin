@@ -14,6 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Database**: MySQL with custom expat-focused user fields
 - **Build Tools**: Vite for asset compilation
 - **Authentication**: Custom Laravel authentication system
+- **Security**: Cloudflare Turnstile integration with automatic form protection
 
 ### Key Components
 
@@ -211,6 +212,8 @@ The Mapbox token is configured in `config/services.php` and used in the interact
 - **Map Integration**: `public/js/country-coordinates.js` - country coordinates mapping
 - **Content Seeder**: `database/seeders/ContentSeeder.php` - sample content generation for development
 - **Frontend Assets**: `resources/css/app.css`, `resources/js/app.js` 
+- **Security Assets**: `resources/js/turnstile-security.js` - Cloudflare Turnstile protection system
+- **Email Templates**: `resources/views/emails/contact.blade.php` - contact form email template
 - **Vite Config**: `vite.config.js` - configured for Laravel integration with HMR
 
 ## Recent Updates (July 2025)
@@ -264,6 +267,30 @@ The Mapbox token is configured in `config/services.php` and used in the interact
   - New migration: `2025_07_12_043816_create_sessions_table.php`
   - Enhanced security and scalability for user sessions
   - Proper session cleanup and management
+
+### Cloudflare Turnstile Security System (July 20, 2025)
+- **Critical Security Fix**: Resolved form submission bypass vulnerability
+  - **Issue**: Users could submit forms before Turnstile verification completed
+  - **Impact**: Complete prevention of unauthorized form submissions
+- **TurnstileSecurityManager**: Centralized JavaScript security system
+  - **File**: `resources/js/turnstile-security.js` - Comprehensive form protection
+  - **Auto-discovery**: Automatically secures all forms containing `.cf-turnstile` widgets
+  - **Button Management**: Disables submit buttons until verification completes
+  - **DOM Surveillance**: Direct monitoring of `input[name="cf-turnstile-response"]` tokens
+  - **Dual Detection**: DOM polling (every 2 seconds) + callback interception as backup
+- **User Experience Enhancements**:
+  - **Visual Feedback**: Buttons show "🔄 En attente de vérification..." during verification
+  - **CSS Classes**: `.turnstile-pending` with `cursor: not-allowed` and opacity styling
+  - **Immediate Activation**: Buttons unlock within 2 seconds of successful verification
+  - **Error Handling**: Clear error messages and security alerts for failed attempts
+- **Technical Implementation**:
+  - **Form Security**: `handleFormSubmit()` prevents submission without valid token
+  - **Token Validation**: Checks for tokens >10 characters in hidden input fields
+  - **Callback Wrapping**: Intercepts existing callbacks (onContactTurnstileSuccess, etc.)
+  - **Fallback System**: 60-second timeout for extreme edge cases
+  - **Debug Support**: `window.debugTurnstile()` for development debugging
+- **Email Template**: `resources/views/emails/contact.blade.php` for contact form submissions
+- **CSS Integration**: Turnstile button states in `resources/css/app.css` with Tailwind classes
 
 ### End-to-End Testing Implementation (July 19, 2025)
 - **Laravel Dusk Configuration**: Complete E2E testing setup

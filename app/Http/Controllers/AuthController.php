@@ -6,7 +6,10 @@ use App\Mail\WelcomeEmail;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Services\TurnstileService;
+use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -14,6 +17,14 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    protected TurnstileService $turnstileService;
+    protected EmailBlacklistService $blacklistService;
+    
+    public function __construct(TurnstileService $turnstileService, EmailBlacklistService $blacklistService)
+    {
+        $this->turnstileService = $turnstileService;
+        $this->blacklistService = $blacklistService;
+    }
     public function showRegister()
     {
         return view('auth.register');
@@ -26,6 +37,20 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Verify Turnstile protection
+        $turnstileCheck = $this->verifyTurnstileForRequest($request, 'register');
+        if ($turnstileCheck !== null) {
+            return $turnstileCheck;
+        }
+        
+        // Check email blacklist
+        if ($this->blacklistService->isBlacklisted($request->input('email'))) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['email' => ['Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.']],
+            ], 422);
+        }
+        
         // Validation pour l'étape 1 : création de compte
         $validator = Validator::make($request->all(), [
             'name' => [
@@ -239,6 +264,12 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Verify Turnstile protection
+        $turnstileCheck = $this->verifyTurnstileForRequest($request, 'login');
+        if ($turnstileCheck !== null) {
+            return $turnstileCheck;
+        }
+        
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -265,6 +296,70 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')->with('success', 'Vous avez été déconnecté avec succès.');
+    }
+    
+    /**
+     * Verify Turnstile protection for a request
+     */
+    private function verifyTurnstileForRequest(Request $request, string $action): ?Response
+    {
+        if (!$this->shouldVerifyTurnstile($request)) {
+            return null;
+        }
+        
+        if (!$this->turnstileService->verify($request->input('cf-turnstile-response'), $action)) {
+            \Log::warning('Turnstile verification failed', [
+                'action' => $action,
+                'ip' => $this->anonymizeIp($request->ip()),
+                'token_provided' => !empty($request->input('cf-turnstile-response')),
+            ]);
+            
+            $errorMessage = 'Vérification de sécurité échouée. Veuillez réessayer.';
+            
+            // Check if request is AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['turnstile' => [$errorMessage]],
+                ], 422);
+            }
+            
+            return back()->withErrors(['turnstile' => $errorMessage])->withInput();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Determine if Turnstile verification should be performed
+     */
+    private function shouldVerifyTurnstile(Request $request): bool
+    {
+        return $this->turnstileService->isConfigured() && !app()->environment('local');
+    }
+    
+    /**
+     * Anonymize IP address for GDPR compliance
+     */
+    private function anonymizeIp(string $ip): string
+    {
+        // For IPv4: zero out the last octet
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $parts = explode('.', $ip);
+            $parts[3] = '0';
+            return implode('.', $parts);
+        }
+        
+        // For IPv6: zero out the last 64 bits
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $parts = explode(':', $ip);
+            for ($i = 4; $i < count($parts); $i++) {
+                $parts[$i] = '0';
+            }
+            return implode(':', $parts);
+        }
+        
+        return 'unknown';
     }
 
     /**

@@ -46,13 +46,8 @@ Route::get('/services', function () {
     return view('services');
 });
 
-Route::get('/contact', function () {
-    $seoService = new \App\Services\SeoService;
-    $seoData = $seoService->generateSeoData('contact');
-    $structuredData = $seoService->generateStructuredData('contact');
-
-    return view('contact', compact('seoData', 'structuredData'));
-})->name('contact');
+Route::get('/contact', [App\Http\Controllers\ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
 
 // Pages légales
 Route::get('/conditions-utilisation', function () {
@@ -70,7 +65,7 @@ Route::get('/mentions-legales', function () {
 // Routes d'authentification
 Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
 Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:10,1');
-Route::post('/inscription/enrichir-profil', [App\Http\Controllers\AuthController::class, 'enrichProfile'])->name('enrich.profile')->middleware('auth');
+Route::post('/inscription/enrichir-profil', [App\Http\Controllers\AuthController::class, 'enrichProfile'])->name('enrich.profile')->middleware(['auth', 'throttle:5,1']);
 Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:20,1');
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
@@ -93,6 +88,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/api/check-username/{username}', [App\Http\Controllers\AuthController::class, 'checkUsername']);
     Route::post('/api/cities', [App\Http\Controllers\Api\CityController::class, 'getCities']);
     Route::post('/api/city-coordinates', [App\Http\Controllers\Api\CityController::class, 'getCityCoordinates']);
+    Route::get('/api/location-from-ip', [App\Http\Controllers\Api\LocationController::class, 'getLocationFromIp'])->middleware('throttle:10,1');
 });
 
 Route::middleware(['auth', 'throttle:10,1'])->group(function () {
