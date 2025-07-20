@@ -70,7 +70,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'country_residence' => 'required|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
+            'country_residence' => 'nullable|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'interest_country' => 'nullable|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'password' => [
                 'required',
@@ -83,7 +83,6 @@ class AuthController extends Controller
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
-            'country_residence.required' => 'Le pays de résidence est obligatoire.',
             'country_residence.in' => 'Le pays de résidence sélectionné n\'est pas valide.',
             'interest_country.in' => 'Le pays d\'intérêt sélectionné n\'est pas valide.',
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',

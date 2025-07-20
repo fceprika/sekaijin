@@ -20,9 +20,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Database Schema Extensions**:
 The User model has been extended beyond standard Laravel auth to include expat-specific fields:
-- Required fields: `name` (pseudo), `email`, `country_residence`
+- Required fields: `name` (pseudo), `email`
 - Optional personal info: `first_name`, `last_name`, `birth_date`, `phone` (nullable)
-- Location data: `country_residence` (required), `city_residence` (optional)
+- Location data: `country_residence` (optional), `city_residence` (optional)
 - Community features: `bio`, `is_verified`, `last_login`, `is_public_profile`
 - Role system: `role` field with 4 levels (free, premium, ambassador, admin)
 
