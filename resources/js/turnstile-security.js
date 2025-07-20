@@ -88,33 +88,46 @@ class TurnstileSecurityManager {
 
         // Approche simplifiée : toujours encapsuler les callbacks existants
         if (originalSuccessCallback) {
-            // Sauvegarder l'original s'il existe
-            const originalFunction = window[originalSuccessCallback];
+            console.log(`🔄 Encapsulation du callback existant: ${originalSuccessCallback}`);
             
-            // Remplacer par notre wrapper
+            // Créer un nouvel ID unique pour le wrapper
+            const wrappedCallbackName = `${originalSuccessCallback}_wrapped_${Date.now()}`;
+            
+            // Sauvegarder l'original avec un nom unique
+            window[wrappedCallbackName] = window[originalSuccessCallback];
+            
+            // Remplacer par notre wrapper qui appelle notre gestionnaire ET l'original
             window[originalSuccessCallback] = (token) => {
-                console.log(`🔓 Callback Turnstile success intercepté pour ${formId}`);
+                console.log(`🔓 Callback Turnstile success intercepté pour ${formId}`, token);
                 
-                // Notre gestionnaire en premier
+                // Notre gestionnaire en premier pour débloquer le bouton
                 this.handleTurnstileSuccess(formId, token);
                 
                 // Puis l'original si il existait
-                if (originalFunction && typeof originalFunction === 'function') {
-                    originalFunction(token);
+                if (window[wrappedCallbackName] && typeof window[wrappedCallbackName] === 'function') {
+                    console.log(`🔄 Appel du callback original: ${wrappedCallbackName}`);
+                    window[wrappedCallbackName](token);
                 }
             };
         }
 
         if (originalErrorCallback) {
-            const originalFunction = window[originalErrorCallback];
+            console.log(`🔄 Encapsulation du callback erreur existant: ${originalErrorCallback}`);
+            
+            // Créer un nouvel ID unique pour le wrapper
+            const wrappedErrorCallbackName = `${originalErrorCallback}_wrapped_${Date.now()}`;
+            
+            // Sauvegarder l'original avec un nom unique
+            window[wrappedErrorCallbackName] = window[originalErrorCallback];
             
             window[originalErrorCallback] = (error) => {
-                console.log(`❌ Callback Turnstile error intercepté pour ${formId}`);
+                console.log(`❌ Callback Turnstile error intercepté pour ${formId}`, error);
                 
                 this.handleTurnstileError(formId, error);
                 
-                if (originalFunction && typeof originalFunction === 'function') {
-                    originalFunction(error);
+                if (window[wrappedErrorCallbackName] && typeof window[wrappedErrorCallbackName] === 'function') {
+                    console.log(`🔄 Appel du callback erreur original: ${wrappedErrorCallbackName}`);
+                    window[wrappedErrorCallbackName](error);
                 }
             };
         }
@@ -148,15 +161,15 @@ class TurnstileSecurityManager {
         // Mise à jour initiale - le bouton restera désactivé jusqu'à la vérification
         this.updateButtonState(formId);
 
-        // Fallback: Si aucune vérification après 15 secondes, permettre la soumission
+        // Fallback: Si aucune vérification après 60 secondes, permettre la soumission (cas extrême)
         setTimeout(() => {
             const currentState = this.formStates.get(formId);
             if (!currentState.isVerified) {
-                console.warn(`⚠️ Timeout Turnstile pour ${formId} - Activation de secours`);
+                console.warn(`⚠️ Timeout Turnstile pour ${formId} - Activation de secours après 60s (cas extrême)`);
                 currentState.isVerified = true;
                 this.updateButtonState(formId);
             }
-        }, 15000);
+        }, 60000);
     }
 
     handleTurnstileSuccess(formId, token) {
