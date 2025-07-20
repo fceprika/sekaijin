@@ -534,21 +534,14 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const formData = new FormData(this);
             
-            // Ajouter le token CSRF dans la FormData
-            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-            if (!csrfMeta) {
-                throw new Error('CSRF token not found');
-            }
-            const csrfToken = csrfMeta.getAttribute('content');
-            formData.append('_token', csrfToken);
-            
-            // Use explicit URL to avoid route resolution issues in CI
-            const registrationUrl = '{{ url("/inscription") }}';
+            // Use Laravel route helper for better reliability
+            const registrationUrl = '{{ route("register") }}';
             const response = await fetch(registrationUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 }
             });
             
