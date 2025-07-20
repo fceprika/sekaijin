@@ -199,23 +199,13 @@ class TurnstileSecurityManager {
         state.submitButtons.forEach(button => {
             button.disabled = false;
             
-            // Restaurer le texte original ou utiliser un texte par défaut
-            const textSpan = button.querySelector('#submit-text, #create-text, #enrich-text, span:not(.hidden)');
-            const loadingSpan = button.querySelector('#submit-loading, #create-loading, #enrich-loading, .hidden');
-            
-            if (textSpan && loadingSpan) {
-                textSpan.classList.remove('hidden');
-                loadingSpan.classList.add('hidden');
-            } else {
-                // Fallback: restaurer le contenu HTML original si sauvegardé
-                if (button.dataset.originalContent) {
-                    button.innerHTML = button.dataset.originalContent;
-                } else {
-                    // Si pas de structure prédéfinie, ajouter une icône de succès
-                    const content = button.textContent.replace(/^[🔄❌]/, '✅');
-                    button.textContent = content;
-                }
+            // Sauvegarder le contenu original avant toute modification (si pas déjà fait)
+            if (!button.dataset.originalContent) {
+                button.dataset.originalContent = button.innerHTML;
             }
+            
+            // Restaurer complètement le contenu original
+            button.innerHTML = button.dataset.originalContent;
             
             // Ajouter une classe pour indiquer que la vérification est réussie
             button.classList.add('turnstile-verified');
@@ -237,19 +227,8 @@ class TurnstileSecurityManager {
                 button.dataset.originalContent = button.innerHTML;
             }
             
-            // Essayer de trouver les éléments de texte et loading spécifiques
-            const textSpan = button.querySelector('#submit-text, #create-text, #enrich-text');
-            const loadingSpan = button.querySelector('#submit-loading, #create-loading, #enrich-loading');
-            
-            if (textSpan && loadingSpan) {
-                // Structure avec spans séparés (comme dans les formulaires existants)
-                textSpan.classList.add('hidden');
-                loadingSpan.classList.remove('hidden');
-                loadingSpan.textContent = message;
-            } else {
-                // Fallback: remplacer tout le contenu
-                button.textContent = message;
-            }
+            // Remplacer simplement le contenu du bouton par le message
+            button.textContent = message;
             
             // Ajouter des classes CSS pour le style
             button.classList.add('turnstile-pending');
