@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\TurnstileService;
 use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -34,22 +35,10 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // Verify Turnstile first (skip in local environment)
-        if ($this->turnstileService->isConfigured() && !app()->environment('local') && !$this->turnstileService->verify($request->input('cf-turnstile-response'), 'register')) {
-            \Log::warning('Turnstile verification failed for registration', [
-                'ip' => $request->ip(),
-                'token_provided' => !empty($request->input('cf-turnstile-response')),
-            ]);
-            
-            // Check if request is AJAX
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => ['turnstile' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
-                ], 422);
-            }
-            
-            return back()->withErrors(['turnstile' => 'Vérification de sécurité échouée. Veuillez réessayer.'])->withInput();
+        // Verify Turnstile protection
+        $turnstileCheck = $this->verifyTurnstileForRequest($request, 'register');
+        if ($turnstileCheck !== null) {
+            return $turnstileCheck;
         }
         
         // Check email blacklist
@@ -149,12 +138,10 @@ class AuthController extends Controller
 
     public function enrichProfile(Request $request)
     {
-        // Verify Turnstile (skip in local environment)
-        if ($this->turnstileService->isConfigured() && !app()->environment('local') && !$this->turnstileService->verify($request->input('cf-turnstile-response'), 'enrich_profile')) {
-            return response()->json([
-                'success' => false,
-                'errors' => ['turnstile' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
-            ], 422);
+        // Verify Turnstile protection
+        $turnstileCheck = $this->verifyTurnstileForRequest($request, 'enrich_profile');
+        if ($turnstileCheck !== null) {
+            return $turnstileCheck;
         }
         
         // Validation pour l'étape 2 : enrichissement du profil
@@ -266,15 +253,10 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Verify Turnstile first (skip in local environment)
-        if ($this->turnstileService->isConfigured() && !app()->environment('local') && !$this->turnstileService->verify($request->input('cf-turnstile-response'), 'login')) {
-            \Log::warning('Turnstile verification failed for login', [
-                'ip' => $request->ip(),
-                'email' => $request->input('email'),
-                'token_provided' => !empty($request->input('cf-turnstile-response')),
-            ]);
-            
-            return back()->withErrors(['turnstile' => 'Vérification de sécurité échouée. Veuillez réessayer.'])->withInput();
+        // Verify Turnstile protection
+        $turnstileCheck = $this->verifyTurnstileForRequest($request, 'login');
+        if ($turnstileCheck !== null) {
+            return $turnstileCheck;
         }
         
         $credentials = $request->validate([
@@ -303,6 +285,70 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/')->with('success', 'Vous avez été déconnecté avec succès.');
+    }
+    
+    /**
+     * Verify Turnstile protection for a request
+     */
+    private function verifyTurnstileForRequest(Request $request, string $action): ?Response
+    {
+        if (!$this->shouldVerifyTurnstile($request)) {
+            return null;
+        }
+        
+        if (!$this->turnstileService->verify($request->input('cf-turnstile-response'), $action)) {
+            \Log::warning('Turnstile verification failed', [
+                'action' => $action,
+                'ip' => $this->anonymizeIp($request->ip()),
+                'token_provided' => !empty($request->input('cf-turnstile-response')),
+            ]);
+            
+            $errorMessage = 'Vérification de sécurité échouée. Veuillez réessayer.';
+            
+            // Check if request is AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['turnstile' => [$errorMessage]],
+                ], 422);
+            }
+            
+            return back()->withErrors(['turnstile' => $errorMessage])->withInput();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Determine if Turnstile verification should be performed
+     */
+    private function shouldVerifyTurnstile(Request $request): bool
+    {
+        return $this->turnstileService->isConfigured() && !app()->environment('local');
+    }
+    
+    /**
+     * Anonymize IP address for GDPR compliance
+     */
+    private function anonymizeIp(string $ip): string
+    {
+        // For IPv4: zero out the last octet
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $parts = explode('.', $ip);
+            $parts[3] = '0';
+            return implode('.', $parts);
+        }
+        
+        // For IPv6: zero out the last 64 bits
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $parts = explode(':', $ip);
+            for ($i = 4; $i < count($parts); $i++) {
+                $parts[$i] = '0';
+            }
+            return implode(':', $parts);
+        }
+        
+        return 'unknown';
     }
 
     /**

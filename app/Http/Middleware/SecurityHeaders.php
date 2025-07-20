@@ -34,7 +34,7 @@ class SecurityHeaders
         if (app()->environment('local', 'development')) {
             // Development CSP - More permissive for Vite
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://challenges.cloudflare.com; " .
+                   "script-src 'self' 'unsafe-inline' http://localhost:* https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://challenges.cloudflare.com; " .
                    "style-src 'self' 'unsafe-inline' http://localhost:* https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; " .
                    "img-src 'self' data: https: http://localhost:*; " .
                    "font-src 'self' https://cdnjs.cloudflare.com http://localhost:*; " .

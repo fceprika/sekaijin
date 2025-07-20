@@ -29,14 +29,13 @@ class TurnstileService
             return; // Skip validation if not configured
         }
         
-        // Validate secret key format (Turnstile keys are longer than reCAPTCHA)
-        if (!preg_match('/^[0-9A-Za-z_-]+$/', $this->secretKey)) {
-            throw new \InvalidArgumentException('Invalid Turnstile secret key format');
+        // Basic length validation for Turnstile keys (Cloudflare will validate authenticity)
+        if (strlen($this->secretKey) < 10) {
+            throw new \InvalidArgumentException('Turnstile secret key appears to be too short');
         }
         
-        // Validate site key format
-        if (!preg_match('/^[0-9A-Za-z_-]+$/', $this->siteKey)) {
-            throw new \InvalidArgumentException('Invalid Turnstile site key format');
+        if (strlen($this->siteKey) < 10) {
+            throw new \InvalidArgumentException('Turnstile site key appears to be too short');
         }
     }
     
@@ -49,6 +48,13 @@ class TurnstileService
         if (empty($token)) {
             Log::warning('Turnstile token is empty');
             return $this->shouldBypassInDevelopment();
+        }
+        
+        // Sanitize and validate token format
+        $token = $this->sanitizeToken($token);
+        if (!$token) {
+            Log::warning('Invalid Turnstile token format after sanitization');
+            return false;
         }
         
         if (empty($this->secretKey)) {
@@ -130,5 +136,26 @@ class TurnstileService
     private function shouldBypassInDevelopment(): bool
     {
         return app()->environment('local') && $this->bypassLocal;
+    }
+    
+    /**
+     * Sanitize and validate Turnstile token
+     */
+    private function sanitizeToken(string $token): ?string
+    {
+        // Remove any whitespace
+        $token = trim($token);
+        
+        // Basic validation: Turnstile tokens should be reasonable length and contain valid characters
+        if (strlen($token) < 10 || strlen($token) > 2048) {
+            return null;
+        }
+        
+        // Allow alphanumeric, dots, dashes, underscores (typical token characters)
+        if (!preg_match('/^[a-zA-Z0-9.\-_]+$/', $token)) {
+            return null;
+        }
+        
+        return $token;
     }
 }
