@@ -61,7 +61,7 @@ class AuthController extends Controller
                 'unique:users,name_slug',
                 'regex:/^[a-zA-Z0-9_.-]+$/',
                 'not_regex:/^[._-]/',
-                'not_regex:/[._-]$/',
+                'not_regex!/[._-]$/',
                 function ($attribute, $value, $fail) {
                     $slug = \App\Models\User::generateSlug($value);
                     if (\App\Models\User::where('name_slug', $slug)->exists()) {
@@ -70,6 +70,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
+            'country_residence' => 'required|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'interest_country' => 'nullable|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'password' => [
                 'required',
@@ -82,6 +83,9 @@ class AuthController extends Controller
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
+            'country_residence.required' => 'Le pays de résidence est obligatoire.',
+            'country_residence.in' => 'Le pays de résidence sélectionné n\'est pas valide.',
+            'interest_country.in' => 'Le pays d\'intérêt sélectionné n\'est pas valide.',
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
             'interest_country.in' => 'Veuillez sélectionner un pays d\'intérêt valide.',
@@ -740,8 +744,24 @@ class AuthController extends Controller
             return back()->with('message', 'Votre email est déjà vérifié.');
         }
 
-        $request->user()->sendEmailVerificationNotification();
-
-        return back()->with('message', 'Email de vérification renvoyé !');
+        try {
+            $request->user()->sendEmailVerificationNotification();
+            
+            \Log::info('Email verification sent successfully', [
+                'user_id' => $request->user()->id,
+                'email' => $request->user()->email,
+            ]);
+            
+            return back()->with('message', 'Email de vérification renvoyé ! Vérifiez votre boîte de réception et vos spams.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to send email verification', [
+                'user_id' => $request->user()->id,
+                'email' => $request->user()->email,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return back()->withErrors(['email' => 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer dans quelques minutes ou contacter le support.']);
+        }
     }
 }

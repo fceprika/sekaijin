@@ -19,6 +19,16 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
+        
+        // Vérifier l'email pour certaines actions critiques
+        if (!$user->hasVerifiedEmail()) {
+            $restrictedActions = ['avatar', 'is_public_profile'];
+            $changedFields = json_decode($request->input('changed_fields', '[]'), true) ?: [];
+            
+            if (array_intersect($restrictedActions, $changedFields) || $request->hasFile('avatar') || $request->boolean('is_public_profile')) {
+                return back()->withErrors(['email_verification' => 'Vous devez vérifier votre email avant d\'uploader un avatar ou de rendre votre profil public.'])->withInput();
+            }
+        }
 
         // Récupérer la liste des champs modifiés depuis le client
         $changedFields = [];
