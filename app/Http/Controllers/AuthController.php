@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
 use App\Models\User;
+use App\Services\RecaptchaService;
+use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +26,34 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Verify reCAPTCHA first (skip in local environment)
+        $recaptchaService = new RecaptchaService();
+        if ($recaptchaService->isConfigured() && !app()->environment('local') && !$recaptchaService->verify($request->input('recaptcha_token'), 'register')) {
+            \Log::warning('reCAPTCHA verification failed for registration', [
+                'ip' => $request->ip(),
+                'token_provided' => !empty($request->input('recaptcha_token')),
+            ]);
+            
+            // Check if request is AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['recaptcha' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
+                ], 422);
+            }
+            
+            return back()->withErrors(['recaptcha' => 'Vérification de sécurité échouée. Veuillez réessayer.'])->withInput();
+        }
+        
+        // Check email blacklist
+        $blacklistService = new EmailBlacklistService();
+        if ($blacklistService->isBlacklisted($request->input('email'))) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['email' => ['Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.']],
+            ], 422);
+        }
+        
         // Validation pour l'étape 1 : création de compte
         $validator = Validator::make($request->all(), [
             'name' => [
@@ -113,6 +143,15 @@ class AuthController extends Controller
 
     public function enrichProfile(Request $request)
     {
+        // Verify reCAPTCHA (skip in local environment)
+        $recaptchaService = new RecaptchaService();
+        if ($recaptchaService->isConfigured() && !app()->environment('local') && !$recaptchaService->verify($request->input('recaptcha_token'), 'enrich_profile')) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['recaptcha' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
+            ], 422);
+        }
+        
         // Validation pour l'étape 2 : enrichissement du profil
         $validator = Validator::make($request->all(), [
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',

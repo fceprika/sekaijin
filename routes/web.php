@@ -46,13 +46,8 @@ Route::get('/services', function () {
     return view('services');
 });
 
-Route::get('/contact', function () {
-    $seoService = new \App\Services\SeoService;
-    $seoData = $seoService->generateSeoData('contact');
-    $structuredData = $seoService->generateStructuredData('contact');
-
-    return view('contact', compact('seoData', 'structuredData'));
-})->name('contact');
+Route::get('/contact', [App\Http\Controllers\ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'send'])->name('contact.send')->middleware('throttle:5,1');
 
 // Pages légales
 Route::get('/conditions-utilisation', function () {
@@ -69,7 +64,7 @@ Route::get('/mentions-legales', function () {
 
 // Routes d'authentification
 Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
-Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:3,60'); // 3 tentatives par heure
 Route::post('/inscription/enrichir-profil', [App\Http\Controllers\AuthController::class, 'enrichProfile'])->name('enrich.profile')->middleware('auth');
 Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:20,1');

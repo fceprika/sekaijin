@@ -14,29 +14,13 @@
 
             <div class="px-8 py-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <!-- Formulaire de contact - TEMPORAIREMENT DÉSACTIVÉ -->
+                    <!-- Formulaire de contact -->
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="mr-3">🚧</span>
-                            Formulaire temporairement indisponible
+                            <span class="mr-3">✉️</span>
+                            Envoyez-nous un message
                         </h2>
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-yellow-800">Formulaire en maintenance</h3>
-                                    <p class="mt-1 text-sm text-yellow-700">
-                                        Le formulaire de contact est temporairement désactivé pour maintenance. 
-                                        Merci de nous contacter directement par email.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- <form id="contact-form" class="space-y-6" style="display: none;">
+                        <form id="contact-form" class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
                                 <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required placeholder="Votre nom et prénom">
@@ -65,7 +49,7 @@
                                 <span class="mr-2">📧</span>
                                 Envoyer le message
                             </button>
-                        </form> -->
+                        </form>
                     </div>
                     
                     <!-- Informations de contact -->
@@ -154,25 +138,108 @@
     </div>
 </div>
 
-<!-- Script temporairement désactivé
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
-    $('#contact-form').on('submit', function(e) {
+    const contactForm = document.getElementById('contact-form');
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+    const submitText = submitButton.querySelector('#submit-text') || submitButton.querySelector('span:not(.hidden)');
+    const submitLoader = submitButton.querySelector('#submit-loading') || submitButton.querySelector('.hidden');
+    
+    // Add IDs if they don't exist
+    if (submitText && !submitText.id) submitText.id = 'submit-text';
+    if (submitLoader && !submitLoader.id) {
+        submitLoader.id = 'submit-loading';
+        submitLoader.innerHTML = '⏳ Envoi en cours...';
+    }
+    
+    @if(config('services.recaptcha.site_key'))
+    // reCAPTCHA v3 integration
+    contactForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const name = $('#name').val();
-        const email = $('#email').val();
-        const subject = $('#subject').val();
-        const message = $('#message').val();
+        // Disable submit button
+        submitButton.disabled = true;
+        if (submitText) submitText.classList.add('hidden');
+        if (submitLoader) submitLoader.classList.remove('hidden');
+        
+        try {
+            // Execute reCAPTCHA
+            grecaptcha.ready(function() {
+                grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'contact'})
+                    .then(async function(token) {
+                        // Prepare form data
+                        const formData = new FormData(contactForm);
+                        formData.append('recaptcha_token', token);
+                        
+                        // Send request
+                        const response = await fetch('{{ route('contact.send') }}', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            // Success
+                            alert(data.message || 'Merci pour votre message ! Nous vous répondrons dans les plus brefs délais.');
+                            contactForm.reset();
+                        } else {
+                            // Error
+                            if (data.errors) {
+                                let errorMessage = 'Veuillez corriger les erreurs suivantes :\n';
+                                for (const field in data.errors) {
+                                    errorMessage += '\n- ' + data.errors[field].join('\n- ');
+                                }
+                                alert(errorMessage);
+                            } else {
+                                alert(data.message || 'Une erreur est survenue. Veuillez réessayer.');
+                            }
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('reCAPTCHA error:', error);
+                        alert('Erreur de vérification de sécurité. Veuillez réessayer.');
+                    })
+                    .finally(function() {
+                        // Re-enable submit button
+                        submitButton.disabled = false;
+                        if (submitText) submitText.classList.remove('hidden');
+                        if (submitLoader) submitLoader.classList.add('hidden');
+                    });
+            });
+        } catch (error) {
+            console.error('Contact form error:', error);
+            alert('Une erreur est survenue. Veuillez réessayer.');
+            
+            // Re-enable submit button
+            submitButton.disabled = false;
+            if (submitText) submitText.classList.remove('hidden');
+            if (submitLoader) submitLoader.classList.add('hidden');
+        }
+    });
+    @else
+    // Fallback without reCAPTCHA
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const subject = document.getElementById('subject').value;
+        const message = document.getElementById('message').value;
         
         if (name && email && subject && message) {
             alert('Merci pour votre message ! Nous vous répondrons dans les plus brefs délais.');
-            $(this)[0].reset();
+            contactForm.reset();
         } else {
             alert('Veuillez remplir tous les champs obligatoires.');
         }
     });
+    @endif
 });
 </script>
--->
 @endsection

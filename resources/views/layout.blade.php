@@ -84,6 +84,11 @@
     
     <!-- Mapbox JS -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js" nonce="{{ $csp_nonce ?? '' }}"></script>
+    
+    @if(config('services.recaptcha.site_key'))
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}" nonce="{{ $csp_nonce ?? '' }}"></script>
+    @endif
 </head>
 <body class="bg-gray-100">
     <nav class="bg-white shadow-lg sticky top-0 z-50 transition-all duration-300">

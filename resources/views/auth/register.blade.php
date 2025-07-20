@@ -1160,5 +1160,184 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Function to display errors
+function displayErrors(errors) {
+    // Clear existing errors
+    document.querySelectorAll('.text-red-600').forEach(el => el.remove());
+    document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+    
+    // Display new errors
+    for (const field in errors) {
+        const messages = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
+        const input = document.querySelector(`[name="${field}"]`);
+        
+        if (input) {
+            input.classList.add('border-red-500');
+            
+            messages.forEach(message => {
+                const errorDiv = document.createElement('p');
+                errorDiv.className = 'text-red-600 text-sm mt-1';
+                errorDiv.textContent = message;
+                
+                // Insert after the input or its parent div
+                const parent = input.closest('.mt-4') || input.parentElement;
+                parent.appendChild(errorDiv);
+            });
+        } else if (field === 'general' || field === 'recaptcha') {
+            // Show general errors at the top of the form
+            const form = document.getElementById('step1-form');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4';
+            alertDiv.innerHTML = messages.join('<br>');
+            form.insertBefore(alertDiv, form.firstChild);
+        }
+    }
+}
+
+// Google reCAPTCHA v3 integration
+@if(config('services.recaptcha.site_key'))
+document.addEventListener('DOMContentLoaded', function() {
+    let recaptchaToken = null;
+    const registrationForm = document.getElementById('step1-form');
+    
+    if (!registrationForm) {
+        console.error('Registration form not found');
+        return;
+    }
+
+    // Function to execute reCAPTCHA
+    function executeRecaptcha(action) {
+        return new Promise((resolve, reject) => {
+            // Wait for grecaptcha to be available
+            let attempts = 0;
+            const maxAttempts = 20; // 10 seconds max
+            
+            function checkRecaptcha() {
+                if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
+                    grecaptcha.ready(function() {
+                        grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: action})
+                            .then(function(token) {
+                                recaptchaToken = token;
+                                console.log('reCAPTCHA token generated:', token ? 'OK' : 'NULL');
+                                resolve(token);
+                            })
+                            .catch(function(error) {
+                                console.error('reCAPTCHA execution error:', error);
+                                reject(error);
+                            });
+                    });
+                } else {
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                        console.error('reCAPTCHA not loaded after 10 seconds');
+                        reject(new Error('reCAPTCHA not loaded'));
+                        return;
+                    }
+                    setTimeout(checkRecaptcha, 500);
+                }
+            }
+            
+            checkRecaptcha();
+        });
+    }
+
+    // Override form submission to include reCAPTCHA
+    registrationForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    try {
+        // Execute reCAPTCHA before submitting
+        const createBtn = document.getElementById('create-account-btn');
+        createBtn.disabled = true;
+        
+        await executeRecaptcha('register');
+        
+        // Add reCAPTCHA token to form data
+        const formData = new FormData(registrationForm);
+        formData.append('recaptcha_token', recaptchaToken);
+        
+        // Debug: log the token
+        console.log('reCAPTCHA token:', recaptchaToken);
+        
+        // Submit with token
+        const response = await fetch(registrationForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Continue with original success flow
+            document.getElementById('create-text').classList.add('hidden');
+            document.getElementById('create-loading').classList.remove('hidden');
+            
+            window.registrationData = {
+                name: data.user.name,
+                email: data.user.email,
+                interest_country: data.user.interest_country || '',
+                ...(window.detectedLocation ? {
+                    location: window.detectedLocation
+                } : {})
+            };
+            
+            setTimeout(() => {
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').style.display = 'block';
+            }, 1000);
+        } else {
+            // Handle errors
+            createBtn.disabled = false;
+            displayErrors(data.errors || {'general': ['Une erreur est survenue']});
+        }
+        } catch (error) {
+            console.error('Registration error:', error);
+            document.getElementById('create-account-btn').disabled = false;
+            displayErrors({'general': ['Erreur de vérification reCAPTCHA. Veuillez réessayer.']});
+        }
+    });
+
+    // Update enrichProfile form submission too
+    const enrichForm = document.getElementById('step2-form');
+    if (enrichForm) {
+        enrichForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        try {
+            await executeRecaptcha('enrich_profile');
+            
+            const formData = new FormData(enrichForm);
+            formData.append('recaptcha_token', recaptchaToken);
+            
+            // Continue with original submission logic
+            const response = await fetch(enrichForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                window.location.href = data.redirect_url || '/';
+            } else {
+                displayErrors(data.errors || {'general': ['Une erreur est survenue']});
+            }
+        } catch (error) {
+            console.error('Profile enrichment error:', error);
+            displayErrors({'general': ['Erreur de vérification reCAPTCHA. Veuillez réessayer.']});
+        }
+        });
+    }
+});
+@endif
 </script>
 @endsection

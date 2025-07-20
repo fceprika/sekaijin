@@ -34,12 +34,13 @@ class SecurityHeaders
         if (app()->environment('local', 'development')) {
             // Development CSP - More permissive for Vite
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com; " .
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; " .
                    "style-src 'self' 'unsafe-inline' http://localhost:* https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; " .
                    "img-src 'self' data: https: http://localhost:*; " .
                    "font-src 'self' https://cdnjs.cloudflare.com http://localhost:*; " .
-                   "connect-src 'self' ws://localhost:* http://localhost:* https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://cdn.tiny.cloud; " .
+                   "connect-src 'self' ws://localhost:* http://localhost:* https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://cdn.tiny.cloud https://www.google.com/recaptcha/; " .
                    "worker-src 'self' blob:; " .
+                   "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .
                    "form-action 'self'";
@@ -47,12 +48,13 @@ class SecurityHeaders
             // Production CSP - Strict security (adapted for local testing)
             $localSources = app()->environment('local') ? ' http://localhost:* http://127.0.0.1:*' : '';
             $csp = "default-src 'self'{$localSources}; " .
-                   "script-src 'self' 'nonce-{$nonce}' https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://www.googletagmanager.com{$localSources}; " .
+                   "script-src 'self' 'nonce-{$nonce}' https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/{$localSources}; " .
                    "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud{$localSources}; " .
                    "img-src 'self' data: https:{$localSources}; " .
                    "font-src 'self' https://cdnjs.cloudflare.com{$localSources}; " .
-                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://cdn.tiny.cloud{$localSources}; " .
+                   "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://cdn.tiny.cloud https://www.google.com/recaptcha/{$localSources}; " .
                    "worker-src 'self' blob:; " .
+                   "frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .
                    "form-action 'self'";
