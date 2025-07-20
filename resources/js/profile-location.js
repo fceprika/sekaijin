@@ -218,35 +218,60 @@ class ProfileLocationManager {
         this.elements.autoLocationBtn.disabled = true;
 
         try {
+            // Vérifier d'abord les permissions
+            if (navigator.permissions && navigator.permissions.query) {
+                try {
+                    const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+                    console.log('Permission status:', permissionStatus.state);
+                    
+                    if (permissionStatus.state === 'denied') {
+                        throw new Error('Géolocalisation refusée. Veuillez vérifier les paramètres de votre navigateur.');
+                    }
+                } catch (permError) {
+                    console.log('Cannot check permission status:', permError);
+                }
+            }
+
             const position = await new Promise((resolve, reject) => {
-                // Essayer d'abord avec enableHighAccuracy à false
-                const options = {
-                    enableHighAccuracy: false,
-                    timeout: 15000, // Augmenter le timeout à 15 secondes
-                    maximumAge: 600000 // 10 minutes cache
+                let attempts = 0;
+                const maxAttempts = 3;
+                
+                const tryGeolocation = (options) => {
+                    attempts++;
+                    console.log(`Tentative de géolocalisation ${attempts}/${maxAttempts}`, options);
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            console.log('Position obtenue:', pos);
+                            resolve(pos);
+                        },
+                        (error) => {
+                            console.error(`Erreur géolocalisation tentative ${attempts}:`, error);
+                            
+                            if (attempts < maxAttempts) {
+                                // Essayer avec des options différentes
+                                setTimeout(() => {
+                                    const newOptions = {
+                                        enableHighAccuracy: attempts === 2, // true au 2e essai
+                                        timeout: 30000, // 30 secondes
+                                        maximumAge: attempts === 1 ? 300000 : 0 // Cache au 1er essai, frais après
+                                    };
+                                    tryGeolocation(newOptions);
+                                }, 1000); // Attendre 1 seconde entre les tentatives
+                            } else {
+                                reject(error);
+                            }
+                        },
+                        options
+                    );
                 };
                 
-                navigator.geolocation.getCurrentPosition(
-                    resolve,
-                    (error) => {
-                        // Si l'erreur est "position unavailable", réessayer avec d'autres options
-                        if (error.code === 2) {
-                            console.log('Position unavailable, retrying with different options...');
-                            navigator.geolocation.getCurrentPosition(
-                                resolve,
-                                reject,
-                                {
-                                    enableHighAccuracy: true,
-                                    timeout: 20000,
-                                    maximumAge: 0
-                                }
-                            );
-                        } else {
-                            reject(error);
-                        }
-                    },
-                    options
-                );
+                // Première tentative avec des options basiques
+                tryGeolocation({
+                    enableHighAccuracy: false,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 minutes de cache
+                });
             });
 
             const lat = position.coords.latitude;
@@ -306,6 +331,45 @@ class ProfileLocationManager {
             if (helpText && window.showToast) {
                 window.showToast(helpText, 'error');
             }
+            
+            // Si la géolocalisation échoue, essayer avec l'IP comme fallback
+            if (error.code === 2 || error.code === 3) {
+                console.log('Tentative de localisation par IP comme fallback...');
+                this.tryIpBasedLocation();
+            }
+        }
+    }
+
+    async tryIpBasedLocation() {
+        try {
+            this.elements.autoLocationIcon.textContent = '🌐';
+            this.elements.autoLocationText.textContent = 'Localisation approximative...';
+            
+            const response = await fetch('/api/location-from-ip');
+            const data = await response.json();
+            
+            if (data.success && data.lat && data.lng) {
+                console.log('Localisation IP réussie:', data);
+                
+                // Utiliser les coordonnées de l'IP
+                this.switchToAutoMode(data.country, data.city, data.lat, data.lng);
+                this.elements.autoLocationIcon.textContent = '📍';
+                this.elements.autoLocationText.textContent = 'Position approximative détectée';
+                
+                // Informer l'utilisateur
+                if (window.showToast) {
+                    window.showToast('Localisation approximative basée sur votre connexion internet', 'info');
+                }
+                
+                this.updateButtonStates();
+            } else {
+                throw new Error('Localisation IP impossible');
+            }
+        } catch (ipError) {
+            console.error('Erreur localisation IP:', ipError);
+            this.elements.autoLocationIcon.textContent = '❌';
+            this.elements.autoLocationText.textContent = 'Utilisez la saisie manuelle';
+            this.elements.autoLocationBtn.disabled = false;
         }
     }
 
