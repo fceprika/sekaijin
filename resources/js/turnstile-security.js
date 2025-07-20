@@ -295,8 +295,15 @@ class TurnstileSecurityManager {
     }
 
     setupGlobalTurnstileListener() {
-        // Approche différente : surveiller quand les callbacks sont créés
-        const self = this;
+        // Nouvelle approche : surveillance directe du statut des widgets Turnstile
+        console.log('🔄 Configuration de la surveillance directe des widgets Turnstile');
+        
+        // Surveiller les changements dans les widgets Turnstile toutes les 2 secondes
+        this.callbackCheckInterval = setInterval(() => {
+            this.checkTurnstileWidgetStatus();
+        }, 2000);
+
+        // Aussi essayer l'interception des callbacks comme backup
         const originalCallbacks = [
             'onContactTurnstileSuccess',
             'onLoginTurnstileSuccess', 
@@ -304,19 +311,38 @@ class TurnstileSecurityManager {
             'onRegisterTurnstileSuccess'
         ];
 
-        // Surveiller les callbacks déjà existants
         this.checkAndWrapCallbacks(originalCallbacks);
+    }
 
-        // Surveiller les callbacks qui seront créés plus tard - vérification immédiate
-        setTimeout(() => {
-            this.checkAndWrapCallbacks(originalCallbacks);
-        }, 100);
-
-        // Vérification périodique toutes les 5 secondes
-        this.callbackCheckInterval = setInterval(() => {
-            console.log('🔍 Vérification périodique des callbacks Turnstile...');
-            this.checkAndWrapCallbacks(originalCallbacks);
-        }, 5000);
+    checkTurnstileWidgetStatus() {
+        // Surveiller directement l'état des widgets Turnstile dans le DOM
+        const turnstileWidgets = document.querySelectorAll('.cf-turnstile');
+        
+        turnstileWidgets.forEach(widget => {
+            const form = widget.closest('form');
+            if (!form) return;
+            
+            const formId = form.id;
+            const state = this.formStates.get(formId);
+            if (!state) return;
+            
+            // Vérifier si le widget contient un token (signe de succès)
+            const hiddenInput = widget.querySelector('input[name="cf-turnstile-response"]');
+            
+            if (hiddenInput && hiddenInput.value && hiddenInput.value.length > 10) {
+                // Le widget a un token valide
+                if (!state.isVerified) {
+                    console.log(`🎉 Widget Turnstile vérifié détecté pour ${formId} - Token: ${hiddenInput.value.substring(0, 20)}...`);
+                    state.isVerified = true;
+                    this.updateButtonState(formId);
+                }
+            } else if (state.isVerified && (!hiddenInput || !hiddenInput.value)) {
+                // Le token a disparu (reset du widget)
+                console.log(`🔄 Widget Turnstile reset détecté pour ${formId}`);
+                state.isVerified = false;
+                this.updateButtonState(formId);
+            }
+        });
     }
 
     checkAndWrapCallbacks(callbackNames) {
