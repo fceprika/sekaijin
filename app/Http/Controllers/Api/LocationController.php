@@ -15,12 +15,31 @@ class LocationController extends Controller
     public function getLocationFromIp(Request $request)
     {
         try {
-            // Get client IP
-            $ip = $request->ip();
+            // Try to get real IP (considering proxies, load balancers, etc.)
+            $ip = $this->getRealIpAddress($request);
             
-            // For local development, use a test IP
+            \Log::info('IP detection for geolocation', [
+                'detected_ip' => $ip,
+                'server_remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'http_x_forwarded_for' => $request->header('X-Forwarded-For'),
+                'http_x_real_ip' => $request->header('X-Real-IP'),
+                'http_cf_connecting_ip' => $request->header('CF-Connecting-IP'),
+            ]);
+            
+            // For local development, don't use test IP - return local info
             if (in_array($ip, ['127.0.0.1', '::1', 'localhost'])) {
-                $ip = '8.8.8.8'; // Google DNS for testing
+                // Return a default location for local development
+                return response()->json([
+                    'success' => true,
+                    'method' => 'local_default',
+                    'country' => 'France',
+                    'countryCode' => 'FR',
+                    'city' => 'Paris',
+                    'lat' => 48.8566,
+                    'lng' => 2.3522,
+                    'accuracy' => 'local_development',
+                    'message' => 'Position par défaut pour développement local'
+                ]);
             }
             
             // Cache key for this IP
@@ -73,5 +92,30 @@ class LocationController extends Controller
                 'message' => 'Location service error'
             ]);
         }
+    }
+    
+    /**
+     * Get real IP address considering proxies and load balancers
+     */
+    private function getRealIpAddress(Request $request): string
+    {
+        // Check for Cloudflare
+        if ($cfIp = $request->header('CF-Connecting-IP')) {
+            return $cfIp;
+        }
+        
+        // Check for standard proxy headers
+        if ($xForwardedFor = $request->header('X-Forwarded-For')) {
+            // X-Forwarded-For can contain multiple IPs, get the first one
+            $ips = explode(',', $xForwardedFor);
+            return trim($ips[0]);
+        }
+        
+        if ($xRealIp = $request->header('X-Real-IP')) {
+            return $xRealIp;
+        }
+        
+        // Fallback to Laravel's IP detection
+        return $request->ip();
     }
 }

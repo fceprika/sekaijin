@@ -240,6 +240,38 @@ class ProfileLocationManager {
                     attempts++;
                     console.log(`Tentative de géolocalisation ${attempts}/${maxAttempts}`, options);
                     
+                    // Pour macOS/Safari, forcer un watchPosition puis clear peut aider
+                    if (attempts === 2 && navigator.userAgent.includes('Safari')) {
+                        console.log('Essai spécial Safari/macOS avec watchPosition...');
+                        const watchId = navigator.geolocation.watchPosition(
+                            (pos) => {
+                                console.log('Position obtenue via watchPosition:', pos);
+                                navigator.geolocation.clearWatch(watchId);
+                                resolve(pos);
+                            },
+                            (error) => {
+                                navigator.geolocation.clearWatch(watchId);
+                                console.error('Erreur watchPosition:', error);
+                                if (attempts < maxAttempts) {
+                                    setTimeout(() => tryGeolocation({
+                                        enableHighAccuracy: true,
+                                        timeout: 60000,
+                                        maximumAge: 0
+                                    }), 2000);
+                                } else {
+                                    reject(error);
+                                }
+                            },
+                            { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                        );
+                        
+                        // Timeout de sécurité pour watchPosition
+                        setTimeout(() => {
+                            navigator.geolocation.clearWatch(watchId);
+                        }, 35000);
+                        return;
+                    }
+                    
                     navigator.geolocation.getCurrentPosition(
                         (pos) => {
                             console.log('Position obtenue:', pos);
@@ -252,12 +284,12 @@ class ProfileLocationManager {
                                 // Essayer avec des options différentes
                                 setTimeout(() => {
                                     const newOptions = {
-                                        enableHighAccuracy: attempts === 2, // true au 2e essai
-                                        timeout: 30000, // 30 secondes
-                                        maximumAge: attempts === 1 ? 300000 : 0 // Cache au 1er essai, frais après
+                                        enableHighAccuracy: attempts >= 2, // true après le 1er essai
+                                        timeout: attempts === 1 ? 20000 : 40000, // Augmenter progressivement
+                                        maximumAge: 0 // Toujours frais après le 1er essai
                                     };
                                     tryGeolocation(newOptions);
-                                }, 1000); // Attendre 1 seconde entre les tentatives
+                                }, attempts * 1000); // Attendre plus longtemps entre les tentatives
                             } else {
                                 reject(error);
                             }
