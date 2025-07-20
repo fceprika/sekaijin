@@ -62,13 +62,14 @@ class TurnstileSecurityManager {
         // Désactiver les boutons immédiatement
         this.disableSubmitButtons(formId, '🔄 Vérification de sécurité...');
 
-        // Configurer les callbacks (les encapsuler si existants, sinon créer nouveaux)
+        // Configurer les callbacks
         const uniqueCallbacks = this.generateUniqueCallbacks(formId);
         
-        // Ne mettre à jour les attributs que si on a créé de nouveaux callbacks
+        // Mettre à jour les attributs seulement si on a créé de nouveaux callbacks
         if (uniqueCallbacks.success && !initialState.originalCallbacks.success) {
             turnstileElement.setAttribute('data-callback', uniqueCallbacks.success);
         }
+        
         if (uniqueCallbacks.error && !initialState.originalCallbacks.error) {
             turnstileElement.setAttribute('data-error-callback', uniqueCallbacks.error);
         }
@@ -85,41 +86,53 @@ class TurnstileSecurityManager {
         const originalSuccessCallback = state.originalCallbacks.success;
         const originalErrorCallback = state.originalCallbacks.error;
 
-        // Si des callbacks existent déjà, les encapsuler plutôt que les remplacer
-        if (originalSuccessCallback && window[originalSuccessCallback]) {
-            const originalSuccess = window[originalSuccessCallback];
+        // Approche simplifiée : toujours encapsuler les callbacks existants
+        if (originalSuccessCallback) {
+            // Sauvegarder l'original s'il existe
+            const originalFunction = window[originalSuccessCallback];
+            
+            // Remplacer par notre wrapper
             window[originalSuccessCallback] = (token) => {
-                // Appeler d'abord notre gestionnaire
+                console.log(`🔓 Callback Turnstile success intercepté pour ${formId}`);
+                
+                // Notre gestionnaire en premier
                 this.handleTurnstileSuccess(formId, token);
-                // Puis l'original
-                originalSuccess(token);
+                
+                // Puis l'original si il existait
+                if (originalFunction && typeof originalFunction === 'function') {
+                    originalFunction(token);
+                }
             };
         }
 
-        if (originalErrorCallback && window[originalErrorCallback]) {
-            const originalError = window[originalErrorCallback];
+        if (originalErrorCallback) {
+            const originalFunction = window[originalErrorCallback];
+            
             window[originalErrorCallback] = (error) => {
-                // Appeler d'abord notre gestionnaire
+                console.log(`❌ Callback Turnstile error intercepté pour ${formId}`);
+                
                 this.handleTurnstileError(formId, error);
-                // Puis l'original
-                originalError(error);
+                
+                if (originalFunction && typeof originalFunction === 'function') {
+                    originalFunction(error);
+                }
             };
         }
 
-        // Si pas de callbacks existants, créer les nôtres
+        // Si aucun callback n'existe, créer les nôtres
         if (!originalSuccessCallback) {
             const successCallback = `turnstileSuccess_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            window[successCallback] = (token) => this.handleTurnstileSuccess(formId, token);
-            return { success: successCallback, error: state.originalCallbacks.error };
+            window[successCallback] = (token) => {
+                console.log(`🔓 Callback Turnstile success créé pour ${formId}`);
+                this.handleTurnstileSuccess(formId, token);
+            };
+            
+            return { 
+                success: successCallback, 
+                error: originalErrorCallback || `turnstileError_${formId.replace(/[^a-zA-Z0-9]/g, '_')}` 
+            };
         }
 
-        if (!originalErrorCallback) {
-            const errorCallback = `turnstileError_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            window[errorCallback] = (error) => this.handleTurnstileError(formId, error);
-            return { success: state.originalCallbacks.success, error: errorCallback };
-        }
-
-        // Les deux callbacks existent, on garde les noms originaux
         return {
             success: originalSuccessCallback,
             error: originalErrorCallback
