@@ -266,6 +266,17 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Verify Turnstile first (skip in local environment)
+        if ($this->turnstileService->isConfigured() && !app()->environment('local') && !$this->turnstileService->verify($request->input('cf-turnstile-response'), 'login')) {
+            \Log::warning('Turnstile verification failed for login', [
+                'ip' => $request->ip(),
+                'email' => $request->input('email'),
+                'token_provided' => !empty($request->input('cf-turnstile-response')),
+            ]);
+            
+            return back()->withErrors(['turnstile' => 'Vérification de sécurité échouée. Veuillez réessayer.'])->withInput();
+        }
+        
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
