@@ -218,92 +218,17 @@ class ProfileLocationManager {
         this.elements.autoLocationBtn.disabled = true;
 
         try {
-            // Vérifier d'abord les permissions
-            if (navigator.permissions && navigator.permissions.query) {
-                try {
-                    const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
-                    console.log('Permission status:', permissionStatus.state);
-                    
-                    if (permissionStatus.state === 'denied') {
-                        throw new Error('Géolocalisation refusée. Veuillez vérifier les paramètres de votre navigateur.');
-                    }
-                } catch (permError) {
-                    console.log('Cannot check permission status:', permError);
-                }
-            }
-
+            // Version simple qui fonctionnait avant
             const position = await new Promise((resolve, reject) => {
-                let attempts = 0;
-                const maxAttempts = 3;
-                
-                const tryGeolocation = (options) => {
-                    attempts++;
-                    console.log(`Tentative de géolocalisation ${attempts}/${maxAttempts}`, options);
-                    
-                    // Pour macOS/Safari, forcer un watchPosition puis clear peut aider
-                    if (attempts === 2 && navigator.userAgent.includes('Safari')) {
-                        console.log('Essai spécial Safari/macOS avec watchPosition...');
-                        const watchId = navigator.geolocation.watchPosition(
-                            (pos) => {
-                                console.log('Position obtenue via watchPosition:', pos);
-                                navigator.geolocation.clearWatch(watchId);
-                                resolve(pos);
-                            },
-                            (error) => {
-                                navigator.geolocation.clearWatch(watchId);
-                                console.error('Erreur watchPosition:', error);
-                                if (attempts < maxAttempts) {
-                                    setTimeout(() => tryGeolocation({
-                                        enableHighAccuracy: true,
-                                        timeout: 60000,
-                                        maximumAge: 0
-                                    }), 2000);
-                                } else {
-                                    reject(error);
-                                }
-                            },
-                            { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
-                        );
-                        
-                        // Timeout de sécurité pour watchPosition
-                        setTimeout(() => {
-                            navigator.geolocation.clearWatch(watchId);
-                        }, 35000);
-                        return;
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    reject,
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes cache
                     }
-                    
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            console.log('Position obtenue:', pos);
-                            resolve(pos);
-                        },
-                        (error) => {
-                            console.error(`Erreur géolocalisation tentative ${attempts}:`, error);
-                            
-                            if (attempts < maxAttempts) {
-                                // Essayer avec des options différentes
-                                setTimeout(() => {
-                                    const newOptions = {
-                                        enableHighAccuracy: attempts >= 2, // true après le 1er essai
-                                        timeout: attempts === 1 ? 20000 : 40000, // Augmenter progressivement
-                                        maximumAge: 0 // Toujours frais après le 1er essai
-                                    };
-                                    tryGeolocation(newOptions);
-                                }, attempts * 1000); // Attendre plus longtemps entre les tentatives
-                            } else {
-                                reject(error);
-                            }
-                        },
-                        options
-                    );
-                };
-                
-                // Première tentative avec des options basiques
-                tryGeolocation({
-                    enableHighAccuracy: false,
-                    timeout: 10000,
-                    maximumAge: 300000 // 5 minutes de cache
-                });
+                );
             });
 
             const lat = position.coords.latitude;
@@ -336,74 +261,19 @@ class ProfileLocationManager {
             this.elements.autoLocationBtn.disabled = false;
 
             let errorMessage = 'Erreur de localisation';
-            let helpText = '';
             
             if (error.code === 1) {
                 errorMessage = 'Autorisation refusée';
-                helpText = 'Veuillez autoriser la géolocalisation dans les paramètres de votre navigateur';
             } else if (error.code === 2) {
                 errorMessage = 'Position indisponible';
-                helpText = 'Vérifiez que les services de localisation sont activés sur votre appareil';
-                // Afficher une alerte plus détaillée pour ce cas
-                console.error('GeolocationPositionError:', {
-                    code: error.code,
-                    message: error.message,
-                    hint: 'Essayez de recharger la page ou utilisez la saisie manuelle'
-                });
             } else if (error.code === 3) {
                 errorMessage = 'Délai dépassé';
-                helpText = 'La localisation prend trop de temps. Réessayez ou utilisez la saisie manuelle';
-            } else if (error.message) {
-                errorMessage = error.message;
             }
             
             this.elements.autoLocationText.textContent = errorMessage;
-            
-            // Afficher un message d'aide si disponible
-            if (helpText && window.showToast) {
-                window.showToast(helpText, 'error');
-            }
-            
-            // Si la géolocalisation échoue, essayer avec l'IP comme fallback
-            if (error.code === 2 || error.code === 3) {
-                console.log('Tentative de localisation par IP comme fallback...');
-                this.tryIpBasedLocation();
-            }
         }
     }
 
-    async tryIpBasedLocation() {
-        try {
-            this.elements.autoLocationIcon.textContent = '🌐';
-            this.elements.autoLocationText.textContent = 'Localisation approximative...';
-            
-            const response = await fetch('/api/location-from-ip');
-            const data = await response.json();
-            
-            if (data.success && data.lat && data.lng) {
-                console.log('Localisation IP réussie:', data);
-                
-                // Utiliser les coordonnées de l'IP
-                this.switchToAutoMode(data.country, data.city, data.lat, data.lng);
-                this.elements.autoLocationIcon.textContent = '📍';
-                this.elements.autoLocationText.textContent = 'Position approximative détectée';
-                
-                // Informer l'utilisateur
-                if (window.showToast) {
-                    window.showToast('Localisation approximative basée sur votre connexion internet', 'info');
-                }
-                
-                this.updateButtonStates();
-            } else {
-                throw new Error('Localisation IP impossible');
-            }
-        } catch (ipError) {
-            console.error('Erreur localisation IP:', ipError);
-            this.elements.autoLocationIcon.textContent = '❌';
-            this.elements.autoLocationText.textContent = 'Utilisez la saisie manuelle';
-            this.elements.autoLocationBtn.disabled = false;
-        }
-    }
 
     handleManualLocation() {
         this.switchToManualMode();
