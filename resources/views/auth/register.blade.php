@@ -957,6 +957,32 @@ document.addEventListener('DOMContentLoaded', function() {
         enrichLoading.classList.remove('hidden');
         
         try {
+            @if(config('services.recaptcha.site_key'))
+            // Execute reCAPTCHA pour étape 2
+            grecaptcha.ready(async function() {
+                const token = await grecaptcha.execute('{{ config('services.recaptcha.site_key') }}', {action: 'enrich_profile'});
+                console.log('reCAPTCHA token generated for step 2:', token);
+                
+                const formData = new FormData(step2Form);
+                formData.append('recaptcha_token', token);
+                
+                // Ajouter les coordonnées si disponibles et si l'utilisateur a coché la case
+                if (shareLocationCheckbox && shareLocationCheckbox.checked && userGeolocation) {
+                    formData.append('initial_latitude', userGeolocation.latitude);
+                    formData.append('initial_longitude', userGeolocation.longitude);
+                }
+                
+                // Use explicit URL to avoid route resolution issues in CI
+                const enrichProfileUrl = '{{ route("enrich.profile") }}';
+                const response = await fetch(enrichProfileUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+            @else
             const formData = new FormData(this);
             
             // Ajouter les coordonnées si disponibles et si l'utilisateur a coché la case
@@ -971,9 +997,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             });
+            @endif
             
             const data = await response.json();
             
@@ -982,12 +1010,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = data.redirect_url || '/';
             } else {
                 // Afficher les erreurs
-                if (data.errors) {
+                if (response.status === 429) {
+                    alert('Trop de tentatives d\'enrichissement. Veuillez patienter avant de réessayer.');
+                } else if (data.errors) {
                     showErrors(data.errors);
                 } else {
                     alert('Une erreur est survenue lors de l\'enrichissement du profil.');
                 }
             }
+            
+            @if(config('services.recaptcha.site_key'))
+            }); // Fermeture de grecaptcha.ready
+            @endif
         } catch (error) {
             console.error('Erreur:', error);
             alert('Une erreur de connexion est survenue. Veuillez réessayer.');
