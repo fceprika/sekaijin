@@ -64,7 +64,7 @@ Route::get('/mentions-legales', function () {
 
 // Routes d'authentification
 Route::get('/inscription', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
-Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:3,60'); // 3 tentatives par heure
+Route::post('/inscription', [App\Http\Controllers\AuthController::class, 'register'])->middleware('throttle:10,1'); // 10 tentatives par minute
 Route::post('/inscription/enrichir-profil', [App\Http\Controllers\AuthController::class, 'enrichProfile'])->name('enrich.profile')->middleware(['auth', 'throttle:5,1']);
 Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:20,1');

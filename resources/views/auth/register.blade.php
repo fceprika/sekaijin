@@ -1330,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Check for rate limiting (status 429)
             if (response.status === 429) {
-                displayErrors({'general': ['Trop de tentatives d\'inscription. Veuillez patienter avant de réessayer.']});
+                displayErrors({'general': ['Trop de tentatives d\'inscription (10 max par minute). Veuillez patienter avant de réessayer.']});
             } else {
                 displayErrors(data.errors || {'general': ['Une erreur est survenue']});
             }

@@ -50,10 +50,10 @@ class RecaptchaService
      */
     public function verify(?string $token, string $action = null): bool
     {
-        // If no token provided, fail verification
+        // If no token provided, check if we should bypass in development
         if (empty($token)) {
             Log::warning('reCAPTCHA token is empty');
-            return false;
+            return $this->shouldBypassInDevelopment();
         }
         if (empty($this->secretKey)) {
             Log::warning('reCAPTCHA secret key not configured');
