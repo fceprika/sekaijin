@@ -88,23 +88,6 @@
                                 </p>
                             </div>
                             
-                            <!-- Adresse -->
-                            <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-                                <div class="flex items-center mb-3">
-                                    <div class="bg-green-100 rounded-full p-3 mr-4">
-                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold text-green-900">Adresse</h3>
-                                        <p class="text-green-700">Sekaijin LLC</p>
-                                        <p class="text-green-600 text-sm">1021 E Lincolnway Suite 8081</p>
-                                        <p class="text-green-600 text-sm">Cheyenne, WY 82001, États-Unis</p>
-                                    </div>
-                                </div>
-                            </div>
                             
                             <!-- Temps de réponse -->
                             <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
