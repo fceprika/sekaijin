@@ -18,12 +18,11 @@ class LocationController extends Controller
             // Try to get real IP (considering proxies, load balancers, etc.)
             $ip = $this->getRealIpAddress($request);
             
-            \Log::info('IP detection for geolocation', [
-                'detected_ip' => $ip,
-                'server_remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'http_x_forwarded_for' => $request->header('X-Forwarded-For'),
-                'http_x_real_ip' => $request->header('X-Real-IP'),
-                'http_cf_connecting_ip' => $request->header('CF-Connecting-IP'),
+            // Log for debugging without sensitive data (GDPR compliance)
+            \Log::info('IP geolocation request', [
+                'ip_type' => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? 'IPv4' : 'IPv6',
+                'is_local' => in_array($ip, ['127.0.0.1', '::1', 'localhost']),
+                'has_proxy_headers' => !empty($request->header('X-Forwarded-For')),
             ]);
             
             // For local development, don't use test IP - return local info
@@ -50,8 +49,8 @@ class LocationController extends Controller
                 return response()->json(Cache::get($cacheKey));
             }
             
-            // Try ip-api.com (free, no key required)
-            $response = Http::timeout(5)->get("http://ip-api.com/json/{$ip}?fields=status,message,country,countryCode,city,lat,lon");
+            // Try ip-api.com (free, no key required) - HTTPS for security
+            $response = Http::timeout(5)->get("https://ip-api.com/json/{$ip}?fields=status,message,country,countryCode,city,lat,lon");
             
             if ($response->successful()) {
                 $data = $response->json();

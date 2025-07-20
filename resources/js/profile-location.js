@@ -263,11 +263,11 @@ class ProfileLocationManager {
             let errorMessage = 'Erreur de localisation';
             
             if (error.code === 1) {
-                errorMessage = 'Autorisation refusée';
+                errorMessage = 'Autorisation refusée - Vérifiez les paramètres de votre navigateur';
             } else if (error.code === 2) {
-                errorMessage = 'Position indisponible';
+                errorMessage = 'Position indisponible - Vérifiez vos paramètres de localisation';
             } else if (error.code === 3) {
-                errorMessage = 'Délai dépassé';
+                errorMessage = 'Délai dépassé - Réessayez dans un moment';
             }
             
             this.elements.autoLocationText.textContent = errorMessage;
