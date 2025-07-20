@@ -219,14 +219,33 @@ class ProfileLocationManager {
 
         try {
             const position = await new Promise((resolve, reject) => {
+                // Essayer d'abord avec enableHighAccuracy à false
+                const options = {
+                    enableHighAccuracy: false,
+                    timeout: 15000, // Augmenter le timeout à 15 secondes
+                    maximumAge: 600000 // 10 minutes cache
+                };
+                
                 navigator.geolocation.getCurrentPosition(
                     resolve,
-                    reject,
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 10000,
-                        maximumAge: 300000 // 5 minutes cache
-                    }
+                    (error) => {
+                        // Si l'erreur est "position unavailable", réessayer avec d'autres options
+                        if (error.code === 2) {
+                            console.log('Position unavailable, retrying with different options...');
+                            navigator.geolocation.getCurrentPosition(
+                                resolve,
+                                reject,
+                                {
+                                    enableHighAccuracy: true,
+                                    timeout: 20000,
+                                    maximumAge: 0
+                                }
+                            );
+                        } else {
+                            reject(error);
+                        }
+                    },
+                    options
                 );
             });
 
@@ -260,14 +279,33 @@ class ProfileLocationManager {
             this.elements.autoLocationBtn.disabled = false;
 
             let errorMessage = 'Erreur de localisation';
+            let helpText = '';
+            
             if (error.code === 1) {
                 errorMessage = 'Autorisation refusée';
+                helpText = 'Veuillez autoriser la géolocalisation dans les paramètres de votre navigateur';
             } else if (error.code === 2) {
                 errorMessage = 'Position indisponible';
+                helpText = 'Vérifiez que les services de localisation sont activés sur votre appareil';
+                // Afficher une alerte plus détaillée pour ce cas
+                console.error('GeolocationPositionError:', {
+                    code: error.code,
+                    message: error.message,
+                    hint: 'Essayez de recharger la page ou utilisez la saisie manuelle'
+                });
             } else if (error.code === 3) {
                 errorMessage = 'Délai dépassé';
+                helpText = 'La localisation prend trop de temps. Réessayez ou utilisez la saisie manuelle';
+            } else if (error.message) {
+                errorMessage = error.message;
             }
+            
             this.elements.autoLocationText.textContent = errorMessage;
+            
+            // Afficher un message d'aide si disponible
+            if (helpText && window.showToast) {
+                window.showToast(helpText, 'error');
+            }
         }
     }
 
