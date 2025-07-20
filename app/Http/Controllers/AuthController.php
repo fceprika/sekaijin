@@ -61,7 +61,7 @@ class AuthController extends Controller
                 'unique:users,name_slug',
                 'regex:/^[a-zA-Z0-9_.-]+$/',
                 'not_regex:/^[._-]/',
-                'not_regex!/[._-]$/',
+                'not_regex:/[._-]$/',
                 function ($attribute, $value, $fail) {
                     $slug = \App\Models\User::generateSlug($value);
                     if (\App\Models\User::where('name_slug', $slug)->exists()) {
