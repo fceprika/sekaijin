@@ -46,8 +46,8 @@
                                 <textarea id="message" name="message" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required placeholder="Décrivez votre demande en détail..."></textarea>
                             </div>
                             <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition duration-300 flex items-center justify-center">
-                                <span class="mr-2">📧</span>
-                                Envoyer le message
+                                <span id="submit-text" class="mr-2">📧 Envoyer le message</span>
+                                <span id="submit-loading" class="hidden">⏳ Envoi en cours...</span>
                             </button>
                         </form>
                     </div>
@@ -142,15 +142,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.getElementById('contact-form');
     const submitButton = contactForm.querySelector('button[type="submit"]');
-    const submitText = submitButton.querySelector('#submit-text') || submitButton.querySelector('span:not(.hidden)');
-    const submitLoader = submitButton.querySelector('#submit-loading') || submitButton.querySelector('.hidden');
-    
-    // Add IDs if they don't exist
-    if (submitText && !submitText.id) submitText.id = 'submit-text';
-    if (submitLoader && !submitLoader.id) {
-        submitLoader.id = 'submit-loading';
-        submitLoader.innerHTML = '⏳ Envoi en cours...';
-    }
+    const submitText = document.getElementById('submit-text');
+    const submitLoader = document.getElementById('submit-loading');
     
     @if(config('services.recaptcha.site_key'))
     // reCAPTCHA v3 integration
