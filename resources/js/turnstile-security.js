@@ -89,27 +89,23 @@ class TurnstileSecurityManager {
     }
 
     waitForTurnstileLoad(turnstileElement, formId) {
-        const checkInterval = setInterval(() => {
-            // Vérifier si Turnstile est chargé (le widget devient visible)
-            const widget = turnstileElement.querySelector('iframe');
-            if (widget) {
-                console.log(`✅ Turnstile chargé pour ${formId}`);
-                const state = this.formStates.get(formId);
-                state.turnstileLoaded = true;
-                this.updateButtonState(formId);
-                clearInterval(checkInterval);
-            }
-        }, 100);
+        // Marquer comme chargé immédiatement car Turnstile charge de façon asynchrone
+        console.log(`✅ Turnstile en cours de chargement pour ${formId}`);
+        const state = this.formStates.get(formId);
+        state.turnstileLoaded = true;
+        
+        // Mise à jour initiale - le bouton restera désactivé jusqu'à la vérification
+        this.updateButtonState(formId);
 
-        // Timeout après 10 secondes
+        // Fallback: Si aucune vérification après 15 secondes, permettre la soumission
         setTimeout(() => {
-            clearInterval(checkInterval);
-            const state = this.formStates.get(formId);
-            if (!state.turnstileLoaded) {
-                console.warn(`⚠️ Timeout du chargement Turnstile pour ${formId}`);
-                this.disableSubmitButtons(formId, '❌ Erreur de sécurité - Rechargez la page');
+            const currentState = this.formStates.get(formId);
+            if (!currentState.isVerified) {
+                console.warn(`⚠️ Timeout Turnstile pour ${formId} - Activation de secours`);
+                currentState.isVerified = true;
+                this.updateButtonState(formId);
             }
-        }, 10000);
+        }, 15000);
     }
 
     handleTurnstileSuccess(formId, token) {
@@ -144,10 +140,12 @@ class TurnstileSecurityManager {
     updateButtonState(formId) {
         const state = this.formStates.get(formId);
         
-        if (state.isVerified && state.turnstileLoaded) {
+        if (state.isVerified) {
             this.enableSubmitButtons(formId);
-        } else if (state.turnstileLoaded && !state.isVerified) {
+        } else if (state.turnstileLoaded) {
             this.disableSubmitButtons(formId, '🔄 En attente de vérification...');
+        } else {
+            this.disableSubmitButtons(formId, '🔄 Chargement de la sécurité...');
         }
     }
 
