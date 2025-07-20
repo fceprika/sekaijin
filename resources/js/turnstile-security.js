@@ -9,6 +9,7 @@ class TurnstileSecurityManager {
     constructor() {
         this.verifiedTokens = new Set();
         this.formStates = new Map();
+        this.callbackCheckInterval = null;
         this.initializeOnDOMReady();
     }
 
@@ -304,22 +305,38 @@ class TurnstileSecurityManager {
         ];
 
         // Surveiller les callbacks déjà existants
-        originalCallbacks.forEach(callbackName => {
+        this.checkAndWrapCallbacks(originalCallbacks);
+
+        // Surveiller les callbacks qui seront créés plus tard - vérification immédiate
+        setTimeout(() => {
+            this.checkAndWrapCallbacks(originalCallbacks);
+        }, 100);
+
+        // Vérification périodique toutes les 5 secondes
+        this.callbackCheckInterval = setInterval(() => {
+            console.log('🔍 Vérification périodique des callbacks Turnstile...');
+            this.checkAndWrapCallbacks(originalCallbacks);
+        }, 5000);
+    }
+
+    checkAndWrapCallbacks(callbackNames) {
+        let foundCallbacks = [];
+        
+        callbackNames.forEach(callbackName => {
             if (window[callbackName]) {
-                console.log(`🔄 Interception immédiate du callback existant: ${callbackName}`);
-                this.wrapExistingCallback(callbackName);
+                if (!window[callbackName]._turnstileWrapped) {
+                    console.log(`🔄 Interception détectée du callback: ${callbackName}`);
+                    this.wrapExistingCallback(callbackName);
+                    foundCallbacks.push(callbackName);
+                } else {
+                    foundCallbacks.push(`${callbackName} (déjà wrappé)`);
+                }
             }
         });
-
-        // Surveiller les callbacks qui seront créés plus tard
-        setTimeout(() => {
-            originalCallbacks.forEach(callbackName => {
-                if (window[callbackName] && !window[callbackName]._turnstileWrapped) {
-                    console.log(`🔄 Interception différée du callback: ${callbackName}`);
-                    this.wrapExistingCallback(callbackName);
-                }
-            });
-        }, 100);
+        
+        if (foundCallbacks.length > 0) {
+            console.log(`📋 Callbacks trouvés: ${foundCallbacks.join(', ')}`);
+        }
     }
 
     wrapExistingCallback(callbackName) {
@@ -364,6 +381,15 @@ class TurnstileSecurityManager {
     // Méthode publique pour déboguer
     getFormStates() {
         return Object.fromEntries(this.formStates);
+    }
+
+    // Méthode pour arrêter la surveillance
+    stopCallbackMonitoring() {
+        if (this.callbackCheckInterval) {
+            clearInterval(this.callbackCheckInterval);
+            this.callbackCheckInterval = null;
+            console.log('🛑 Surveillance des callbacks Turnstile arrêtée');
+        }
     }
 }
 
