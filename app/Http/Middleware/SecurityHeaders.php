@@ -39,6 +39,7 @@ class SecurityHeaders
                    "img-src 'self' data: https: http://localhost:*; " .
                    "font-src 'self' https://cdnjs.cloudflare.com http://localhost:*; " .
                    "connect-src 'self' ws://localhost:* http://localhost:* https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://cdn.tiny.cloud https://challenges.cloudflare.com; " .
+                   "frame-src 'self' https://challenges.cloudflare.com; " .
                    "worker-src 'self' blob:; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .
@@ -52,6 +53,7 @@ class SecurityHeaders
                    "img-src 'self' data: https:{$localSources}; " .
                    "font-src 'self' https://cdnjs.cloudflare.com{$localSources}; " .
                    "connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://cdn.tiny.cloud https://challenges.cloudflare.com{$localSources}; " .
+                   "frame-src 'self' https://challenges.cloudflare.com; " .
                    "worker-src 'self' blob:; " .
                    "frame-ancestors 'none'; " .
                    "base-uri 'self'; " .
