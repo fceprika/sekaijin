@@ -23,6 +23,9 @@ class TurnstileSecurityManager {
     initialize() {
         console.log('🔒 Initialisation du gestionnaire de sécurité Turnstile');
         
+        // Écouter les événements Turnstile globaux
+        this.setupGlobalTurnstileListener();
+        
         // Trouver tous les formulaires avec Turnstile
         const turnstileElements = document.querySelectorAll('.cf-turnstile');
         
@@ -288,6 +291,65 @@ class TurnstileSecurityManager {
                 alert.style.display = 'none';
             }
         }, 4000);
+    }
+
+    setupGlobalTurnstileListener() {
+        // Approche différente : surveiller quand les callbacks sont créés
+        const self = this;
+        const originalCallbacks = [
+            'onContactTurnstileSuccess',
+            'onLoginTurnstileSuccess', 
+            'onTurnstileSuccess',
+            'onRegisterTurnstileSuccess'
+        ];
+
+        // Surveiller les callbacks déjà existants
+        originalCallbacks.forEach(callbackName => {
+            if (window[callbackName]) {
+                console.log(`🔄 Interception immédiate du callback existant: ${callbackName}`);
+                this.wrapExistingCallback(callbackName);
+            }
+        });
+
+        // Surveiller les callbacks qui seront créés plus tard
+        setTimeout(() => {
+            originalCallbacks.forEach(callbackName => {
+                if (window[callbackName] && !window[callbackName]._turnstileWrapped) {
+                    console.log(`🔄 Interception différée du callback: ${callbackName}`);
+                    this.wrapExistingCallback(callbackName);
+                }
+            });
+        }, 100);
+    }
+
+    wrapExistingCallback(callbackName) {
+        const originalCallback = window[callbackName];
+        
+        window[callbackName] = (token) => {
+            console.log(`🔓 Callback global intercepté: ${callbackName}`, token);
+            
+            // Exécuter l'original d'abord
+            if (originalCallback && typeof originalCallback === 'function') {
+                originalCallback(token);
+            }
+            
+            // Puis activer tous les boutons de tous les formulaires
+            this.activateAllVerifiedForms();
+        };
+        
+        // Marquer comme wrappé pour éviter les doubles wrapping
+        window[callbackName]._turnstileWrapped = true;
+    }
+
+    activateAllVerifiedForms() {
+        console.log('🚀 Activation de tous les formulaires vérifiés');
+        
+        // Activer tous les formulaires sécurisés
+        this.formStates.forEach((state, formId) => {
+            console.log(`🔓 Activation du formulaire: ${formId}`);
+            state.isVerified = true;
+            this.updateButtonState(formId);
+        });
     }
 
     setupGlobalCallbacks() {
