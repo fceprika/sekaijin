@@ -189,8 +189,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             alert(data.message || 'Merci pour votre message ! Nous vous répondrons dans les plus brefs délais.');
                             contactForm.reset();
                         } else {
-                            // Error
-                            if (data.errors) {
+                            // Error handling with rate limiting support
+                            if (response.status === 429) {
+                                alert('Trop de messages envoyés. Veuillez patienter avant de réessayer.');
+                            } else if (data.errors) {
                                 let errorMessage = 'Veuillez corriger les erreurs suivantes :\n';
                                 for (const field in data.errors) {
                                     errorMessage += '\n- ' + data.errors[field].join('\n- ');

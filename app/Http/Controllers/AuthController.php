@@ -14,6 +14,15 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    protected RecaptchaService $recaptchaService;
+    protected EmailBlacklistService $blacklistService;
+    
+    public function __construct(RecaptchaService $recaptchaService, EmailBlacklistService $blacklistService)
+    {
+        $this->recaptchaService = $recaptchaService;
+        $this->blacklistService = $blacklistService;
+    }
+    
     public function showRegister()
     {
         return view('auth.register');
@@ -27,8 +36,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         // Verify reCAPTCHA first (skip in local environment)
-        $recaptchaService = new RecaptchaService();
-        if ($recaptchaService->isConfigured() && !app()->environment('local') && !$recaptchaService->verify($request->input('recaptcha_token'), 'register')) {
+        if ($this->recaptchaService->isConfigured() && !app()->environment('local') && !$this->recaptchaService->verify($request->input('recaptcha_token'), 'register')) {
             \Log::warning('reCAPTCHA verification failed for registration', [
                 'ip' => $request->ip(),
                 'token_provided' => !empty($request->input('recaptcha_token')),
@@ -46,8 +54,7 @@ class AuthController extends Controller
         }
         
         // Check email blacklist
-        $blacklistService = new EmailBlacklistService();
-        if ($blacklistService->isBlacklisted($request->input('email'))) {
+        if ($this->blacklistService->isBlacklisted($request->input('email'))) {
             return response()->json([
                 'success' => false,
                 'errors' => ['email' => ['Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.']],
@@ -144,8 +151,7 @@ class AuthController extends Controller
     public function enrichProfile(Request $request)
     {
         // Verify reCAPTCHA (skip in local environment)
-        $recaptchaService = new RecaptchaService();
-        if ($recaptchaService->isConfigured() && !app()->environment('local') && !$recaptchaService->verify($request->input('recaptcha_token'), 'enrich_profile')) {
+        if ($this->recaptchaService->isConfigured() && !app()->environment('local') && !$this->recaptchaService->verify($request->input('recaptcha_token'), 'enrich_profile')) {
             return response()->json([
                 'success' => false,
                 'errors' => ['recaptcha' => ['Vérification de sécurité échouée. Veuillez réessayer.']],

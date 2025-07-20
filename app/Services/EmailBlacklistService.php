@@ -8,9 +8,27 @@ use Illuminate\Support\Facades\Log;
 class EmailBlacklistService
 {
     /**
-     * Common disposable email domains
+     * Cache TTL for custom blacklist (1 week)
      */
-    protected array $disposableDomains = [
+    private const CACHE_TTL = 604800; // 7 days in seconds
+    
+    /**
+     * Cache TTL for custom blacklist updates (shorter for dynamic updates)
+     */
+    private const DYNAMIC_CACHE_TTL = 86400; // 1 day in seconds
+    
+    /**
+     * Common disposable email domains (loaded once per instance)
+     */
+    private static ?array $disposableDomains = null;
+    
+    /**
+     * Get disposable domains with lazy loading
+     */
+    private function getDisposableDomains(): array
+    {
+        if (self::$disposableDomains === null) {
+            self::$disposableDomains = [
         // Test domains
         'example.com',
         'example.org',
@@ -73,7 +91,10 @@ class EmailBlacklistService
         'mintemail.com',
         'tempinbox.com',
         'mohmal.com',
-    ];
+            ];
+        }
+        return self::$disposableDomains;
+    }
     
     /**
      * Specific blacklisted emails
@@ -135,7 +156,7 @@ class EmailBlacklistService
      */
     protected function isDisposableDomain(string $domain): bool
     {
-        return in_array($domain, $this->disposableDomains);
+        return in_array($domain, $this->getDisposableDomains());
     }
     
     /**
@@ -168,7 +189,7 @@ class EmailBlacklistService
         
         if (!in_array($email, $blacklist['emails'])) {
             $blacklist['emails'][] = strtolower(trim($email));
-            Cache::put('email_blacklist', $blacklist, now()->addDays(30));
+            Cache::put('email_blacklist', $blacklist, self::DYNAMIC_CACHE_TTL);
             
             Log::info('Email added to blacklist', ['email' => $email]);
         }
@@ -183,7 +204,7 @@ class EmailBlacklistService
         
         if (!in_array($domain, $blacklist['domains'])) {
             $blacklist['domains'][] = strtolower(trim($domain));
-            Cache::put('email_blacklist', $blacklist, now()->addDays(30));
+            Cache::put('email_blacklist', $blacklist, self::DYNAMIC_CACHE_TTL);
             
             Log::info('Domain added to blacklist', ['domain' => $domain]);
         }
@@ -192,8 +213,8 @@ class EmailBlacklistService
     /**
      * Get all disposable domains for frontend validation
      */
-    public function getDisposableDomains(): array
+    public function getDisposableDomainsForFrontend(): array
     {
-        return $this->disposableDomains;
+        return $this->getDisposableDomains();
     }
 }

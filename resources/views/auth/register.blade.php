@@ -1293,7 +1293,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // Handle errors
             createBtn.disabled = false;
-            displayErrors(data.errors || {'general': ['Une erreur est survenue']});
+            
+            // Check for rate limiting (status 429)
+            if (response.status === 429) {
+                displayErrors({'general': ['Trop de tentatives d\'inscription. Veuillez patienter avant de réessayer.']});
+            } else {
+                displayErrors(data.errors || {'general': ['Une erreur est survenue']});
+            }
         }
         } catch (error) {
             console.error('Registration error:', error);

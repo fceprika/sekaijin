@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
 {
+    protected RecaptchaService $recaptchaService;
+    protected EmailBlacklistService $blacklistService;
+    
+    public function __construct(RecaptchaService $recaptchaService, EmailBlacklistService $blacklistService)
+    {
+        $this->recaptchaService = $recaptchaService;
+        $this->blacklistService = $blacklistService;
+    }
+    
     public function show()
     {
         $seoService = new \App\Services\SeoService;
@@ -23,20 +32,28 @@ class ContactController extends Controller
     public function send(Request $request)
     {
         // Verify reCAPTCHA first (skip in local environment)
-        $recaptchaService = new RecaptchaService();
-        if ($recaptchaService->isConfigured() && !app()->environment('local') && !$recaptchaService->verify($request->input('recaptcha_token'), 'contact')) {
+        if ($this->recaptchaService->isConfigured() && !app()->environment('local') && !$this->recaptchaService->verify($request->input('recaptcha_token'), 'contact')) {
+            \Log::warning('reCAPTCHA verification failed for contact form', [
+                'ip' => $request->ip(),
+                'token_provided' => !empty($request->input('recaptcha_token')),
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Vérification de sécurité échouée. Veuillez réessayer.',
+                'errors' => ['recaptcha' => ['Vérification de sécurité échouée. Veuillez réessayer.']],
             ], 422);
         }
         
         // Check email blacklist
-        $blacklistService = new EmailBlacklistService();
-        if ($blacklistService->isBlacklisted($request->input('email'))) {
+        if ($this->blacklistService->isBlacklisted($request->input('email'))) {
+            \Log::warning('Blacklisted email attempted contact form', [
+                'email' => $request->input('email'),
+                'ip' => $request->ip(),
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.',
+                'errors' => ['email' => ['Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.']],
             ], 422);
         }
         
@@ -60,7 +77,6 @@ class ContactController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Veuillez corriger les erreurs dans le formulaire.',
                 'errors' => $validator->errors(),
             ], 422);
         }
