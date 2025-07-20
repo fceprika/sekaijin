@@ -207,6 +207,8 @@ class TurnstileSecurityManager {
             // Restaurer complètement le contenu original
             button.innerHTML = button.dataset.originalContent;
             
+            // Les styles sont maintenant gérés par les classes CSS
+            
             // Ajouter une classe pour indiquer que la vérification est réussie
             button.classList.add('turnstile-verified');
             button.classList.remove('turnstile-pending', 'turnstile-error');
@@ -230,7 +232,7 @@ class TurnstileSecurityManager {
             // Remplacer simplement le contenu du bouton par le message
             button.textContent = message;
             
-            // Ajouter des classes CSS pour le style
+            // Ajouter des classes CSS pour le style et le curseur
             button.classList.add('turnstile-pending');
             button.classList.remove('turnstile-verified', 'turnstile-error');
         });
