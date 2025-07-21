@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Seed content only if we're not in testing environment
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             $this->call([
                 ContentSeeder::class,
             ]);
