@@ -320,25 +320,25 @@ class RolePermissionTest extends TestCase
     public function test_role_badge_display(): void
     {
         $adminUser = User::factory()->admin()->create([
-            'name' => 'adminuser', 
-            'is_public_profile' => true, 
-            'email_verified_at' => now()
+            'name' => 'adminuser',
+            'is_public_profile' => true,
+            'email_verified_at' => now(),
         ]);
         $ambassadorUser = User::factory()->ambassador()->create([
-            'name' => 'ambassadoruser', 
-            'is_public_profile' => true, 
-            'email_verified_at' => now()
+            'name' => 'ambassadoruser',
+            'is_public_profile' => true,
+            'email_verified_at' => now(),
         ]);
         $premiumUser = User::factory()->premium()->create([
-            'name' => 'premiumuser', 
-            'is_public_profile' => true, 
-            'email_verified_at' => now()
+            'name' => 'premiumuser',
+            'is_public_profile' => true,
+            'email_verified_at' => now(),
         ]);
         $freeUser = User::factory()->create([
-            'name' => 'freeuser', 
-            'role' => 'free', 
-            'is_public_profile' => true, 
-            'email_verified_at' => now()
+            'name' => 'freeuser',
+            'role' => 'free',
+            'is_public_profile' => true,
+            'email_verified_at' => now(),
         ]);
 
         $adminResponse = $this->get('/membre/adminuser');

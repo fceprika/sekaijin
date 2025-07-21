@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
 
 class TurnstileServiceProvider extends ServiceProvider
 {
@@ -30,9 +30,9 @@ class TurnstileServiceProvider extends ServiceProvider
             $isConfigured = config('services.turnstile.key') && config('services.turnstile.secret');
             $isLocalEnvironment = app()->environment(['local', 'testing']);
             $bypassLocal = config('services.turnstile.bypass_local', false);
-            
+
             // Show Turnstile if configured AND (not local OR local but bypass disabled)
-            return $isConfigured && (!$isLocalEnvironment || !$bypassLocal);
+            return $isConfigured && (! $isLocalEnvironment || ! $bypassLocal);
         });
     }
 }
