@@ -371,14 +371,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Send the email verification notification.
-     *
-     * @return void
      */
     public function sendEmailVerificationNotification()
     {
         try {
             $this->notify(new VerifyEmailNotification);
-            
+
             // Log successful email verification notification
             \Log::info('Email verification notification sent successfully', [
                 'user_id' => $this->id,
@@ -386,7 +384,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 'user_name' => $this->name,
                 'timestamp' => now()->toISOString(),
             ]);
-            
+
         } catch (\Exception $e) {
             // Log email verification notification failure
             \Log::error('Failed to send email verification notification', [
@@ -396,7 +394,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 'error_message' => $e->getMessage(),
                 'timestamp' => now()->toISOString(),
             ]);
-            
+
             // Re-throw the exception to maintain expected behavior
             throw $e;
         }
@@ -405,8 +403,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Send the password reset notification.
      *
-     * @param  string  $token
-     * @return void
+     * @param string $token
      */
     public function sendPasswordResetNotification($token)
     {

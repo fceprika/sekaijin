@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
 use App\Models\User;
+use App\Services\EmailBlacklistService;
+use App\Services\TurnstileService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Services\TurnstileService;
-use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -15,18 +15,18 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     protected TurnstileService $turnstileService;
     protected EmailBlacklistService $blacklistService;
-    
+
     public function __construct(TurnstileService $turnstileService, EmailBlacklistService $blacklistService)
     {
         $this->turnstileService = $turnstileService;
         $this->blacklistService = $blacklistService;
     }
+
     public function showRegister()
     {
         return view('auth.register');
@@ -44,7 +44,7 @@ class AuthController extends Controller
         if ($turnstileCheck !== null) {
             return $turnstileCheck;
         }
-        
+
         // Check email blacklist
         if ($this->blacklistService->isBlacklisted($request->input('email'))) {
             return response()->json([
@@ -52,7 +52,7 @@ class AuthController extends Controller
                 'errors' => ['email' => ['Cette adresse email n\'est pas autorisée. Veuillez utiliser une adresse email valide.']],
             ], 422);
         }
-        
+
         // Validation pour l'étape 1 : création de compte
         $validator = Validator::make($request->all(), [
             'name' => [
@@ -105,7 +105,7 @@ class AuthController extends Controller
         }
 
         // Validate country exists if provided (additional server-side check)
-        if ($request->interest_country && !Country::where('name_fr', $request->interest_country)->exists()) {
+        if ($request->interest_country && ! Country::where('name_fr', $request->interest_country)->exists()) {
             return back()->withErrors(['interest_country' => 'Le pays d\'intérêt sélectionné n\'existe pas.'])->withInput();
         }
 
@@ -121,7 +121,7 @@ class AuthController extends Controller
         Auth::login($user);
 
         // Envoyer l'email de vérification (sauf si désactivé en configuration)
-        if (!config('services.email_verification.skip', false)) {
+        if (! config('services.email_verification.skip', false)) {
             try {
                 $user->sendEmailVerificationNotification();
                 \Log::info('Email verification sent successfully', [
@@ -289,7 +289,7 @@ class AuthController extends Controller
         if ($turnstileCheck !== null) {
             return $turnstileCheck;
         }
-        
+
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -317,25 +317,25 @@ class AuthController extends Controller
 
         return redirect('/')->with('success', 'Vous avez été déconnecté avec succès.');
     }
-    
+
     /**
-     * Verify Turnstile protection for a request
+     * Verify Turnstile protection for a request.
      */
     private function verifyTurnstileForRequest(Request $request, string $action): ?Response
     {
-        if (!$this->shouldVerifyTurnstile($request)) {
+        if (! $this->shouldVerifyTurnstile($request)) {
             return null;
         }
-        
-        if (!$this->turnstileService->verify($request->input('cf-turnstile-response'), $action)) {
+
+        if (! $this->turnstileService->verify($request->input('cf-turnstile-response'), $action)) {
             \Log::warning('Turnstile verification failed', [
                 'action' => $action,
                 'ip' => $this->anonymizeIp($request->ip()),
-                'token_provided' => !empty($request->input('cf-turnstile-response')),
+                'token_provided' => ! empty($request->input('cf-turnstile-response')),
             ]);
-            
+
             $errorMessage = 'Vérification de sécurité échouée. Veuillez réessayer.';
-            
+
             // Check if request is AJAX
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -343,23 +343,23 @@ class AuthController extends Controller
                     'errors' => ['turnstile' => [$errorMessage]],
                 ], 422);
             }
-            
+
             return back()->withErrors(['turnstile' => $errorMessage])->withInput();
         }
-        
+
         return null;
     }
-    
+
     /**
-     * Determine if Turnstile verification should be performed
+     * Determine if Turnstile verification should be performed.
      */
     private function shouldVerifyTurnstile(Request $request): bool
     {
-        return $this->turnstileService->isConfigured() && !app()->environment('local');
+        return $this->turnstileService->isConfigured() && ! app()->environment('local');
     }
-    
+
     /**
-     * Anonymize IP address for GDPR compliance
+     * Anonymize IP address for GDPR compliance.
      */
     private function anonymizeIp(string $ip): string
     {
@@ -367,18 +367,20 @@ class AuthController extends Controller
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $parts = explode('.', $ip);
             $parts[3] = '0';
+
             return implode('.', $parts);
         }
-        
+
         // For IPv6: zero out the last 64 bits
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
             $parts = explode(':', $ip);
             for ($i = 4; $i < count($parts); $i++) {
                 $parts[$i] = '0';
             }
+
             return implode(':', $parts);
         }
-        
+
         return 'unknown';
     }
 
@@ -762,21 +764,21 @@ class AuthController extends Controller
 
         try {
             $request->user()->sendEmailVerificationNotification();
-            
+
             \Log::info('Email verification sent successfully', [
                 'user_id' => $request->user()->id,
                 'email' => $request->user()->email,
             ]);
-            
+
             return back()->with('message', 'Email de vérification renvoyé ! Vérifiez votre boîte de réception et vos spams.');
-            
+
         } catch (\Exception $e) {
             \Log::error('Failed to send email verification', [
                 'user_id' => $request->user()->id,
                 'email' => $request->user()->email,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return back()->withErrors(['email' => 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer dans quelques minutes ou contacter le support.']);
         }
     }
@@ -851,7 +853,7 @@ class AuthController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password)
+                    'password' => Hash::make($password),
                 ])->setRememberToken(\Str::random(60));
 
                 $user->save();

@@ -5,7 +5,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Lang;
 
 class ResetPasswordNotification extends Notification
 {
@@ -28,8 +27,7 @@ class ResetPasswordNotification extends Notification
     /**
      * Create a notification instance.
      *
-     * @param  string  $token
-     * @return void
+     * @param string $token
      */
     public function __construct($token)
     {
@@ -39,7 +37,8 @@ class ResetPasswordNotification extends Notification
     /**
      * Get the notification's channels.
      *
-     * @param  mixed  $notifiable
+     * @param mixed $notifiable
+     *
      * @return array|string
      */
     public function via($notifiable)
@@ -50,7 +49,8 @@ class ResetPasswordNotification extends Notification
     /**
      * Build the mail representation of the notification.
      *
-     * @param  mixed  $notifiable
+     * @param mixed $notifiable
+     *
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
@@ -75,8 +75,7 @@ class ResetPasswordNotification extends Notification
     /**
      * Set a callback that should be used when creating the reset password button URL.
      *
-     * @param  \Closure  $callback
-     * @return void
+     * @param \Closure $callback
      */
     public static function createUrlUsing($callback)
     {
