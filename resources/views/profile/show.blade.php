@@ -117,7 +117,7 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-gray-500 mt-2 text-center sm:text-left">
-                                        JPG, PNG ou WebP. Maximum <span class="font-bold text-red-600">100KB</span>. Laissez vide pour conserver l'avatar actuel.
+                                        JPG, PNG ou WebP. Maximum <span class="font-bold text-red-600">500KB</span>. Laissez vide pour conserver l'avatar actuel.
                                     </p>
                                     @if($user->avatar)
                                         <label class="flex items-center justify-center sm:justify-start mt-3">
@@ -704,9 +704,9 @@ document.addEventListener('DOMContentLoaded', function() {
             avatarInput.addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 if (file) {
-                    // Vérifier la taille du fichier (100KB max)
-                    if (file.size > 100 * 1024) {
-                        alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                    // Vérifier la taille du fichier (500KB max)
+                    if (file.size > 500 * 1024) {
+                        alert('Le fichier est trop volumineux. Maximum 500KB autorisé.');
                         this.value = '';
                         return;
                     }
@@ -796,8 +796,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const file = files[0];
                     
                     // Vérification immédiate pour le drag & drop
-                    if (file.size > 100 * 1024) {
-                        alert('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+                    if (file.size > 500 * 1024) {
+                        alert('Le fichier est trop volumineux. Maximum 500KB autorisé.');
                         return;
                     }
                     
