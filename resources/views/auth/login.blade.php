@@ -56,7 +56,7 @@
                     </label>
                 </div>
                 <div class="text-sm">
-                    <a href="#" class="text-blue-600 hover:text-blue-800 underline">
+                    <a href="{{ route('password.request') }}" class="text-blue-600 hover:text-blue-800 underline">
                         Mot de passe oublié ?
                     </a>
                 </div>

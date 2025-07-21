@@ -49,12 +49,6 @@
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
         ],
-        "test": [
-            "@php artisan test"
-        ],
-        "test-coverage": [
-            "@php artisan test --coverage"
-        ],
         "pint": [
             "./vendor/bin/pint"
         ],
@@ -66,8 +60,7 @@
         ],
         "quality": [
             "@pint-test",
-            "@stan",
-            "@test"
+            "@stan"
         ],
         "ci": [
             "@quality"
