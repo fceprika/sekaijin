@@ -23,6 +23,11 @@ class PublicProfileController extends Controller
             return redirect()->route('member.invitation');
         }
 
+        // Vérifier que l'utilisateur a vérifié son email (profils publics uniquement pour emails vérifiés)
+        if ($user->is_public_profile && ! $user->hasVerifiedEmail()) {
+            abort(404, 'Profil non disponible');
+        }
+
         // Redirection canonique vers l'URL en minuscules si nécessaire
         if ($name !== $user->name_slug) {
             return redirect()->route(User::ROUTE_PUBLIC_PROFILE, $user->name_slug, 301);

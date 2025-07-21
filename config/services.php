@@ -49,4 +49,8 @@ return [
         'bypass_local' => env('TURNSTILE_BYPASS_LOCAL', false),
     ],
 
+    'email_verification' => [
+        'skip' => env('SKIP_EMAIL_VERIFICATION', false),
+    ],
+
 ];

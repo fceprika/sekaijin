@@ -31,14 +31,14 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
 
-        if (app()->environment('local', 'development')) {
-            // Development CSP - More permissive for Vite
+        if (app()->environment('local', 'development') || config('app.debug')) {
+            // Development CSP - More permissive for Vite and HMR
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'unsafe-inline' http://localhost:* https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://challenges.cloudflare.com; " .
-                   "style-src 'self' 'unsafe-inline' http://localhost:* https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; " .
-                   "img-src 'self' data: https: http://localhost:*; " .
-                   "font-src 'self' https://cdnjs.cloudflare.com http://localhost:*; " .
-                   "connect-src 'self' ws://localhost:* http://localhost:* https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://cdn.tiny.cloud https://challenges.cloudflare.com; " .
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* ws://localhost:* wss://localhost:* https://cdn.tiny.cloud https://api.mapbox.com https://cdnjs.cloudflare.com https://challenges.cloudflare.com; " .
+                   "style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:* https://api.mapbox.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; " .
+                   "img-src 'self' data: https: http://localhost:* http://127.0.0.1:*; " .
+                   "font-src 'self' https://cdnjs.cloudflare.com http://localhost:* http://127.0.0.1:*; " .
+                   "connect-src 'self' ws://localhost:* wss://localhost:* http://localhost:* http://127.0.0.1:* https://api.mapbox.com https://events.mapbox.com https://api.bigdatacloud.net https://cdn.tiny.cloud https://challenges.cloudflare.com; " .
                    "frame-src 'self' https://challenges.cloudflare.com; " .
                    "worker-src 'self' blob:; " .
                    "frame-ancestors 'none'; " .

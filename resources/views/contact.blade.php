@@ -131,6 +131,7 @@
     </div>
 </div>
 
+<!-- Script temporairement désactivé
 <script nonce="{{ $csp_nonce ?? '' }}">
 document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.getElementById('contact-form');

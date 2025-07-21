@@ -70,6 +70,15 @@ Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:20,1');
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
+// Email Verification Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [App\Http\Controllers\AuthController::class, 'showVerifyEmail'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\AuthController::class, 'verifyEmail'])
+        ->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+    Route::post('/email/verification-notification', [App\Http\Controllers\AuthController::class, 'resendVerification'])
+        ->middleware('throttle:6,1')->name('verification.send');
+});
+
 // API Routes with rate limiting
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/api/expats-by-country', [App\Http\Controllers\Api\ExpatController::class, 'expatsByCountry']);
@@ -87,8 +96,8 @@ Route::middleware(['auth', 'throttle:10,1'])->group(function () {
     Route::post('/api/remove-location', [App\Http\Controllers\Api\ExpatController::class, 'removeLocation']);
 });
 
-// Event management routes for ambassadors and admins
-Route::middleware('auth')->group(function () {
+// Event management routes for ambassadors and admins (require email verification)
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/evenements/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
     Route::post('/evenements', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
     Route::get('/evenements/{event}/edit', [App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
@@ -102,8 +111,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/profil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/clear-location', [App\Http\Controllers\ProfileController::class, 'clearLocation'])->name('profile.clear-location');
 
-    // Articles management routes
+    // Articles management routes (viewing own articles doesn't require verification)
     Route::get('/mes-articles', [App\Http\Controllers\ArticleController::class, 'myArticles'])->name('articles.my-articles');
+});
+
+// Content creation routes (require email verification)
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Articles creation and editing
     Route::get('/articles/create', [App\Http\Controllers\ArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [App\Http\Controllers\ArticleController::class, 'store'])->name('articles.store');
     Route::get('/articles/{article}/edit', [App\Http\Controllers\ArticleController::class, 'edit'])->name('articles.edit');
@@ -171,12 +185,12 @@ Route::middleware('auth')->group(function () {
 Route::prefix('annonces')->group(function () {
     Route::get('/', [App\Http\Controllers\AnnouncementController::class, 'globalIndex'])->name('announcements.index');
     Route::get('/mes-annonces', [App\Http\Controllers\AnnouncementController::class, 'myAnnouncements'])->name('announcements.my')->middleware('auth');
-    Route::get('/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create')->middleware('auth');
-    Route::post('/', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store')->middleware('auth');
+    Route::get('/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create')->middleware(['auth', 'verified']);
+    Route::post('/', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store')->middleware(['auth', 'verified']);
     Route::get('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'show'])->name('announcements.show');
-    Route::get('/{announcement}/edit', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit')->middleware('auth');
-    Route::put('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update')->middleware('auth');
-    Route::delete('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy')->middleware('auth');
+    Route::get('/{announcement}/edit', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit')->middleware(['auth', 'verified']);
+    Route::put('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update')->middleware(['auth', 'verified']);
+    Route::delete('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy')->middleware(['auth', 'verified']);
 });
 
 // Routes par pays avec middleware de validation (EN DERNIER pour éviter les conflits)
@@ -192,7 +206,7 @@ Route::prefix('{country}')->middleware('country')->group(function () {
 
     // Routes des annonces par pays
     Route::get('/annonces', [App\Http\Controllers\CountryController::class, 'annonces'])->name('country.annonces');
-    Route::get('/annonces/create', [App\Http\Controllers\CountryController::class, 'createAnnouncement'])->name('country.announcements.create')->middleware('auth');
-    Route::post('/annonces', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('country.announcements.store')->middleware('auth');
+    Route::get('/annonces/create', [App\Http\Controllers\CountryController::class, 'createAnnouncement'])->name('country.announcements.create')->middleware(['auth', 'verified']);
+    Route::post('/annonces', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('country.announcements.store')->middleware(['auth', 'verified']);
     Route::get('/annonces/{announcement}', [App\Http\Controllers\CountryController::class, 'showAnnouncement'])->name('country.announcement.show');
 });

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Services\TurnstileService;
 use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
@@ -68,6 +70,7 @@ class AuthController extends Controller
                 },
             ],
             'email' => 'required|string|email|max:255|unique:users',
+            'country_residence' => 'nullable|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'interest_country' => 'nullable|string|in:' . \App\Models\Country::pluck('name_fr')->join(','),
             'password' => [
                 'required',
@@ -80,6 +83,8 @@ class AuthController extends Controller
         ], [
             'name.regex' => 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.',
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
+            'country_residence.in' => 'Le pays de résidence sélectionné n\'est pas valide.',
+            'interest_country.in' => 'Le pays d\'intérêt sélectionné n\'est pas valide.',
             'password.min' => 'Le mot de passe doit contenir au moins 12 caractères.',
             'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
             'interest_country.in' => 'Veuillez sélectionner un pays d\'intérêt valide.',
@@ -97,6 +102,11 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Validate country exists if provided (additional server-side check)
+        if ($request->interest_country && !Country::where('name_fr', $request->interest_country)->exists()) {
+            return back()->withErrors(['interest_country' => 'Le pays d\'intérêt sélectionné n\'existe pas.'])->withInput();
+        }
+
         // Créer le compte utilisateur (étape 1)
         $user = User::create([
             'name' => $request->name,
@@ -108,7 +118,32 @@ class AuthController extends Controller
         // Connecter l'utilisateur immédiatement
         Auth::login($user);
 
-        // Envoyer l'email de bienvenue (en arrière-plan, ne pas bloquer si échec)
+        // Envoyer l'email de vérification (sauf si désactivé en configuration)
+        if (!config('services.email_verification.skip', false)) {
+            try {
+                $user->sendEmailVerificationNotification();
+                \Log::info('Email verification sent successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send verification email', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } else {
+            // En développement, marquer automatiquement l'email comme vérifié
+            $user->markEmailAsVerified();
+            \Log::info('Email verification skipped - marked as verified automatically', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'environment' => app()->environment(),
+            ]);
+        }
+
+        // Envoyer aussi l'email de bienvenue (en arrière-plan, ne pas bloquer si échec)
         try {
             Mail::to($user->email)->send(new WelcomeEmail($user));
             \Log::info('Welcome email sent successfully', [
@@ -121,13 +156,13 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'error' => $e->getMessage(),
             ]);
-            // Ne pas échouer l'inscription si l'email ne peut pas être envoyé
         }
 
-        // Retourner une réponse JSON pour l'étape 2
+        // Retourner une réponse JSON redirigeant vers la page de vérification
         return response()->json([
             'success' => true,
-            'message' => 'Compte créé avec succès !',
+            'message' => 'Compte créé avec succès ! Vérifiez votre email pour activer votre compte.',
+            'redirect' => route('verification.notice'),
             'user' => [
                 'name' => $user->name,
                 'email' => $user->email,
@@ -690,5 +725,57 @@ class AuthController extends Controller
         $offset = (rand(-500, 500) / 10000); // Random offset between -0.05 and 0.05 degrees
 
         return round($coordinate + $offset, 6);
+    }
+
+    /**
+     * Show the email verification notice.
+     */
+    public function showVerifyEmail(Request $request)
+    {
+        return $request->user()->hasVerifiedEmail()
+            ? redirect()->intended('/')
+            : view('auth.verify-email');
+    }
+
+    /**
+     * Verify the user's email address.
+     */
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        $request->fulfill();
+
+        event(new Verified($request->user()));
+
+        return redirect('/')->with('status', 'verified');
+    }
+
+    /**
+     * Resend the email verification notification.
+     */
+    public function resendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return back()->with('message', 'Votre email est déjà vérifié.');
+        }
+
+        try {
+            $request->user()->sendEmailVerificationNotification();
+            
+            \Log::info('Email verification sent successfully', [
+                'user_id' => $request->user()->id,
+                'email' => $request->user()->email,
+            ]);
+            
+            return back()->with('message', 'Email de vérification renvoyé ! Vérifiez votre boîte de réception et vos spams.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to send email verification', [
+                'user_id' => $request->user()->id,
+                'email' => $request->user()->email,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return back()->withErrors(['email' => 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer dans quelques minutes ou contacter le support.']);
+        }
     }
 }
