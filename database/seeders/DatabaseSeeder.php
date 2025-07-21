@@ -12,11 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Always seed countries as they are required for the application to work
+        $this->call([
+            CountrySeeder::class,
+        ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Seed content only if we're not in testing environment
+        if (!app()->environment('testing')) {
+            $this->call([
+                ContentSeeder::class,
+            ]);
+        }
     }
 }
