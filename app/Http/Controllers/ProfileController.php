@@ -20,8 +20,8 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
-        // Vérifier l'email pour certaines actions critiques (validation côté serveur uniquement)
-        if (!$user->hasVerifiedEmail()) {
+        // Vérifier l'email pour certaines actions critiques (sauf si désactivé en configuration)
+        if (!config('services.email_verification.skip', false) && !$user->hasVerifiedEmail()) {
             // Vérifier directement les champs critiques sans dépendre du client
             $hasAvatarUpload = $request->hasFile('avatar');
             $wantsPublicProfile = $request->boolean('is_public_profile');

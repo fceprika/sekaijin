@@ -118,18 +118,28 @@ class AuthController extends Controller
         // Connecter l'utilisateur immédiatement
         Auth::login($user);
 
-        // Envoyer l'email de vérification (obligatoire maintenant)
-        try {
-            $user->sendEmailVerificationNotification();
-            \Log::info('Email verification sent successfully', [
+        // Envoyer l'email de vérification (sauf si désactivé en configuration)
+        if (!config('services.email_verification.skip', false)) {
+            try {
+                $user->sendEmailVerificationNotification();
+                \Log::info('Email verification sent successfully', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send verification email', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } else {
+            // En développement, marquer automatiquement l'email comme vérifié
+            $user->markEmailAsVerified();
+            \Log::info('Email verification skipped - marked as verified automatically', [
                 'user_id' => $user->id,
                 'email' => $user->email,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send verification email', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'error' => $e->getMessage(),
+                'environment' => app()->environment(),
             ]);
         }
 

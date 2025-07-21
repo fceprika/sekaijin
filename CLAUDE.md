@@ -80,9 +80,9 @@ composer stan        # Static analysis
 
 ### Authentication & Security
 - Simplified registration: pseudo, email, country, password (min 8 chars)
-- **Email verification**: Required for avatar upload and public profile features
+- **Email verification**: Required for avatar upload and public profile features (configurable)
 - CSRF protection, email uniqueness validation, terms acceptance
-- Cloudflare Turnstile integration with form protection
+- **Cloudflare Turnstile**: Form protection with development bypass support
 - Role-based access control with 4 levels
 
 ### Content Management System
@@ -144,6 +144,10 @@ MAIL_PASSWORD=your_password
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@sekaijin.com
 MAIL_FROM_NAME="Sekaijin"
+
+# Development Configuration
+TURNSTILE_BYPASS_LOCAL=true          # Bypass Cloudflare in local
+SKIP_EMAIL_VERIFICATION=true         # Skip email verification in local/test
 ```
 
 ### Database
@@ -193,4 +197,4 @@ Laravel Dusk E2E testing with comprehensive authentication test suite and CI/CD 
 Admin panel with TinyMCE editor, bulk operations, preview system, and content corruption fixes.
 
 ### Email Verification System (July 2025)
-Complete email verification implementation with custom templates, security restrictions, and comprehensive error handling.
+Complete email verification implementation with custom templates, security restrictions, comprehensive error handling, and development bypass support.
