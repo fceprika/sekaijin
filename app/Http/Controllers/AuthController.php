@@ -398,6 +398,12 @@ class AuthController extends Controller
     public function checkUsername($username)
     {
         try {
+            // Log the request for debugging CI issues
+            \Log::info('Username availability check started', [
+                'username' => $username,
+                'environment' => app()->environment(),
+            ]);
+
             // Clean the username
             $cleanedUsername = trim($username);
 
@@ -425,20 +431,35 @@ class AuthController extends Controller
                 ]);
             }
 
+            // Check database connection
+            try {
+                \DB::connection()->getPdo();
+                \Log::info('Database connection successful');
+            } catch (\Exception $dbError) {
+                \Log::error('Database connection failed', ['error' => $dbError->getMessage()]);
+                throw $dbError;
+            }
+
             // Check if username exists (case-insensitive)
+            \Log::info('Checking username existence', ['cleaned_username' => $cleanedUsername]);
             $exists = User::whereRaw('LOWER(name) = ?', [strtolower($cleanedUsername)])->exists();
 
             // Also check if the generated slug would conflict
+            \Log::info('Generating slug for username check');
             $slug = User::generateSlug($cleanedUsername);
+            \Log::info('Generated slug', ['slug' => $slug]);
+            
             $slugExists = User::whereRaw('LOWER(name_slug) = ?', [strtolower($slug)])->exists();
 
             if ($exists || $slugExists) {
+                \Log::info('Username taken', ['exists' => $exists, 'slugExists' => $slugExists]);
                 return response()->json([
                     'available' => false,
                     'message' => 'Ce pseudo est déjà pris.',
                 ]);
             }
 
+            \Log::info('Username available');
             return response()->json([
                 'available' => true,
                 'message' => 'Ce pseudo est disponible.',
@@ -448,12 +469,17 @@ class AuthController extends Controller
             \Log::error('Username check error', [
                 'username' => $username,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
+            // Return proper JSON response even on error
             return response()->json([
                 'available' => false,
                 'message' => 'Erreur lors de la vérification.',
-            ]);
+                'debug' => app()->environment('testing') ? $e->getMessage() : null,
+            ], 500);
         }
     }
 

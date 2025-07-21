@@ -12,10 +12,24 @@ class ApiEndpointsTest extends TestCase
 
     public function test_username_availability_api(): void
     {
-        User::factory()->create(['name' => 'existinguser']);
+        // Create user with explicit fields needed for CI environment
+        $user = User::factory()->create([
+            'name' => 'existinguser',
+            'email' => 'existinguser@test.com',
+            'email_verified_at' => now(),
+        ]);
+        
+        // Verify user was created successfully
+        $this->assertDatabaseHas('users', ['name' => 'existinguser']);
 
         // Test existing username
         $response = $this->get('/api/check-username/existinguser');
+        
+        // If we get a 500 error, log the response for debugging
+        if ($response->status() === 500) {
+            $this->fail('API returned 500 error. Response content: ' . $response->getContent());
+        }
+        
         $response->assertStatus(200);
         $response->assertJson(['available' => false]);
 
