@@ -85,7 +85,7 @@ class ApiEndpointsTest extends TestCase
 
     public function test_members_with_location_api_with_auth(): void
     {
-        $this->signIn();
+        $this->signIn(['is_visible_on_map' => false]); // Ensure authenticated user is not visible
 
         // Create users with location
         User::factory()->create([

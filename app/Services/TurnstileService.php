@@ -135,7 +135,7 @@ class TurnstileService
      */
     private function shouldBypassInDevelopment(): bool
     {
-        return app()->environment('local') && $this->bypassLocal;
+        return app()->environment(['local', 'testing']) && $this->bypassLocal;
     }
     
     /**

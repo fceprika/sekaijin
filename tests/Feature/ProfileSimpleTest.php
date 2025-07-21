@@ -39,6 +39,7 @@ class ProfileSimpleTest extends TestCase
             'country_residence' => 'France',
             'city_residence' => 'Paris',
             'role' => 'premium',
+            'email_verified_at' => now(),
         ]);
 
         $response = $this->get('/membre/publicuser');

@@ -47,6 +47,7 @@
                             </div>
                             
                             <!-- Protection anti-spam Turnstile -->
+                            @turnstileEnabled
                             <div class="mt-6">
                                 <x-turnstile 
                                     data-action="contact"
@@ -54,6 +55,7 @@
                                     data-error-callback="onContactTurnstileError"
                                 />
                             </div>
+                            @endturnstileEnabled
                             
                             <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition duration-300 flex items-center justify-center">
                                 <span id="submit-text" class="mr-2">📧 Envoyer le message</span>

@@ -39,7 +39,7 @@ class UserFactory extends Factory
         return [
             'name' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => fake()->optional(0.8)->dateTimeBetween('-1 year', 'now'),
+            'email_verified_at' => fake()->optional(0.8)->dateTimeBetween('-1 year', '-1 day'),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'first_name' => fake()->optional(0.7)->firstName(),
@@ -63,11 +63,10 @@ class UserFactory extends Factory
             'latitude' => fake()->optional(0.3)->latitude(-90, 90),
             'longitude' => fake()->optional(0.3)->longitude(-180, 180),
             'city_detected' => null,
-            'last_login' => fake()->optional(0.9)->dateTimeBetween('-30 days', 'now'),
+            'last_login' => fake()->optional(0.9)->dateTimeBetween('-30 days', '-1 hour'),
             'role' => fake()->randomElement(['free', 'free', 'free', 'free', 'premium', 'ambassador']),
             'avatar' => null,
-            'name_slug' => null,
-            'created_at' => fake()->dateTimeBetween('-2 years', 'now'),
+            'created_at' => fake()->dateTimeBetween('-2 years', '-1 day'),
             'updated_at' => fn ($attributes) => $attributes['created_at'],
         ];
     }

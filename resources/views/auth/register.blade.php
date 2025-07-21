@@ -164,6 +164,7 @@
                             </div>
 
                             <!-- Protection anti-spam Turnstile -->
+                            @turnstileEnabled
                             <div class="mt-6">
                                 <x-turnstile 
                                     data-action="register"
@@ -171,6 +172,7 @@
                                     data-error-callback="onTurnstileError"
                                 />
                             </div>
+                            @endturnstileEnabled
 
                             <!-- Bouton Créer le compte -->
                             <div class="mt-8">

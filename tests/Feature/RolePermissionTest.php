@@ -319,19 +319,36 @@ class RolePermissionTest extends TestCase
 
     public function test_role_badge_display(): void
     {
-        $adminUser = User::factory()->admin()->create(['name' => 'adminuser', 'is_public_profile' => true]);
-        $ambassadorUser = User::factory()->ambassador()->create(['name' => 'ambassadoruser', 'is_public_profile' => true]);
-        $premiumUser = User::factory()->premium()->create(['name' => 'premiumuser', 'is_public_profile' => true]);
-        $freeUser = User::factory()->create(['name' => 'freeuser', 'role' => 'free', 'is_public_profile' => true]);
+        $adminUser = User::factory()->admin()->create([
+            'name' => 'adminuser', 
+            'is_public_profile' => true, 
+            'email_verified_at' => now()
+        ]);
+        $ambassadorUser = User::factory()->ambassador()->create([
+            'name' => 'ambassadoruser', 
+            'is_public_profile' => true, 
+            'email_verified_at' => now()
+        ]);
+        $premiumUser = User::factory()->premium()->create([
+            'name' => 'premiumuser', 
+            'is_public_profile' => true, 
+            'email_verified_at' => now()
+        ]);
+        $freeUser = User::factory()->create([
+            'name' => 'freeuser', 
+            'role' => 'free', 
+            'is_public_profile' => true, 
+            'email_verified_at' => now()
+        ]);
 
         $adminResponse = $this->get('/membre/adminuser');
         $adminResponse->assertSee('Administrateur');
 
         $ambassadorResponse = $this->get('/membre/ambassadoruser');
-        $ambassadorResponse->assertSee('Ambassadeur');
+        $ambassadorResponse->assertSee('Ambassadeur Sekaijin');
 
         $premiumResponse = $this->get('/membre/premiumuser');
-        $premiumResponse->assertSee('Premium');
+        $premiumResponse->assertSee('Membre Premium');
 
         $freeResponse = $this->get('/membre/freeuser');
         $freeResponse->assertSee('Membre');

@@ -11,7 +11,9 @@ trait AuthenticatesUsers
      */
     protected function signIn(array $attributes = []): User
     {
-        $user = User::factory()->create($attributes);
+        $user = User::factory()->create(array_merge([
+            'email_verified_at' => now(),
+        ], $attributes));
         $this->actingAs($user);
 
         return $user;
@@ -22,7 +24,9 @@ trait AuthenticatesUsers
      */
     protected function signInAdmin(array $attributes = []): User
     {
-        $user = User::factory()->admin()->create($attributes);
+        $user = User::factory()->admin()->create(array_merge([
+            'email_verified_at' => now(),
+        ], $attributes));
         $this->actingAs($user);
 
         return $user;
@@ -33,7 +37,9 @@ trait AuthenticatesUsers
      */
     protected function signInPremium(array $attributes = []): User
     {
-        $user = User::factory()->premium()->create($attributes);
+        $user = User::factory()->premium()->create(array_merge([
+            'email_verified_at' => now(),
+        ], $attributes));
         $this->actingAs($user);
 
         return $user;
@@ -44,7 +50,9 @@ trait AuthenticatesUsers
      */
     protected function signInAmbassador(array $attributes = []): User
     {
-        $user = User::factory()->ambassador()->create($attributes);
+        $user = User::factory()->ambassador()->create(array_merge([
+            'email_verified_at' => now(),
+        ], $attributes));
         $this->actingAs($user);
 
         return $user;
@@ -55,7 +63,10 @@ trait AuthenticatesUsers
      */
     protected function signInFree(array $attributes = []): User
     {
-        $user = User::factory()->create(array_merge(['role' => 'free'], $attributes));
+        $user = User::factory()->create(array_merge([
+            'role' => 'free',
+            'email_verified_at' => now(),
+        ], $attributes));
         $this->actingAs($user);
 
         return $user;

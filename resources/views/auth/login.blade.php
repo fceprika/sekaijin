@@ -63,6 +63,7 @@
             </div>
 
             <!-- Protection anti-spam Turnstile -->
+            @turnstileEnabled
             <div class="mt-6">
                 <x-turnstile 
                     data-action="login"
@@ -70,6 +71,7 @@
                     data-error-callback="onLoginTurnstileError"
                 />
             </div>
+            @endturnstileEnabled
 
             <!-- Bouton de connexion -->
             <div>

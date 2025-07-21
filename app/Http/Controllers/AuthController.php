@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
 use App\Models\User;
+use App\Models\Country;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Services\TurnstileService;
 use App\Services\EmailBlacklistService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -91,8 +93,8 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            // Check if request is AJAX
-            if (request()->ajax()) {
+            // Check if request is AJAX or wants JSON response
+            if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'errors' => $validator->errors(),
@@ -104,6 +106,12 @@ class AuthController extends Controller
 
         // Validate country exists if provided (additional server-side check)
         if ($request->interest_country && !Country::where('name_fr', $request->interest_country)->exists()) {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['interest_country' => ['Le pays d\'intérêt sélectionné n\'existe pas.']],
+                ], 422);
+            }
             return back()->withErrors(['interest_country' => 'Le pays d\'intérêt sélectionné n\'existe pas.'])->withInput();
         }
 
@@ -319,7 +327,7 @@ class AuthController extends Controller
     /**
      * Verify Turnstile protection for a request
      */
-    private function verifyTurnstileForRequest(Request $request, string $action): ?Response
+    private function verifyTurnstileForRequest(Request $request, string $action): Response|JsonResponse|null
     {
         if (!$this->shouldVerifyTurnstile($request)) {
             return null;
@@ -353,7 +361,7 @@ class AuthController extends Controller
      */
     private function shouldVerifyTurnstile(Request $request): bool
     {
-        return $this->turnstileService->isConfigured() && !app()->environment('local');
+        return $this->turnstileService->isConfigured() && !app()->environment(['local', 'testing']);
     }
     
     /**
