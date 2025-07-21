@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     window.onContactTurnstileError = function(error) {
+        console.error('Turnstile error (contact):', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
     

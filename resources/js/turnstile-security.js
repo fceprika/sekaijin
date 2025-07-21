@@ -172,6 +172,7 @@ class TurnstileSecurityManager {
     }
 
     handleTurnstileError(formId, error) {
+        console.error('Turnstile verification error:', formId, error);
         
         const state = this.formStates.get(formId);
         if (state) {

@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     window.onLoginTurnstileError = function(error) {
+        console.error('Turnstile error (login):', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
 });

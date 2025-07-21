@@ -1169,6 +1169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     window.onTurnstileError = function(error) {
+        console.error('Turnstile error (register):', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
     

@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     window.onForgotPasswordTurnstileError = function(error) {
+        console.error('Turnstile error (forgot-password):', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
 });

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TurnstileService
 {
@@ -66,12 +67,21 @@ class TurnstileService
             ]);
 
             if (! $response->successful()) {
+                Log::error('Turnstile API request failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
                 return false;
             }
 
             $result = $response->json();
 
             if (! isset($result['success'])) {
+                Log::error('Invalid Turnstile API response format', [
+                    'response' => $result,
+                ]);
+
                 return false;
             }
 
@@ -80,6 +90,11 @@ class TurnstileService
             return $success;
 
         } catch (\Exception $e) {
+            Log::error('Turnstile verification exception', [
+                'error' => $e->getMessage(),
+                'action' => $action,
+            ]);
+
             return false;
         }
     }
