@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class TurnstileService
 {
@@ -46,22 +45,16 @@ class TurnstileService
     {
         // If no token provided, check if we should bypass in development
         if (empty($token)) {
-            Log::warning('Turnstile token is empty');
-
             return $this->shouldBypassInDevelopment();
         }
 
         // Sanitize and validate token format
         $token = $this->sanitizeToken($token);
         if (! $token) {
-            Log::warning('Invalid Turnstile token format after sanitization');
-
             return false;
         }
 
         if (empty($this->secretKey)) {
-            Log::warning('Turnstile secret key not configured');
-
             return $this->shouldBypassInDevelopment();
         }
 
@@ -73,48 +66,20 @@ class TurnstileService
             ]);
 
             if (! $response->successful()) {
-                Log::error('Turnstile API request failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
-
                 return false;
             }
 
             $result = $response->json();
 
             if (! isset($result['success'])) {
-                Log::error('Invalid Turnstile API response format', [
-                    'response' => $result,
-                ]);
-
                 return false;
             }
 
             $success = $result['success'] === true;
 
-            if (! $success) {
-                Log::warning('Turnstile verification failed', [
-                    'error_codes' => $result['error-codes'] ?? [],
-                    'action' => $action,
-                    'ip' => request()->ip(),
-                ]);
-            } else {
-                Log::info('Turnstile verification successful', [
-                    'action' => $action,
-                    'ip' => request()->ip(),
-                ]);
-            }
-
             return $success;
 
         } catch (\Exception $e) {
-            Log::error('Turnstile verification exception', [
-                'error' => $e->getMessage(),
-                'action' => $action,
-                'ip' => request()->ip(),
-            ]);
-
             return false;
         }
     }

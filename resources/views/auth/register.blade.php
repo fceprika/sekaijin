@@ -1165,12 +1165,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Callbacks Turnstile pour étape 1
     window.onTurnstileSuccess = function(token) {
-        console.log('Turnstile verification successful for step 1:', token);
         // Le token sera automatiquement inclus dans le formulaire
     };
     
     window.onTurnstileError = function(error) {
-        console.error('Turnstile error for step 1:', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
     

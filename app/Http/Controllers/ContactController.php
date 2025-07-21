@@ -135,12 +135,6 @@ class ContactController extends Controller
         }
 
         if (! $this->turnstileService->verify($request->input('cf-turnstile-response'), $action)) {
-            \Log::warning('Turnstile verification failed', [
-                'action' => $action,
-                'ip' => $this->anonymizeIp($request->ip()),
-                'token_provided' => ! empty($request->input('cf-turnstile-response')),
-            ]);
-
             return response()->json([
                 'success' => false,
                 'errors' => ['turnstile' => ['Vérification de sécurité échouée. Veuillez réessayer.']],

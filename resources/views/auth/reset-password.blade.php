@@ -97,12 +97,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Callbacks Turnstile pour réinitialisation du mot de passe
     window.onResetPasswordTurnstileSuccess = function(token) {
-        console.log('Turnstile verification successful for reset password:', token);
         // Le token sera automatiquement inclus dans le formulaire
     };
     
     window.onResetPasswordTurnstileError = function(error) {
-        console.error('Turnstile error for reset password:', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
 });

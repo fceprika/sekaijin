@@ -93,12 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Callbacks Turnstile pour mot de passe oublié
     window.onForgotPasswordTurnstileSuccess = function(token) {
-        console.log('Turnstile verification successful for forgot password:', token);
         // Le token sera automatiquement inclus dans le formulaire
     };
     
     window.onForgotPasswordTurnstileError = function(error) {
-        console.error('Turnstile error for forgot password:', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
 });
