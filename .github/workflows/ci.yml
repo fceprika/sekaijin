@@ -1,20 +1,88 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline (Optimized)
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # Quick validation job for early failure detection
+  quick-checks:
+    runs-on: ubuntu-latest
+    name: Quick Validation
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, dom, fileinfo, mysql, gd, zip
+        tools: composer:v2
+    
+    - name: Get composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+    
+    - name: Cache composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+    
+    - name: Install PHP dependencies
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
+    
+    - name: Check PHP syntax errors
+      run: find . -name "*.php" -not -path "./vendor/*" -not -path "./node_modules/*" -exec php -l {} \;
+    
+    - name: Run Laravel Pint (Code Style)
+      run: ./vendor/bin/pint --test
+    
+    - name: Run PHPStan (Static Analysis)  
+      run: ./vendor/bin/phpstan analyse --memory-limit=2G
+      continue-on-error: true
+    
+    - name: Security audit
+      run: composer audit
+      continue-on-error: true
+    
+    - name: Check for sensitive files
+      run: |
+        if [[ -f .env ]]; then
+          echo "❌ .env file found in repository"
+          exit 1
+        fi
+        if [[ -f .env.production ]]; then
+          echo "❌ .env.production file found in repository"
+          exit 1
+        fi
+        echo "✅ No sensitive files found"
+
+  # Main test suite with optimized matrix
   test:
     runs-on: ubuntu-latest
     name: Laravel Tests (PHP ${{ matrix.php }})
+    needs: quick-checks
     
     strategy:
       matrix:
-        php: ['8.1', '8.2']
-        node: ['18', '20']
+        # Reduced matrix: only test PHP 8.2 + Node 20 (latest) and PHP 8.1 + Node 18 (minimum supported)
+        include:
+          - php: '8.2'
+            node: '20'
+            coverage: true
+          - php: '8.1'
+            node: '18'
+            coverage: false
         
     services:
       mysql:
@@ -35,7 +103,7 @@ jobs:
         php-version: ${{ matrix.php }}
         extensions: mbstring, dom, fileinfo, mysql, gd, zip
         tools: composer:v2
-        coverage: xdebug
+        coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -54,58 +122,80 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         restore-keys: ${{ runner.os }}-composer-
 
-    - name: Install PHP dependencies
-      run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-    - name: Install Node.js dependencies
-      run: npm ci
+    - name: Install dependencies
+      run: |
+        composer install --no-progress --prefer-dist --optimize-autoloader
+        npm ci
 
     - name: Build frontend assets
       run: npm run build
 
     - name: Setup Laravel environment
       run: |
-        cp .env.example .env
-        php artisan key:generate
-        
-    - name: Configure test environment
-      run: |
         cp .env.testing.example .env.testing
         php artisan key:generate --env=testing
         cp .env.testing .env
+        
+        # Database configuration
         echo "DB_HOST=127.0.0.1" >> .env
         echo "DB_PORT=3306" >> .env
         echo "DB_DATABASE=sekaijin_test" >> .env
         echo "DB_USERNAME=root" >> .env
         echo "DB_PASSWORD=root" >> .env
+        
+        # CI/CD bypass configurations
+        echo "TURNSTILE_BYPASS_LOCAL=true" >> .env
+        echo "SKIP_EMAIL_VERIFICATION=true" >> .env
+        echo "TURNSTILE_SITE_KEY=test_key" >> .env
+        echo "TURNSTILE_SECRET_KEY=test_secret" >> .env
+        
+        # Cache and session configuration for CI
+        echo "CACHE_DRIVER=array" >> .env
+        echo "SESSION_DRIVER=array" >> .env
+        echo "QUEUE_CONNECTION=sync" >> .env
+        echo "MAIL_MAILER=log" >> .env
 
-    - name: Create testing database
+    - name: Create and prepare database
       run: |
         mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS sekaijin_test;"
         mysql -h 127.0.0.1 -u root -proot -e "GRANT ALL PRIVILEGES ON sekaijin_test.* TO 'root'@'%';"
-
-    - name: Run database migrations
-      run: php artisan migrate --env=testing --force
-
-    - name: Run database seeders
-      run: php artisan db:seed --env=testing --force
+        php artisan migrate --env=testing --force
+        php artisan db:seed --env=testing --force
 
     - name: Run PHPUnit tests
-      run: php artisan test --coverage --min=40
+      run: |
+        if [[ "${{ matrix.coverage }}" == "true" ]]; then
+          php artisan test --coverage --min=40
+        else
+          php artisan test --stop-on-failure
+        fi
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
-      if: matrix.php == '8.2' && matrix.node == '20'
+      if: matrix.coverage == true
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
 
-  code-quality:
+  # Browser tests (only on main test combination)
+  browser-tests:
     runs-on: ubuntu-latest
-    name: Code Quality Checks
+    name: Browser Tests (Laravel Dusk)
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sekaijin_dusk
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
     - uses: actions/checkout@v4
     
@@ -116,26 +206,43 @@ jobs:
         extensions: mbstring, dom, fileinfo, mysql, gd, zip
         tools: composer:v2
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
     - name: Install dependencies
-      run: composer install --no-progress --prefer-dist --optimize-autoloader
+      run: |
+        composer install --no-progress --prefer-dist --optimize-autoloader
+        npm ci && npm run build
 
-    - name: Run Laravel Pint (Code Style)
-      run: ./vendor/bin/pint --test
+    - name: Setup Dusk environment
+      run: |
+        cp .env.dusk.local.example .env.dusk.local
+        php artisan key:generate --env=dusk.local
+        echo "DB_DATABASE=sekaijin_dusk" >> .env.dusk.local
+        echo "TURNSTILE_BYPASS_LOCAL=true" >> .env.dusk.local
+        echo "SKIP_EMAIL_VERIFICATION=true" >> .env.dusk.local
 
-    - name: Run PHPStan (Static Analysis)
-      run: ./vendor/bin/phpstan analyse --memory-limit=2G
-      continue-on-error: true
+    - name: Prepare Dusk database
+      run: |
+        mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS sekaijin_dusk;"
+        php artisan migrate --env=dusk.local --force
+        php artisan db:seed --env=dusk.local --force
 
-    - name: Check for security vulnerabilities
-      run: composer audit
-      continue-on-error: true
+    - name: Install Chrome Driver
+      run: php artisan dusk:chrome-driver
 
+    - name: Run Laravel Dusk tests
+      run: php artisan dusk --env=dusk.local
 
+  # Deployment readiness check (only on main branch)
   deployment-ready:
     runs-on: ubuntu-latest
     name: Deployment Readiness
-    needs: [test, code-quality]
-    if: github.ref == 'refs/heads/main'
+    needs: [test, browser-tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - uses: actions/checkout@v4
@@ -161,15 +268,61 @@ jobs:
     - name: Build production assets
       run: npm run build
 
-    - name: Optimize Laravel
+    - name: Optimize Laravel for production
       run: |
+        cp .env.example .env
+        php artisan key:generate
         php artisan config:cache
         php artisan route:cache
         php artisan view:cache
 
-    - name: Check production readiness
+    - name: Production readiness summary
       run: |
-        echo "✅ Production build completed successfully"
-        echo "✅ All tests passed"
-        echo "✅ Code quality checks passed"
-        echo "🚀 Ready for deployment!"
+        echo "🚀 **Deployment Status: READY**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ✅ All Checks Passed" >> $GITHUB_STEP_SUMMARY
+        echo "- Quick validation checks" >> $GITHUB_STEP_SUMMARY
+        echo "- Unit and integration tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Browser tests (Laravel Dusk)" >> $GITHUB_STEP_SUMMARY
+        echo "- Production build optimization" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Performance Metrics" >> $GITHUB_STEP_SUMMARY
+        echo "- **PHP Version**: 8.2" >> $GITHUB_STEP_SUMMARY
+        echo "- **Node Version**: 20" >> $GITHUB_STEP_SUMMARY
+        echo "- **Pipeline Duration**: Optimized for speed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Ready for deployment to production! 🎉"
+
+  # Summary job for pull requests
+  pr-summary:
+    runs-on: ubuntu-latest
+    name: PR Summary
+    needs: [quick-checks, test]
+    if: github.event_name == 'pull_request' && always()
+    
+    steps:
+    - name: Generate pull request summary
+      run: |
+        echo "## 📊 Pull Request Validation Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔍 Check Results" >> $GITHUB_STEP_SUMMARY
+        echo "- **Code Quality**: ${{ needs.quick-checks.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **PHP 8.2 + Node 20**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **PHP 8.1 + Node 18**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.quick-checks.result }}" == "success" && "${{ needs.test.result }}" == "success" ]]; then
+          echo "### ✅ **Status: READY FOR REVIEW**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All validation checks have passed successfully!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### ❌ **Status: CHANGES REQUIRED**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Some checks have failed. Please review the details above and make necessary corrections." >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Resources" >> $GITHUB_STEP_SUMMARY
+        echo "- [View Detailed Results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+        echo "- [Code Coverage Report](https://codecov.io/gh/${{ github.repository }})" >> $GITHUB_STEP_SUMMARY
+        echo "- [Sekaijin Documentation](https://github.com/${{ github.repository }}/blob/main/CLAUDE.md)" >> $GITHUB_STEP_SUMMARY
