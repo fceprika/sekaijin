@@ -70,6 +70,14 @@ Route::get('/connexion', [App\Http\Controllers\AuthController::class, 'showLogin
 Route::post('/connexion', [App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:20,1');
 Route::post('/deconnexion', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
+// Password Reset Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/mot-de-passe/oublie', [App\Http\Controllers\AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/mot-de-passe/email', [App\Http\Controllers\AuthController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:5,1');
+    Route::get('/mot-de-passe/reinitialiser/{token}', [App\Http\Controllers\AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/mot-de-passe/reinitialiser', [App\Http\Controllers\AuthController::class, 'reset'])->name('password.update')->middleware('throttle:5,1');
+});
+
 // Email Verification Routes
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [App\Http\Controllers\AuthController::class, 'showVerifyEmail'])->name('verification.notice');

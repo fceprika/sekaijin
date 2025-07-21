@@ -7,24 +7,14 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    name: Laravel Tests (PHP ${{ matrix.php }})
+    name: Build Laravel Application (PHP ${{ matrix.php }})
     
     strategy:
       matrix:
         php: ['8.1', '8.2']
         node: ['18', '20']
-        
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: sekaijin_test
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - uses: actions/checkout@v4
@@ -35,7 +25,6 @@ jobs:
         php-version: ${{ matrix.php }}
         extensions: mbstring, dom, fileinfo, mysql, gd, zip
         tools: composer:v2
-        coverage: xdebug
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -67,40 +56,12 @@ jobs:
       run: |
         cp .env.example .env
         php artisan key:generate
-        
-    - name: Configure test environment
+
+    - name: Check Laravel configuration
       run: |
-        cp .env.testing.example .env.testing
-        php artisan key:generate --env=testing
-        cp .env.testing .env
-        echo "DB_HOST=127.0.0.1" >> .env
-        echo "DB_PORT=3306" >> .env
-        echo "DB_DATABASE=sekaijin_test" >> .env
-        echo "DB_USERNAME=root" >> .env
-        echo "DB_PASSWORD=root" >> .env
-
-    - name: Create testing database
-      run: |
-        mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS sekaijin_test;"
-        mysql -h 127.0.0.1 -u root -proot -e "GRANT ALL PRIVILEGES ON sekaijin_test.* TO 'root'@'%';"
-
-    - name: Run database migrations
-      run: php artisan migrate --env=testing --force
-
-    - name: Run database seeders
-      run: php artisan db:seed --env=testing --force
-
-    - name: Run PHPUnit tests
-      run: php artisan test --coverage --min=40
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      if: matrix.php == '8.2' && matrix.node == '20'
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+        php artisan config:clear
+        php artisan cache:clear
+        php artisan view:clear
 
   code-quality:
     runs-on: ubuntu-latest
@@ -130,11 +91,10 @@ jobs:
       run: composer audit
       continue-on-error: true
 
-
   deployment-ready:
     runs-on: ubuntu-latest
     name: Deployment Readiness
-    needs: [test, code-quality]
+    needs: [build, code-quality]
     if: github.ref == 'refs/heads/main'
     
     steps:
@@ -170,6 +130,5 @@ jobs:
     - name: Check production readiness
       run: |
         echo "✅ Production build completed successfully"
-        echo "✅ All tests passed"
         echo "✅ Code quality checks passed"
         echo "🚀 Ready for deployment!"

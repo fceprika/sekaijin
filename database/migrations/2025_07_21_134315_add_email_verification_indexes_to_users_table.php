@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Add index on email_verified_at for performance
             $table->index('email_verified_at', 'users_email_verified_at_idx');
-            
+
             // Add composite index for email verification queries
             $table->index(['email', 'email_verified_at'], 'users_email_verification_idx');
         });

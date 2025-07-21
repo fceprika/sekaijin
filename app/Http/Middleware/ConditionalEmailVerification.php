@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ConditionalEmailVerification
@@ -12,7 +12,7 @@ class ConditionalEmailVerification
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -22,7 +22,8 @@ class ConditionalEmailVerification
         }
 
         // Otherwise use Laravel's default email verification middleware
-        $emailVerificationMiddleware = new EnsureEmailIsVerified();
+        $emailVerificationMiddleware = new EnsureEmailIsVerified;
+
         return $emailVerificationMiddleware->handle($request, $next);
     }
 }
