@@ -20,12 +20,14 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
-        // Vérifier l'email pour certaines actions critiques
+        // Vérifier l'email pour certaines actions critiques (validation côté serveur uniquement)
         if (!$user->hasVerifiedEmail()) {
-            $restrictedActions = ['avatar', 'is_public_profile'];
-            $changedFields = json_decode($request->input('changed_fields', '[]'), true) ?: [];
+            // Vérifier directement les champs critiques sans dépendre du client
+            $hasAvatarUpload = $request->hasFile('avatar');
+            $wantsPublicProfile = $request->boolean('is_public_profile');
+            $hasRestrictedChanges = $hasAvatarUpload || ($wantsPublicProfile && !$user->is_public_profile);
             
-            if (array_intersect($restrictedActions, $changedFields) || $request->hasFile('avatar') || $request->boolean('is_public_profile')) {
+            if ($hasRestrictedChanges) {
                 return back()->withErrors(['email_verification' => 'Vous devez vérifier votre email avant d\'uploader un avatar ou de rendre votre profil public.'])->withInput();
             }
         }

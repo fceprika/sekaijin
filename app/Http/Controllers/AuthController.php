@@ -102,6 +102,11 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Validate country exists if provided (additional server-side check)
+        if ($request->interest_country && !Country::where('name_fr', $request->interest_country)->exists()) {
+            return back()->withErrors(['interest_country' => 'Le pays d\'intérêt sélectionné n\'existe pas.'])->withInput();
+        }
+
         // Créer le compte utilisateur (étape 1)
         $user = User::create([
             'name' => $request->name,

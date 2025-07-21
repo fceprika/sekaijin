@@ -46,7 +46,7 @@
         
         <p>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :</p>
         
-        <div class="link">{{ $verificationUrl }}</div>
+        <div class="link">{!! e($verificationUrl) !!}</div>
         
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
         
