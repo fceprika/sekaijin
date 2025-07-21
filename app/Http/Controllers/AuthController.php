@@ -812,7 +812,7 @@ class AuthController extends Controller
         );
 
         return $status === \Password::RESET_LINK_SENT
-                    ? back()->with(['status' => __($status)])
+                    ? redirect()->route('home')->with(['success' => 'Nous vous avons envoyé par email un lien de réinitialisation de mot de passe !'])
                     : back()->withErrors(['email' => __($status)]);
     }
 
