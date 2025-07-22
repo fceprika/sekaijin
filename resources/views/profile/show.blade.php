@@ -640,7 +640,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initialiser le tracker de changements
         const changeTracker = new FormChangeTracker('form[action="{{ route('profile.update') }}"]', {
-            excludeFields: ['_token', 'avatar', 'remove_avatar'],
+            excludeFields: ['_token'],
             showVisualIndicators: true
         });
         
@@ -728,9 +728,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (removeAvatarCheckbox) {
                         removeAvatarCheckbox.checked = false;
                     }
+                    
+                    // Forcer la détection de changement pour l'avatar
+                    if (changeTracker) {
+                        changeTracker.checkFieldChange(this);
+                    }
                 } else {
                     // Remettre l'image originale si aucun fichier
                     avatarPreview.src = originalAvatarSrc;
+                    
+                    // Forcer la détection de changement
+                    if (changeTracker) {
+                        changeTracker.checkFieldChange(this);
+                    }
                 }
             });
         }
@@ -745,9 +755,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (avatarInput) {
                         avatarInput.value = '';
                     }
+                    
+                    // Forcer la détection de changement
+                    if (changeTracker) {
+                        changeTracker.checkFieldChange(this);
+                    }
                 } else {
                     // Remettre l'image originale
                     avatarPreview.src = originalAvatarSrc;
+                    
+                    // Forcer la détection de changement
+                    if (changeTracker) {
+                        changeTracker.checkFieldChange(this);
+                    }
                 }
             });
         }
