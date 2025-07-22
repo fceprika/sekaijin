@@ -141,12 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Callbacks Turnstile pour contact
     window.onContactTurnstileSuccess = function(token) {
-        console.log('Turnstile verification successful for contact:', token);
         // Le token sera automatiquement inclus dans le formulaire
     };
     
     window.onContactTurnstileError = function(error) {
-        console.error('Turnstile error for contact:', error);
+        console.error('Turnstile error (contact):', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
     

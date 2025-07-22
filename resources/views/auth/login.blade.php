@@ -131,12 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Callbacks Turnstile pour connexion
     window.onLoginTurnstileSuccess = function(token) {
-        console.log('Turnstile verification successful for login:', token);
         // Le token sera automatiquement inclus dans le formulaire
     };
     
     window.onLoginTurnstileError = function(error) {
-        console.error('Turnstile error for login:', error);
+        console.error('Turnstile error (login):', error);
         alert('Erreur de vérification de sécurité. Veuillez recharger la page.');
     };
 });

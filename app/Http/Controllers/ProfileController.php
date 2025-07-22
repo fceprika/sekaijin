@@ -70,7 +70,7 @@ class ProfileController extends Controller
             'name.not_regex' => 'Le pseudo ne peut pas commencer ou finir par un point, tiret ou underscore.',
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
-            'avatar.max' => 'L\'avatar ne doit pas dépasser 100KB.',
+            'avatar.max' => 'L\'avatar ne doit pas dépasser 500KB.',
             'phone.regex' => 'Le numéro de téléphone doit contenir uniquement des chiffres, espaces, tirets et parenthèses.',
             'youtube_username.regex' => 'Le nom d\'utilisateur YouTube doit commencer par @ (ex: @monusername).',
             'instagram_username.regex' => 'Le nom d\'utilisateur Instagram peut contenir seulement des lettres, chiffres, points et underscores.',
@@ -247,8 +247,8 @@ class ProfileController extends Controller
     private function validateImageFile($file): void
     {
         // Check file size (double-check on server side)
-        if ($file->getSize() > 100 * 1024) {
-            throw new \InvalidArgumentException('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+        if ($file->getSize() > 500 * 1024) {
+            throw new \InvalidArgumentException('Le fichier est trop volumineux. Maximum 500KB autorisé.');
         }
 
         // Validate MIME type
@@ -646,7 +646,7 @@ class ProfileController extends Controller
 
         // Règles conditionnelles selon les champs modifiés
         $conditionalRules = [
-            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:500|mimetypes:image/jpeg,image/png,image/webp',
             'remove_avatar' => 'nullable|boolean',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',

@@ -7,7 +7,7 @@ class FormChangeTracker {
     constructor(formSelector, options = {}) {
         this.form = typeof formSelector === 'string' ? document.querySelector(formSelector) : formSelector;
         this.options = {
-            excludeFields: ['_token', 'avatar'], // Champs à exclure du tracking
+            excludeFields: ['_token'], // Champs à exclure du tracking
             showVisualIndicators: true,
             submitButtonSelector: 'button[type="submit"]',
             ...options

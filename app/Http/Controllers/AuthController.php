@@ -177,7 +177,7 @@ class AuthController extends Controller
     {
         // Validation pour l'étape 2 : enrichissement du profil
         $validator = Validator::make($request->all(), [
-            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:100|mimetypes:image/jpeg,image/png,image/webp',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:500|mimetypes:image/jpeg,image/png,image/webp',
             'country_residence' => 'nullable|string|max:255',
             'city_residence' => 'nullable|string|max:255',
             'share_location' => 'nullable|boolean',
@@ -187,7 +187,7 @@ class AuthController extends Controller
         ], [
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.mimes' => 'L\'avatar doit être au format JPEG, JPG, PNG ou WebP.',
-            'avatar.max' => 'L\'avatar ne doit pas dépasser 100KB.',
+            'avatar.max' => 'L\'avatar ne doit pas dépasser 500KB.',
         ]);
 
         if ($validator->fails()) {
@@ -328,12 +328,6 @@ class AuthController extends Controller
         }
 
         if (! $this->turnstileService->verify($request->input('cf-turnstile-response'), $action)) {
-            \Log::warning('Turnstile verification failed', [
-                'action' => $action,
-                'ip' => $this->anonymizeIp($request->ip()),
-                'token_provided' => ! empty($request->input('cf-turnstile-response')),
-            ]);
-
             $errorMessage = 'Vérification de sécurité échouée. Veuillez réessayer.';
 
             // Check if request is AJAX
@@ -644,8 +638,8 @@ class AuthController extends Controller
     private function validateImageFile($file): void
     {
         // Check file size (double-check on server side)
-        if ($file->getSize() > 100 * 1024) {
-            throw new \InvalidArgumentException('Le fichier est trop volumineux. Maximum 100KB autorisé.');
+        if ($file->getSize() > 500 * 1024) {
+            throw new \InvalidArgumentException('Le fichier est trop volumineux. Maximum 500KB autorisé.');
         }
 
         // Validate MIME type

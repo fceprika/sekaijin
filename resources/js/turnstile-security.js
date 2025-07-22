@@ -22,8 +22,6 @@ class TurnstileSecurityManager {
     }
 
     initialize() {
-        console.log('🔒 Initialisation du gestionnaire de sécurité Turnstile');
-        
         // Écouter les événements Turnstile globaux
         this.setupGlobalTurnstileListener();
         
@@ -45,7 +43,7 @@ class TurnstileSecurityManager {
         const formId = form.id || `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         if (!form.id) form.id = formId;
 
-        console.log(`🔒 Sécurisation du formulaire: ${formId}`);
+
 
         // Trouver tous les boutons de soumission dans ce formulaire
         const submitButtons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
@@ -92,14 +90,12 @@ class TurnstileSecurityManager {
 
         // Approche simple : encapsuler les callbacks existants en conservant leur logique
         if (originalSuccessCallback && window[originalSuccessCallback]) {
-            console.log(`🔄 Encapsulation du callback existant: ${originalSuccessCallback}`);
             
             // Sauvegarder l'original
             const originalFunction = window[originalSuccessCallback];
             
             // Remplacer par notre wrapper
             window[originalSuccessCallback] = (token) => {
-                console.log(`🔓 Callback Turnstile success intercepté pour ${formId}`, token);
                 
                 // Exécuter l'original en premier (pour maintenir la logique métier)
                 if (originalFunction && typeof originalFunction === 'function') {
@@ -112,12 +108,10 @@ class TurnstileSecurityManager {
         }
 
         if (originalErrorCallback && window[originalErrorCallback]) {
-            console.log(`🔄 Encapsulation du callback erreur existant: ${originalErrorCallback}`);
             
             const originalErrorFunction = window[originalErrorCallback];
             
             window[originalErrorCallback] = (error) => {
-                console.log(`❌ Callback Turnstile error intercepté pour ${formId}`, error);
                 
                 // Exécuter l'original en premier
                 if (originalErrorFunction && typeof originalErrorFunction === 'function') {
@@ -133,7 +127,6 @@ class TurnstileSecurityManager {
         if (!originalSuccessCallback) {
             const successCallback = `turnstileSuccess_${formId.replace(/[^a-zA-Z0-9]/g, '_')}`;
             window[successCallback] = (token) => {
-                console.log(`🔓 Callback Turnstile success créé pour ${formId}`);
                 this.handleTurnstileSuccess(formId, token);
             };
             
@@ -151,7 +144,6 @@ class TurnstileSecurityManager {
 
     waitForTurnstileLoad(turnstileElement, formId) {
         // Marquer comme chargé immédiatement car Turnstile charge de façon asynchrone
-        console.log(`✅ Turnstile en cours de chargement pour ${formId}`);
         const state = this.formStates.get(formId);
         state.turnstileLoaded = true;
         
@@ -162,7 +154,7 @@ class TurnstileSecurityManager {
         setTimeout(() => {
             const currentState = this.formStates.get(formId);
             if (!currentState.isVerified) {
-                console.warn(`⚠️ Timeout Turnstile pour ${formId} - Activation de secours après 60s (cas extrême)`);
+                // Timeout fallback
                 currentState.isVerified = true;
                 this.updateButtonState(formId);
             }
@@ -170,7 +162,6 @@ class TurnstileSecurityManager {
     }
 
     handleTurnstileSuccess(formId, token) {
-        console.log(`✅ Turnstile vérifié avec succès pour ${formId}:`, token);
         
         const state = this.formStates.get(formId);
         if (state) {
@@ -181,7 +172,7 @@ class TurnstileSecurityManager {
     }
 
     handleTurnstileError(formId, error) {
-        console.error(`❌ Erreur Turnstile pour ${formId}:`, error);
+        console.error('Turnstile verification error:', formId, error);
         
         const state = this.formStates.get(formId);
         if (state) {
@@ -224,7 +215,6 @@ class TurnstileSecurityManager {
             button.classList.remove('turnstile-pending', 'turnstile-error');
         });
 
-        console.log(`✅ Boutons de soumission activés pour ${formId}`);
     }
 
     disableSubmitButtons(formId, message = '🔄 Vérification en cours...') {
@@ -247,7 +237,7 @@ class TurnstileSecurityManager {
             button.classList.remove('turnstile-verified', 'turnstile-error');
         });
 
-        console.log(`🔒 Boutons de soumission désactivés pour ${formId}: ${message}`);
+
     }
 
     handleFormSubmit(event, formId) {
@@ -257,7 +247,7 @@ class TurnstileSecurityManager {
             event.preventDefault();
             event.stopImmediatePropagation();
             
-            console.warn(`🚫 Soumission bloquée pour ${formId} - Turnstile non vérifié`);
+            // Block submission - Turnstile not verified
             
             // Afficher un message d'erreur à l'utilisateur
             this.showUserError('Veuillez patienter pendant la vérification de sécurité...');
@@ -265,7 +255,6 @@ class TurnstileSecurityManager {
             return false;
         }
 
-        console.log(`✅ Soumission autorisée pour ${formId} - Turnstile vérifié`);
         return true;
     }
 
@@ -296,7 +285,6 @@ class TurnstileSecurityManager {
 
     setupGlobalTurnstileListener() {
         // Nouvelle approche : surveillance directe du statut des widgets Turnstile
-        console.log('🔄 Configuration de la surveillance directe des widgets Turnstile');
         
         // Surveiller les changements dans les widgets Turnstile toutes les 2 secondes
         this.callbackCheckInterval = setInterval(() => {
@@ -332,13 +320,11 @@ class TurnstileSecurityManager {
             if (hiddenInput && hiddenInput.value && hiddenInput.value.length > 10) {
                 // Le widget a un token valide
                 if (!state.isVerified) {
-                    console.log(`🎉 Widget Turnstile vérifié détecté pour ${formId} - Token: ${hiddenInput.value.substring(0, 20)}...`);
                     state.isVerified = true;
                     this.updateButtonState(formId);
                 }
             } else if (state.isVerified && (!hiddenInput || !hiddenInput.value)) {
                 // Le token a disparu (reset du widget)
-                console.log(`🔄 Widget Turnstile reset détecté pour ${formId}`);
                 state.isVerified = false;
                 this.updateButtonState(formId);
             }
@@ -351,7 +337,6 @@ class TurnstileSecurityManager {
         callbackNames.forEach(callbackName => {
             if (window[callbackName]) {
                 if (!window[callbackName]._turnstileWrapped) {
-                    console.log(`🔄 Interception détectée du callback: ${callbackName}`);
                     this.wrapExistingCallback(callbackName);
                     foundCallbacks.push(callbackName);
                 } else {
@@ -361,7 +346,7 @@ class TurnstileSecurityManager {
         });
         
         if (foundCallbacks.length > 0) {
-            console.log(`📋 Callbacks trouvés: ${foundCallbacks.join(', ')}`);
+            // Callbacks found
         }
     }
 
@@ -369,7 +354,7 @@ class TurnstileSecurityManager {
         const originalCallback = window[callbackName];
         
         window[callbackName] = (token) => {
-            console.log(`🔓 Callback global intercepté: ${callbackName}`, token);
+            // Global callback intercepted
             
             // Exécuter l'original d'abord
             if (originalCallback && typeof originalCallback === 'function') {
@@ -385,11 +370,11 @@ class TurnstileSecurityManager {
     }
 
     activateAllVerifiedForms() {
-        console.log('🚀 Activation de tous les formulaires vérifiés');
+        // Activate all verified forms
         
         // Activer tous les formulaires sécurisés
         this.formStates.forEach((state, formId) => {
-            console.log(`🔓 Activation du formulaire: ${formId}`);
+            // Activate form
             state.isVerified = true;
             this.updateButtonState(formId);
         });
@@ -399,7 +384,6 @@ class TurnstileSecurityManager {
         // Callback de secours pour détecter les réussites Turnstile non interceptées
         const originalOnload = window.onTurnstileLoad;
         window.onTurnstileLoad = () => {
-            console.log('🔄 Détection du chargement global de Turnstile');
             if (originalOnload) originalOnload();
         };
     }
@@ -414,7 +398,6 @@ class TurnstileSecurityManager {
         if (this.callbackCheckInterval) {
             clearInterval(this.callbackCheckInterval);
             this.callbackCheckInterval = null;
-            console.log('🛑 Surveillance des callbacks Turnstile arrêtée');
         }
     }
 }
