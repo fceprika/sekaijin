@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\WelcomeEmail;
+use App\Models\Country;
 use App\Models\User;
 use App\Services\EmailBlacklistService;
 use App\Services\TurnstileService;
