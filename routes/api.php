@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\NewsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,25 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+/*
+|--------------------------------------------------------------------------
+| News API Routes
+|--------------------------------------------------------------------------
+|
+| RESTful API endpoints for news management via automated tools like n8n.
+| Authentication via Sanctum token required for all endpoints.
+|
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    // Main CRUD endpoints
+    Route::apiResource('news', NewsController::class);
+
+    // Alternative explicit routes (same functionality as apiResource)
+    // Route::get('/news', [NewsController::class, 'index']);         // GET /api/news - List articles
+    // Route::post('/news', [NewsController::class, 'store']);        // POST /api/news - Create article
+    // Route::get('/news/{news}', [NewsController::class, 'show']);   // GET /api/news/{id} - Show article
+    // Route::put('/news/{news}', [NewsController::class, 'update']); // PUT /api/news/{id} - Update article
+    // Route::delete('/news/{news}', [NewsController::class, 'destroy']); // DELETE /api/news/{id} - Delete article
 });
