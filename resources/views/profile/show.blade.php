@@ -455,8 +455,9 @@
                                     <input type="text" id="youtube_username" name="youtube_username" 
                                            value="{{ old('youtube_username', $user->youtube_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="@monusername">
+                                           placeholder="jean_expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Le @ sera ajouté automatiquement si besoin</p>
                             </div>
 
                             <!-- Instagram -->
@@ -472,8 +473,9 @@
                                     <input type="text" id="instagram_username" name="instagram_username" 
                                            value="{{ old('instagram_username', $user->instagram_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="monprofil">
+                                           placeholder="jean_expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Pas de @ nécessaire</p>
                             </div>
 
                             <!-- TikTok -->
@@ -489,8 +491,9 @@
                                     <input type="text" id="tiktok_username" name="tiktok_username" 
                                            value="{{ old('tiktok_username', $user->tiktok_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="@monusername">
+                                           placeholder="jean_expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Le @ est optionnel, tapez comme vous voulez</p>
                             </div>
 
                             <!-- LinkedIn -->
@@ -506,8 +509,9 @@
                                     <input type="text" id="linkedin_username" name="linkedin_username" 
                                            value="{{ old('linkedin_username', $user->linkedin_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="mon-profil">
+                                           placeholder="jean-expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Pas de @ nécessaire</p>
                             </div>
 
                             <!-- Twitter -->
@@ -523,8 +527,9 @@
                                     <input type="text" id="twitter_username" name="twitter_username" 
                                            value="{{ old('twitter_username', $user->twitter_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="@monusername">
+                                           placeholder="jean_expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Pas de @ nécessaire</p>
                             </div>
 
                             <!-- Facebook -->
@@ -540,8 +545,9 @@
                                     <input type="text" id="facebook_username" name="facebook_username" 
                                            value="{{ old('facebook_username', $user->facebook_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="mon.profil">
+                                           placeholder="jean.expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Pas de @ nécessaire</p>
                             </div>
 
                             <!-- Telegram -->
@@ -557,8 +563,9 @@
                                     <input type="text" id="telegram_username" name="telegram_username" 
                                            value="{{ old('telegram_username', $user->telegram_username) }}"
                                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                           placeholder="@monusername">
+                                           placeholder="jean_expat">
                                 </div>
+                                <p class="text-xs text-gray-500 mt-1">💡 Pas de @ nécessaire</p>
                             </div>
                         </div>
                     </div>

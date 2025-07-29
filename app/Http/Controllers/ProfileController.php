@@ -58,6 +58,9 @@ class ProfileController extends Controller
         // Déterminer si on utilise le mode automatique ou manuel AVANT la validation
         $useAutoMode = $request->filled('country_residence_auto') && $request->filled('city_residence_auto');
 
+        // Nettoyer les usernames des réseaux sociaux avant validation
+        $this->cleanSocialMediaUsernames($request);
+
         // Préparer les données pour la validation (seulement les champs modifiés + champs requis)
         $validationData = $this->prepareValidationData($request, $changedFields, $useAutoMode);
 
@@ -76,9 +79,9 @@ class ProfileController extends Controller
             'instagram_username.regex' => 'Le nom d\'utilisateur Instagram peut contenir seulement des lettres, chiffres, points et underscores.',
             'tiktok_username.regex' => 'Le nom d\'utilisateur TikTok peut contenir seulement des lettres, chiffres, points et underscores (@ optionnel).',
             'linkedin_username.regex' => 'Le nom d\'utilisateur LinkedIn peut contenir des lettres, chiffres, tirets, points et underscores.',
-            'twitter_username.regex' => 'Le nom d\'utilisateur Twitter peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
+            'twitter_username.regex' => 'Le nom d\'utilisateur Twitter peut contenir seulement des lettres, chiffres et underscores.',
             'facebook_username.regex' => 'Le nom d\'utilisateur Facebook peut contenir des lettres, chiffres, points, underscores et tirets.',
-            'telegram_username.regex' => 'Le nom d\'utilisateur Telegram peut contenir seulement des lettres, chiffres et underscores (@ optionnel).',
+            'telegram_username.regex' => 'Le nom d\'utilisateur Telegram peut contenir seulement des lettres, chiffres et underscores.',
             'new_password.min' => 'Le nouveau mot de passe doit contenir au moins 12 caractères.',
             'new_password.regex' => 'Le nouveau mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.',
         ]);
@@ -664,9 +667,9 @@ class ProfileController extends Controller
             'instagram_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9_.]+$/',
             'tiktok_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_.]+$/',
             'linkedin_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\-_.]+$/',
-            'twitter_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_]+$/',
+            'twitter_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9_]+$/',
             'facebook_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9._-]+$/',
-            'telegram_username' => 'nullable|string|max:255|regex:/^@?[a-zA-Z0-9_]+$/',
+            'telegram_username' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9_]+$/',
             'current_password' => 'nullable|required_with:new_password|current_password',
             'new_password' => [
                 'nullable',
@@ -767,5 +770,62 @@ class ProfileController extends Controller
         }
 
         return array_unique($validatedChanges);
+    }
+
+    /**
+     * Nettoyer automatiquement les usernames des réseaux sociaux.
+     */
+    private function cleanSocialMediaUsernames(Request $request): void
+    {
+        $socialFields = [
+            'youtube_username' => ['require_at' => true, 'allow_at' => true],
+            'instagram_username' => ['require_at' => false, 'allow_at' => false],
+            'tiktok_username' => ['require_at' => false, 'allow_at' => true],
+            'linkedin_username' => ['require_at' => false, 'allow_at' => false],
+            'twitter_username' => ['require_at' => false, 'allow_at' => false],
+            'facebook_username' => ['require_at' => false, 'allow_at' => false],
+            'telegram_username' => ['require_at' => false, 'allow_at' => false],
+        ];
+
+        foreach ($socialFields as $field => $rules) {
+            if ($request->has($field) && $request->filled($field)) {
+                $username = trim($request->input($field));
+
+                if (empty($username)) {
+                    continue;
+                }
+
+                // Nettoyer le username selon les règles de la plateforme
+                $cleanedUsername = $this->cleanUsernameForPlatform($username, $rules);
+
+                // Mettre à jour la requête avec le username nettoyé
+                $request->merge([$field => $cleanedUsername]);
+            }
+        }
+    }
+
+    /**
+     * Nettoyer un username selon les règles d'une plateforme.
+     */
+    private function cleanUsernameForPlatform(string $username, array $rules): string
+    {
+        $username = trim($username);
+
+        // Supprimer les @ multiples ou en fin de chaîne
+        $username = preg_replace('/@@+/', '@', $username);
+        $username = rtrim($username, '@');
+
+        if ($rules['require_at']) {
+            // Plateformes qui requièrent @ (YouTube)
+            if (! str_starts_with($username, '@')) {
+                $username = '@' . $username;
+            }
+        } elseif (! $rules['allow_at']) {
+            // Plateformes qui n'autorisent pas @ (Instagram, LinkedIn, Facebook, Twitter, Telegram)
+            $username = ltrim($username, '@');
+        }
+        // Pour les plateformes qui autorisent @ mais ne l'exigent pas (TikTok), on garde tel quel
+
+        return $username;
     }
 }

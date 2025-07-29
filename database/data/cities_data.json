@@ -427,7 +427,9 @@
     { "name": "Lampang", "lat": 18.2932, "lng": 99.4936 },
     { "name": "Khon Kaen", "lat": 16.4322, "lng": 102.8236 },
     { "name": "Nakhon Si Thammarat", "lat": 8.4304, "lng": 99.9631 },
-    { "name": "Ubon Ratchathani", "lat": 15.2447, "lng": 104.8473 }
+    { "name": "Ubon Ratchathani", "lat": 15.2447, "lng": 104.8473 },
+    { "name": "Phuket", "lat": 7.8804, "lng": 98.3923 },
+    { "name": "Krabi", "lat": 8.0863, "lng": 98.9063 }
   ],
   "Indonésie": [
     { "name": "Jakarta", "lat": -6.2088, "lng": 106.8456 },

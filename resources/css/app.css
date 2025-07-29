@@ -189,8 +189,10 @@
 }
 
 .change-indicator {
-    @apply text-orange-600 font-medium text-xs;
+    @apply text-orange-600 font-medium text-xs bg-orange-50 px-2 py-1 rounded;
     animation: pulse 2s infinite;
+    white-space: nowrap;
+    z-index: 10;
 }
 
 .form-no-changes .submit-btn {

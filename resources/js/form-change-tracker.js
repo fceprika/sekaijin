@@ -158,30 +158,30 @@ class FormChangeTracker {
 
     addChangeIndicator(field) {
         // Éviter les doublons
-        if (field.parentNode.querySelector('.change-indicator')) return;
+        if (field.closest('div').querySelector('.change-indicator')) return;
         
         const indicator = document.createElement('span');
-        indicator.className = 'change-indicator text-orange-500 text-sm ml-2';
+        indicator.className = 'change-indicator text-orange-600 font-medium text-xs absolute -bottom-5 left-0';
         indicator.innerHTML = '● Modifié';
         indicator.setAttribute('title', 'Ce champ a été modifié');
         
-        // Trouver le meilleur endroit pour placer l'indicateur
-        const label = field.closest('.form-group')?.querySelector('label') || 
-                     field.parentNode.querySelector('label') ||
-                     field.nextElementSibling;
-        
-        if (label && label.tagName === 'LABEL') {
-            label.appendChild(indicator);
-        } else {
-            field.parentNode.appendChild(indicator);
+        // Trouver le conteneur parent du champ (div avec relative positioning)
+        const fieldContainer = field.closest('div');
+        if (fieldContainer) {
+            // S'assurer que le conteneur a position relative
+            if (!fieldContainer.classList.contains('relative')) {
+                fieldContainer.classList.add('relative');
+            }
+            fieldContainer.appendChild(indicator);
         }
     }
 
     removeChangeIndicator(field) {
-        const indicators = field.closest('.form-group')?.querySelectorAll('.change-indicator') ||
-                          field.parentNode.querySelectorAll('.change-indicator');
-        
-        indicators.forEach(indicator => indicator.remove());
+        const fieldContainer = field.closest('div');
+        if (fieldContainer) {
+            const indicators = fieldContainer.querySelectorAll('.change-indicator');
+            indicators.forEach(indicator => indicator.remove());
+        }
     }
 
     initializeSubmitButtons() {
