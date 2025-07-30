@@ -108,7 +108,7 @@ class ImageDownloadService
     private function convertYouTubeVideoToThumbnail(string $url): ?string
     {
         $videoId = $this->extractYouTubeVideoId($url);
-        
+
         if (! $videoId) {
             return null;
         }

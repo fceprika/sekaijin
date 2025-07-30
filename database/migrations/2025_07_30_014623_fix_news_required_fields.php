@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('news', function (Blueprint $table) {
             // Make country_id nullable for API compatibility
             $table->unsignedBigInteger('country_id')->nullable()->change();
-            
+
             // Set default values for other fields that may cause issues
             $table->string('category')->default('general')->change();
             $table->boolean('is_featured')->default(false)->change();

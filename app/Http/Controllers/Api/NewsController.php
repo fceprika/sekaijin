@@ -53,15 +53,15 @@ class NewsController extends Controller
 
             // Prepare data for creation
             $newsData = $validated;
-            
+
             // Remove thumbnail_url as it's not a database field
             unset($newsData['thumbnail_url']);
-            
+
             // Add processed fields
             $newsData['thumbnail_path'] = $thumbnailPath;
             $newsData['image_url'] = $thumbnailPath ? asset('storage/news_thumbnails/' . $thumbnailPath) : null;
             $newsData['published_at'] = $validated['status'] === 'published' ? now() : null;
-            
+
             // Create the news article
             $news = News::create($newsData);
 
