@@ -28,6 +28,16 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Custom rate limiting for News API (more restrictive due to image downloads)
+        RateLimiter::for('api-news', function (Request $request) {
+            return [
+                // 30 requests per minute per user/IP
+                Limit::perMinute(30)->by($request->user()?->id ?: $request->ip()),
+                // 100 requests per hour per user/IP
+                Limit::perHour(100)->by($request->user()?->id ?: $request->ip()),
+            ];
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

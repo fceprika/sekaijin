@@ -28,8 +28,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 | Authentication via Sanctum token required for all endpoints.
 |
 */
-Route::middleware('auth:sanctum')->group(function () {
-    // Main CRUD endpoints
+Route::middleware(['auth:sanctum', 'throttle:api-news'])->group(function () {
+    // Main CRUD endpoints with rate limiting
     Route::apiResource('news', NewsController::class);
 
     // Alternative explicit routes (same functionality as apiResource)

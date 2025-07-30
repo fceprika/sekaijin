@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -20,6 +21,13 @@ class ImageDownloadService
                 if (! $url) {
                     return null;
                 }
+            }
+
+            // SECURITY: Validate URL before downloading
+            if (! $this->isAllowedUrl($url)) {
+                Log::warning('Blocked potentially dangerous URL', ['url' => $url]);
+
+                return null;
             }
 
             // Try to download the image
@@ -53,13 +61,73 @@ class ImageDownloadService
             return $filename;
 
         } catch (\Exception $e) {
-            \Log::error('Failed to download image', [
+            Log::error('Failed to download image', [
                 'url' => $url,
                 'error' => $e->getMessage(),
             ]);
 
             return null;
         }
+    }
+
+    /**
+     * Validate URL to prevent SSRF attacks.
+     */
+    private function isAllowedUrl(string $url): bool
+    {
+        $parsedUrl = parse_url($url);
+
+        if (! $parsedUrl || ! isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            return false;
+        }
+
+        // Only allow HTTP/HTTPS
+        if (! in_array($parsedUrl['scheme'], ['http', 'https'])) {
+            return false;
+        }
+
+        $host = strtolower($parsedUrl['host']);
+
+        // Whitelist trusted domains for images
+        $allowedDomains = [
+            'img.youtube.com',
+            'i.ytimg.com',
+            'images.unsplash.com',
+            'unsplash.com',
+            'pixabay.com',
+            'pexels.com',
+            'cdn.pixabay.com',
+            'images.pexels.com',
+        ];
+
+        // Check if domain is in whitelist
+        foreach ($allowedDomains as $domain) {
+            if ($host === $domain || str_ends_with($host, '.' . $domain)) {
+                return true;
+            }
+        }
+
+        // Resolve IP and check for private ranges
+        $ip = gethostbyname($host);
+        if ($ip === $host) {
+            // gethostbyname failed, might be an IP already
+            $ip = $host;
+        }
+
+        // Block private IP ranges, localhost, etc.
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return false;
+        }
+
+        // Additional security: block common internal ports
+        if (isset($parsedUrl['port'])) {
+            $dangerousPorts = [22, 23, 25, 53, 80, 110, 143, 993, 995, 1433, 3306, 5432, 6379, 11211, 27017];
+            if (in_array($parsedUrl['port'], $dangerousPorts)) {
+                return false;
+            }
+        }
+
+        return false; // Default deny - only whitelisted domains allowed
     }
 
     /**
@@ -75,22 +143,104 @@ class ImageDownloadService
                 ->get($url);
 
             if ($response->successful()) {
-                // Validate that it's actually an image
-                $contentType = $response->header('Content-Type');
-                if (str_starts_with($contentType, 'image/')) {
-                    return $response;
+                // SECURITY: Enhanced file validation
+                if (! $this->isValidImageResponse($response)) {
+                    return null;
                 }
+
+                return $response;
             }
 
             return null;
 
         } catch (\Exception $e) {
-            \Log::warning('Failed to download image from URL', [
+            Log::warning('Failed to download image from URL', [
                 'url' => $url,
                 'error' => $e->getMessage(),
             ]);
 
             return null;
+        }
+    }
+
+    /**
+     * Validate image response for security and format compliance.
+     */
+    private function isValidImageResponse(\Illuminate\Http\Client\Response $response): bool
+    {
+        // Check file size (10MB limit)
+        $contentLength = $response->header('Content-Length');
+        if ($contentLength && $contentLength > 10 * 1024 * 1024) {
+            Log::warning('Image file too large', ['size' => $contentLength]);
+
+            return false;
+        }
+
+        // Validate Content-Type
+        $contentType = $response->header('Content-Type');
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+        if (! $contentType || ! in_array(strtolower($contentType), $allowedTypes)) {
+            Log::warning('Invalid content type', ['type' => $contentType]);
+
+            return false;
+        }
+
+        // Validate actual image content
+        try {
+            $imageData = $response->body();
+
+            // Check actual file size after download
+            if (strlen($imageData) > 10 * 1024 * 1024) {
+                Log::warning('Downloaded image too large', ['size' => strlen($imageData)]);
+
+                return false;
+            }
+
+            // Verify it's actually an image
+            $imageInfo = getimagesizefromstring($imageData);
+            if ($imageInfo === false) {
+                Log::warning('Invalid image data');
+
+                return false;
+            }
+
+            // Check image dimensions (reasonable limits)
+            if ($imageInfo[0] > 4000 || $imageInfo[1] > 4000) {
+                Log::warning('Image dimensions too large', [
+                    'width' => $imageInfo[0],
+                    'height' => $imageInfo[1],
+                ]);
+
+                return false;
+            }
+
+            // Verify MIME type matches actual content
+            $actualMimeType = $imageInfo['mime'] ?? '';
+            $expectedMimes = [
+                'image/jpeg' => ['image/jpeg', 'image/jpg'],
+                'image/jpg' => ['image/jpeg', 'image/jpg'],
+                'image/png' => ['image/png'],
+                'image/gif' => ['image/gif'],
+                'image/webp' => ['image/webp'],
+            ];
+
+            $allowedMimes = $expectedMimes[strtolower($contentType)] ?? [];
+            if (! in_array($actualMimeType, $allowedMimes)) {
+                Log::warning('MIME type mismatch', [
+                    'declared' => $contentType,
+                    'actual' => $actualMimeType,
+                ]);
+
+                return false;
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::warning('Image validation failed', ['error' => $e->getMessage()]);
+
+            return false;
         }
     }
 
@@ -202,7 +352,7 @@ class ImageDownloadService
             return true; // File doesn't exist, consider it "deleted"
 
         } catch (\Exception $e) {
-            \Log::error('Failed to delete image', [
+            Log::error('Failed to delete image', [
                 'filename' => $filename,
                 'directory' => $directory,
                 'error' => $e->getMessage(),

@@ -10,6 +10,7 @@ use App\Http\Resources\Api\NewsResource;
 use App\Models\News;
 use App\Services\ImageDownloadService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class NewsController extends Controller
 {
@@ -75,7 +76,7 @@ class NewsController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            \Log::error('Failed to create news article', [
+            Log::error('Failed to create news article', [
                 'error' => $e->getMessage(),
                 'data' => $request->all(),
             ]);
@@ -104,7 +105,7 @@ class NewsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Failed to retrieve news article', [
+            Log::error('Failed to retrieve news article', [
                 'news_id' => $news->id,
                 'error' => $e->getMessage(),
             ]);
@@ -179,7 +180,7 @@ class NewsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Failed to update news article', [
+            Log::error('Failed to update news article', [
                 'news_id' => $news->id,
                 'error' => $e->getMessage(),
                 'data' => $request->all(),
@@ -214,7 +215,7 @@ class NewsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Failed to delete news article', [
+            Log::error('Failed to delete news article', [
                 'news_id' => $news->id,
                 'error' => $e->getMessage(),
             ]);
@@ -253,7 +254,7 @@ class NewsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Failed to retrieve news articles', [
+            Log::error('Failed to retrieve news articles', [
                 'error' => $e->getMessage(),
             ]);
 
