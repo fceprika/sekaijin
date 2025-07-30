@@ -24,7 +24,7 @@ class StoreNewsRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'excerpt' => 'required|string|max:500',
+            'summary' => 'required|string|max:500',
             'content' => 'required|string|min:100',
             'category' => 'required|in:administrative,vie-pratique,culture,economie',
             'country_id' => 'required|exists:countries,id',
@@ -44,8 +44,8 @@ class StoreNewsRequest extends FormRequest
         return [
             'title.required' => 'Le titre est obligatoire.',
             'title.max' => 'Le titre ne peut pas dépasser 255 caractères.',
-            'excerpt.required' => 'Le résumé est obligatoire.',
-            'excerpt.max' => 'Le résumé ne peut pas dépasser 500 caractères.',
+            'summary.required' => 'Le résumé est obligatoire.',
+            'summary.max' => 'Le résumé ne peut pas dépasser 500 caractères.',
             'content.required' => 'Le contenu est obligatoire.',
             'content.min' => 'Le contenu doit contenir au moins 100 caractères.',
             'category.required' => 'La catégorie est obligatoire.',

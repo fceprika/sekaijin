@@ -205,12 +205,12 @@
 
                     <!-- Résumé -->
                     <div class="lg:col-span-2">
-                        <label for="excerpt" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="summary" class="block text-sm font-medium text-gray-700 mb-2">
                             Résumé de l'actualité *
                         </label>
-                        <textarea id="excerpt" name="excerpt" rows="3" required
+                        <textarea id="summary" name="summary" rows="3" required
                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
-                                  placeholder="Rédigez un résumé accrocheur de votre actualité...">{{ old('excerpt', $news->excerpt) }}</textarea>
+                                  placeholder="Rédigez un résumé accrocheur de votre actualité...">{{ old('summary', $news->summary) }}</textarea>
                         <p class="text-xs text-gray-500 mt-1">Maximum 500 caractères</p>
                     </div>
                 </div>
@@ -426,12 +426,12 @@
         const content = tinymce.get('content').getContent();
         formData.set('content', content);
         
-        // Ensure title, excerpt and slug are included
+        // Ensure title, summary and slug are included
         const title = document.getElementById('title').value;
-        const excerpt = document.getElementById('excerpt').value;
+        const summary = document.getElementById('summary').value;
         const slug = document.getElementById('slug').value;
         formData.set('title', title);
-        formData.set('excerpt', excerpt);
+        formData.set('summary', summary);
         formData.set('slug', slug);
         
         // Open preview in new tab
