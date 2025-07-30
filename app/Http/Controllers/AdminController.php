@@ -29,8 +29,8 @@ class AdminController extends Controller
             'articles_published' => Article::where('is_published', true)->count(),
             'articles_draft' => Article::where('is_published', false)->count(),
             'news_total' => News::count(),
-            'news_published' => News::where('is_published', true)->count(),
-            'news_draft' => News::where('is_published', false)->count(),
+            'news_published' => News::where('status', 'published')->count(),
+            'news_draft' => News::where('status', 'draft')->count(),
             'users_total' => User::count(),
             'countries_active' => Country::count(),
         ];

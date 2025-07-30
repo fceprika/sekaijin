@@ -166,7 +166,7 @@
                                     </span>
                                     <span>
                                         <i class="fas fa-map-marker-alt mr-1"></i>
-                                        {{ $article->country->name_fr }}
+                                        {{ $article->country ? $article->country->name_fr : 'Non défini' }}
                                     </span>
                                     <span>
                                         <i class="fas fa-clock mr-1"></i>
@@ -215,7 +215,7 @@
                                     </span>
                                     <span>
                                         <i class="fas fa-map-marker-alt mr-1"></i>
-                                        {{ $news->country->name_fr }}
+                                        {{ $news->country ? $news->country->name_fr : 'Non défini' }}
                                     </span>
                                     <span>
                                         <i class="fas fa-clock mr-1"></i>
@@ -224,7 +224,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
-                                @if($news->is_published)
+                                @if($news->status === 'published')
                                     <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Publiée</span>
                                 @else
                                     <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Brouillon</span>
