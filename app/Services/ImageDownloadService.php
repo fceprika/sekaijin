@@ -14,6 +14,14 @@ class ImageDownloadService
     public function downloadAndStore(string $url, string $directory = 'news_thumbnails'): ?string
     {
         try {
+            // If it's a YouTube video URL, convert it to thumbnail URL
+            if ($this->isYouTubeVideoUrl($url)) {
+                $url = $this->convertYouTubeVideoToThumbnail($url);
+                if (! $url) {
+                    return null;
+                }
+            }
+
             // Try to download the image
             $response = $this->downloadImage($url);
 
@@ -84,6 +92,52 @@ class ImageDownloadService
 
             return null;
         }
+    }
+
+    /**
+     * Check if URL is a YouTube video URL.
+     */
+    private function isYouTubeVideoUrl(string $url): bool
+    {
+        return str_contains($url, 'youtube.com/watch?v=') || str_contains($url, 'youtu.be/');
+    }
+
+    /**
+     * Convert YouTube video URL to thumbnail URL.
+     */
+    private function convertYouTubeVideoToThumbnail(string $url): ?string
+    {
+        $videoId = $this->extractYouTubeVideoId($url);
+        
+        if (! $videoId) {
+            return null;
+        }
+
+        // Return maxresdefault URL (will fallback to hqdefault if needed)
+        return "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg";
+    }
+
+    /**
+     * Extract YouTube video ID from various URL formats.
+     */
+    private function extractYouTubeVideoId(string $url): ?string
+    {
+        // Pattern for youtube.com/watch?v=VIDEO_ID
+        if (preg_match('/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern for youtu.be/VIDEO_ID
+        if (preg_match('/youtu\.be\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern for youtube.com/embed/VIDEO_ID
+        if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     /**

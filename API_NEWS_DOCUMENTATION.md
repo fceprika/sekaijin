@@ -127,6 +127,10 @@ Content-Type: application/json
 
 ### Téléchargement automatique d'images
 - L'API télécharge automatiquement les images depuis `thumbnail_url`
+- **Support intelligent des URLs YouTube** : accepte les URLs complètes de vidéos
+  - `https://www.youtube.com/watch?v=VIDEO_ID` 
+  - `https://youtu.be/VIDEO_ID`
+  - `https://www.youtube.com/embed/VIDEO_ID`
 - Support du fallback YouTube (maxresdefault → hqdefault)
 - Images stockées dans `storage/news_thumbnails/`
 - Génération automatique de noms de fichiers uniques
@@ -168,9 +172,13 @@ Content-Type: application/json
         "title": "{{ $json.title }}",
         "summary": "{{ $json.summary }}",
         "content": "{{ $json.content }}",
-        "thumbnail_url": "{{ $json.thumbnail_url }}",
+        // Peut être une URL YouTube complète !
+        "thumbnail_url": "https://www.youtube.com/watch?v=OlFoXWRBGOQ",
         "author_id": 1,
         "status": "published",
+        "country_id": 1,
+        "category": "culture",
+        "is_featured": false,
         "tags": "{{ $json.tags }}"
     }
 }
