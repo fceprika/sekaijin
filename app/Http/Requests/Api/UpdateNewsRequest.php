@@ -30,6 +30,9 @@ class UpdateNewsRequest extends FormRequest
             'status' => 'sometimes|required|in:draft,published',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
+            'country_id' => 'nullable|integer|exists:countries,id',
+            'category' => 'nullable|string|in:general,administrative,vie-pratique,culture,economie,lifestyle,cuisine',
+            'is_featured' => 'nullable|boolean',
         ];
     }
 

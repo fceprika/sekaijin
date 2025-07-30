@@ -51,17 +51,18 @@ class NewsController extends Controller
                 }
             }
 
+            // Prepare data for creation
+            $newsData = $validated;
+            
+            // Remove thumbnail_url as it's not a database field
+            unset($newsData['thumbnail_url']);
+            
+            // Add processed fields
+            $newsData['thumbnail_path'] = $thumbnailPath;
+            $newsData['published_at'] = $validated['status'] === 'published' ? now() : null;
+            
             // Create the news article
-            $news = News::create([
-                'title' => $validated['title'],
-                'summary' => $validated['summary'],
-                'content' => $validated['content'],
-                'thumbnail_path' => $thumbnailPath,
-                'author_id' => $validated['author_id'],
-                'status' => $validated['status'],
-                'tags' => $validated['tags'] ?? null,
-                'published_at' => $validated['status'] === 'published' ? now() : null,
-            ]);
+            $news = News::create($newsData);
 
             // Load the author relationship
             $news->load('author');
