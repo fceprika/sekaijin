@@ -150,7 +150,11 @@
                                     {{ $newsItem->author->name }}
                                 </td>
                                 <td class="px-4 py-4 text-sm text-gray-900">
-                                    {{ $newsItem->country->emoji }} {{ $newsItem->country->name_fr }}
+                                    @if($newsItem->country)
+                                        {{ $newsItem->country->emoji }} {{ $newsItem->country->name_fr }}
+                                    @else
+                                        <span class="text-gray-500">Non défini</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-4">
                                     @php
@@ -167,7 +171,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-4">
-                                    @if($newsItem->is_published)
+                                    @if($newsItem->status === 'published')
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <i class="fas fa-check-circle mr-1"></i>
                                             Publiée
@@ -191,7 +195,7 @@
                                            title="Modifier">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        @if($newsItem->is_published)
+                                        @if($newsItem->status === 'published' && $newsItem->country && $newsItem->slug)
                                             <a href="{{ route('country.news.show', [$newsItem->country->slug, $newsItem->slug]) }}" 
                                                target="_blank"
                                                class="text-green-600 hover:text-green-900 transition duration-200" 
