@@ -486,6 +486,9 @@ class AdminController extends Controller
     {
         $this->authorize('update', $news);
 
+        // Load the country relationship if not already loaded
+        $news->load(['author', 'country']);
+
         $countries = Country::all();
         $categories = array_keys(config('content.news_categories'));
 

@@ -33,7 +33,7 @@
                     <i class="fas fa-eye mr-2"></i>
                     Prévisualisation
                 </button>
-                @if($news->is_published)
+                @if($news->status === 'published' && $news->country && $news->slug)
                     <a href="{{ route('country.news.show', [$news->country->slug, $news->slug]) }}" 
                        target="_blank"
                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200">
@@ -75,7 +75,7 @@
                         <!-- Actualité publiée -->
                         <div class="flex items-center">
                             <input id="is_published_top" name="is_published" type="checkbox" value="1" 
-                                   {{ old('is_published', $news->is_published) ? 'checked' : '' }}
+                                   {{ old('is_published', $news->status === 'published') ? 'checked' : '' }}
                                    class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2">
                             <label for="is_published_top" class="ml-2 text-sm font-medium text-gray-700">
                                 Actualité publiée
@@ -250,7 +250,7 @@
                         <div>
                             <p class="text-sm text-blue-600 font-medium">Statut</p>
                             <p class="text-lg font-bold text-blue-800">
-                                @if($news->is_published)
+                                @if($news->status === 'published')
                                     <i class="fas fa-check-circle mr-1"></i>
                                     Publiée
                                 @else
@@ -259,7 +259,7 @@
                                 @endif
                             </p>
                         </div>
-                        <i class="fas fa-{{ $news->is_published ? 'globe' : 'lock' }} text-blue-600 text-xl"></i>
+                        <i class="fas fa-{{ $news->status === 'published' ? 'globe' : 'lock' }} text-blue-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -277,8 +277,8 @@
                         <div class="space-y-2">
                             <div class="flex items-center">
                                 <span class="text-sm text-gray-600">Publication:</span>
-                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $news->is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                    {{ $news->is_published ? 'Publiée' : 'Brouillon' }}
+                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $news->status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $news->status === 'published' ? 'Publiée' : 'Brouillon' }}
                                 </span>
                             </div>
                             <div class="flex items-center">
