@@ -136,7 +136,7 @@
                                     <div>
                                         <a href="{{ route('admin.news.edit', $newsItem) }}" class="block hover:bg-gray-50 -m-2 p-2 rounded">
                                             <h3 class="text-sm font-medium text-gray-900 hover:text-purple-600 transition duration-200">{{ $newsItem->title }}</h3>
-                                            <p class="text-sm text-gray-500">{{ Str::limit($newsItem->excerpt, 60) }}</p>
+                                            <p class="text-sm text-gray-500">{{ Str::limit($newsItem->summary, 60) }}</p>
                                             @if($newsItem->is_featured)
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
                                                     <i class="fas fa-star mr-1"></i>
