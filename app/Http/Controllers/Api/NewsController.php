@@ -59,6 +59,7 @@ class NewsController extends Controller
             
             // Add processed fields
             $newsData['thumbnail_path'] = $thumbnailPath;
+            $newsData['image_url'] = $thumbnailPath ? asset('storage/news_thumbnails/' . $thumbnailPath) : null;
             $newsData['published_at'] = $validated['status'] === 'published' ? now() : null;
             
             // Create the news article
@@ -152,6 +153,7 @@ class NewsController extends Controller
                 }
 
                 $validated['thumbnail_path'] = $thumbnailPath;
+                $validated['image_url'] = asset('storage/news_thumbnails/' . $thumbnailPath);
             }
 
             // Handle status change to published
