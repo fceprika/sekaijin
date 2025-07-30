@@ -35,8 +35,8 @@
                 
                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{{ $news->title }}</h1>
                 
-                @if($news->excerpt)
-                    <p class="text-xl text-gray-600 mb-6">{{ $news->excerpt }}</p>
+                @if($news->summary)
+                    <p class="text-xl text-gray-600 mb-6">{{ $news->summary }}</p>
                 @endif
 
                 <!-- News Image -->
@@ -88,7 +88,7 @@
                         <button class="share-button text-gray-600 hover:text-blue-600 transition-colors" 
                                 data-url="{{ route('country.news.show', [$country->slug, $news->slug]) }}"
                                 data-title="{{ $news->title }} - {{ $country->name_fr }}"
-                                data-text="{{ $news->excerpt }}"
+                                data-text="{{ $news->summary }}"
                                 aria-label="Partager l'actualité {{ $news->title }}">
                             <i class="fas fa-share-alt" aria-hidden="true"></i>
                         </button>
@@ -110,7 +110,7 @@
                         <button class="share-button flex items-center space-x-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                                 data-url="{{ route('country.news.show', [$country->slug, $news->slug]) }}"
                                 data-title="{{ $news->title }} - {{ $country->name_fr }}"
-                                data-text="{{ $news->excerpt }}"
+                                data-text="{{ $news->summary }}"
                                 aria-label="Partager l'actualité {{ $news->title }}">
                             <i class="fas fa-share-alt" aria-hidden="true"></i>
                             <span>Partager</span>
@@ -163,8 +163,8 @@
                             </a>
                         </h3>
                         
-                        @if($relatedNewsItem->excerpt)
-                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $relatedNewsItem->excerpt }}</p>
+                        @if($relatedNewsItem->summary)
+                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $relatedNewsItem->summary }}</p>
                         @endif
                         
                         <div class="flex items-center justify-between text-xs text-gray-500">

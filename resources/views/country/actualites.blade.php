@@ -52,7 +52,7 @@
                                 </a>
                             </h2>
                             <p class="text-gray-600 mb-4">
-                                {{ $featuredNewsItem->excerpt }}
+                                {{ $featuredNewsItem->summary }}
                             </p>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
@@ -104,7 +104,7 @@
                                         </a>
                                     </h3>
                                     <p class="text-gray-600 mb-4">
-                                        {{ $newsItem->excerpt }}
+                                        {{ $newsItem->summary }}
                                     </p>
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-2">

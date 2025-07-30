@@ -35,7 +35,7 @@
                                 <a href="{{ route('country.news.show', [$countryModel->slug, $news->slug]) }}" 
                                    class="block border-l-4 border-blue-500 pl-4 py-2 hover:bg-gray-50 transition duration-200 cursor-pointer">
                                     <h3 class="font-semibold text-gray-800 hover:text-blue-600">{{ $news->title }}</h3>
-                                    <p class="text-gray-600 text-sm">{{ $news->excerpt }}</p>
+                                    <p class="text-gray-600 text-sm">{{ $news->summary }}</p>
                                     <span class="text-xs text-gray-500">{{ $news->published_at?->diffForHumans() ?? 'Date inconnue' }}</span>
                                 </a>
                             @endforeach
