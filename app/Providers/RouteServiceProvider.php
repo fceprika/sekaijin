@@ -24,6 +24,36 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Custom route model binding for articles
+        Route::bind('article', function ($value, $route) {
+            // Check if this is an API route (starts with api/)
+            $uri = $route->uri();
+            $isApiRoute = str_starts_with($uri, 'api/');
+
+            if ($isApiRoute) {
+                // For API routes: always use ID
+                return \App\Models\Article::findOrFail($value);
+            }
+
+            // For web routes: check if we're in a country context
+            $country = $route->parameter('country');
+            if ($country && is_string($country)) {
+                $countryModel = \App\Models\Country::where('slug', $country)->first();
+                if ($countryModel) {
+                    return \App\Models\Article::where('slug', $value)
+                        ->where('country_id', $countryModel->id)
+                        ->firstOrFail();
+                }
+            }
+
+            // Fallback: find by slug globally or by ID if numeric
+            if (is_numeric($value)) {
+                return \App\Models\Article::findOrFail($value);
+            }
+
+            return \App\Models\Article::where('slug', $value)->firstOrFail();
+        });
+
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });

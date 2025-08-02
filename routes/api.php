@@ -52,11 +52,6 @@ Route::middleware(['auth:sanctum', 'throttle:api-news'])->group(function () {
 | Same rate limiting as news API (30/min, 100/hour).
 |
 */
-// Fix model binding for articles API - use ID instead of slug
-Route::bind('article', function ($value) {
-    return \App\Models\Article::where('id', $value)->firstOrFail();
-});
-
 Route::middleware(['auth:sanctum', 'throttle:api-news'])->group(function () {
     // Main CRUD endpoints with rate limiting (reusing same rate limiter as news)
     Route::apiResource('articles', ArticleController::class);
