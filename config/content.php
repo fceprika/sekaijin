@@ -121,5 +121,6 @@ return [
         'excerpt_max_length' => 500, // characters
         'title_max_length' => 255, // characters
         'featured_content_limit' => 3, // number of featured items per section
+        'default_article_category' => 'témoignage', // default category for articles
     ],
 ];

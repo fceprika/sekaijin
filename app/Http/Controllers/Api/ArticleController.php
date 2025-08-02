@@ -27,9 +27,17 @@ class ArticleController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Article::with(['country', 'author'])
-            ->published()
-            ->orderBy('published_at', 'desc');
+        $query = Article::with(['country', 'author']);
+
+        // Filter by publication status (default: only published)
+        $status = $request->input('status', 'published');
+        if ($status === 'published') {
+            $query->published();
+        } elseif ($status === 'draft') {
+            $query->where('is_published', false);
+        } elseif ($status === 'all') {
+            // No filter - show all articles
+        }
 
         // Filter by country
         if ($request->has('country_id')) {
@@ -46,13 +54,38 @@ class ArticleController extends Controller
             $query->where('author_id', $request->author_id);
         }
 
-        // Search in title and excerpt
+        // Filter by featured status
+        if ($request->has('featured')) {
+            $query->where('is_featured', $request->boolean('featured'));
+        }
+
+        // Date range filtering
+        if ($request->has('date_from')) {
+            $query->whereDate('published_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('published_at', '<=', $request->date_to);
+        }
+
+        // Search in title, excerpt, and content
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('excerpt', 'like', "%{$search}%");
+                    ->orWhere('excerpt', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
             });
+        }
+
+        // Sorting options
+        $sortBy = $request->input('sort_by', 'published_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        $allowedSortFields = ['published_at', 'created_at', 'updated_at', 'title', 'views', 'likes'];
+        if (in_array($sortBy, $allowedSortFields)) {
+            $query->orderBy($sortBy, $sortDirection === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->orderBy('published_at', 'desc');
         }
 
         $articles = $query->paginate($request->input('per_page', 20));
@@ -94,6 +127,7 @@ class ArticleController extends Controller
             // Check for duplicate title
             if (Article::where('title', $validated['title'])->exists()) {
                 return response()->json([
+                    'success' => false,
                     'message' => 'Un article avec ce titre existe déjà.',
                     'errors' => [
                         'title' => ['Un article avec ce titre existe déjà.'],
@@ -121,6 +155,7 @@ class ArticleController extends Controller
             Log::info('Article created via API', ['id' => $article->id, 'title' => $article->title]);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Article créé avec succès.',
                 'data' => new ArticleResource($article),
             ], 201);
@@ -129,6 +164,7 @@ class ArticleController extends Controller
             Log::error('Error creating article via API', ['error' => $e->getMessage()]);
 
             return response()->json([
+                'success' => false,
                 'message' => 'Erreur lors de la création de l\'article.',
                 'error' => $e->getMessage(),
             ], 500);
@@ -190,6 +226,7 @@ class ArticleController extends Controller
             Log::info('Article updated via API', ['id' => $article->id]);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Article mis à jour avec succès.',
                 'data' => new ArticleResource($article),
             ]);
@@ -198,6 +235,7 @@ class ArticleController extends Controller
             Log::error('Error updating article via API', ['id' => $article->id, 'error' => $e->getMessage()]);
 
             return response()->json([
+                'success' => false,
                 'message' => 'Erreur lors de la mise à jour de l\'article.',
                 'error' => $e->getMessage(),
             ], 500);
@@ -215,6 +253,7 @@ class ArticleController extends Controller
             Log::info('Article deleted via API', ['id' => $article->id]);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Article supprimé avec succès.',
             ]);
 
@@ -222,6 +261,7 @@ class ArticleController extends Controller
             Log::error('Error deleting article via API', ['id' => $article->id, 'error' => $e->getMessage()]);
 
             return response()->json([
+                'success' => false,
                 'message' => 'Erreur lors de la suppression de l\'article.',
                 'error' => $e->getMessage(),
             ], 500);

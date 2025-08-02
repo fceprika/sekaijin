@@ -91,7 +91,7 @@ class StoreArticleRequest extends FormRequest
 
         // Set default category if not provided
         if (! $this->has('category') || empty($this->category)) {
-            $data['category'] = 'témoignage';
+            $data['category'] = config('content.settings.default_article_category', 'témoignage');
         }
 
         // Handle YouTube URLs

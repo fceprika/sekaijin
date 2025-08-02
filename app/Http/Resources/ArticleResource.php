@@ -39,12 +39,12 @@ class ArticleResource extends JsonResource
             'published_at' => $this->published_at?->toIso8601String(),
             'views' => $this->views,
             'likes' => $this->likes,
-            'reading_time' => $this->reading_time,
-            'reading_time_formatted' => $this->reading_time ? "{$this->reading_time} min de lecture" : null,
+            'reading_time' => $this->getAttributes()['reading_time'] ?? null,
+            'reading_time_formatted' => $this->reading_time,
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
             'links' => [
-                'self' => route('articles.show', $this->id),
+                'self' => url("/api/articles/{$this->id}"),
                 'web' => $this->country ? route('country.article.show', [$this->country->slug, $this->slug]) : null,
             ],
         ];
