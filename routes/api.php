@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\NewsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,9 +34,25 @@ Route::middleware(['auth:sanctum', 'throttle:api-news'])->group(function () {
     Route::apiResource('news', NewsController::class);
 
     // Alternative explicit routes (same functionality as apiResource)
+    // Alternative explicit routes (same functionality as apiResource)
     // Route::get('/news', [NewsController::class, 'index']);         // GET /api/news - List articles
     // Route::post('/news', [NewsController::class, 'store']);        // POST /api/news - Create article
     // Route::get('/news/{news}', [NewsController::class, 'show']);   // GET /api/news/{id} - Show article
     // Route::put('/news/{news}', [NewsController::class, 'update']); // PUT /api/news/{id} - Update article
     // Route::delete('/news/{news}', [NewsController::class, 'destroy']); // DELETE /api/news/{id} - Delete article
+});
+
+/*
+|--------------------------------------------------------------------------
+| Articles API Routes
+|--------------------------------------------------------------------------
+|
+| RESTful API endpoints for articles/blog management via automated tools.
+| Authentication via Sanctum token required for all endpoints.
+| Same rate limiting as news API (30/min, 100/hour).
+|
+*/
+Route::middleware(['auth:sanctum', 'throttle:api-news'])->group(function () {
+    // Main CRUD endpoints with rate limiting (reusing same rate limiter as news)
+    Route::apiResource('articles', ArticleController::class);
 });
