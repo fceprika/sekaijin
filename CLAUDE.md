@@ -198,3 +198,12 @@ Admin panel with TinyMCE editor, bulk operations, preview system, and content co
 
 ### Email Verification System (July 2025)
 Complete email verification implementation with custom templates, security restrictions, comprehensive error handling, and development bypass support.
+
+### RESTful API System (July 2025)
+Complete RESTful API for automated news creation with enterprise-grade security:
+- **Sanctum Authentication**: Token-based API access with proper rate limiting (30/min, 100/hour)
+- **Smart YouTube Integration**: Auto thumbnail extraction with multi-format support  
+- **Secure Image Processing**: SSRF protection, file validation, size limits (10MB, 4000px)
+- **n8n Integration**: Ready for workflow automation and bulk operations
+- **CRUD Operations**: Full news management via API with French localization
+- **Security Features**: Domain whitelist, MIME type verification, private IP blocking

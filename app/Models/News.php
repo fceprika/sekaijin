@@ -12,22 +12,29 @@ class News extends Model
     protected $fillable = [
         'title',
         'slug',
-        'excerpt',
+        'summary',
         'content',
+        'thumbnail_path',
+        'author_id',
+        'status',
+        'published_at',
+        'tags',
+        // Legacy fields (pour compatibilité existante)
+        'excerpt',
         'category',
         'image_url',
         'country_id',
-        'author_id',
         'is_featured',
         'is_published',
-        'published_at',
         'views',
     ];
 
     protected $casts = [
+        'published_at' => 'datetime',
+        'tags' => 'array',
+        // Legacy casts (pour compatibilité existante)
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
-        'published_at' => 'datetime',
     ];
 
     /**
@@ -47,9 +54,19 @@ class News extends Model
     }
 
     /**
-     * Scope for published news.
+     * Scope for published news (nouvelle version pour API).
      */
     public function scopePublished($query)
+    {
+        return $query->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    /**
+     * Scope for legacy published news (ancienne version pour compatibilité).
+     */
+    public function scopeLegacyPublished($query)
     {
         return $query->where('is_published', true)
             ->whereNotNull('published_at')
@@ -184,5 +201,57 @@ class News extends Model
         return $this->favorites()
             ->where('user_id', $user->id)
             ->exists();
+    }
+
+    /**
+     * Get the thumbnail URL for API responses.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if ($this->thumbnail_path) {
+            return asset('storage/news_thumbnails/' . $this->thumbnail_path);
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if this news has duplicate title.
+     */
+    public static function hasDuplicateTitle(string $title, ?int $excludeId = null): bool
+    {
+        $query = self::where('title', $title);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Mark as published and set published_at timestamp.
+     */
+    public function markAsPublished(): self
+    {
+        $this->update([
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * Mark as draft and clear published_at timestamp.
+     */
+    public function markAsDraft(): self
+    {
+        $this->update([
+            'status' => 'draft',
+            'published_at' => null,
+        ]);
+
+        return $this;
     }
 }

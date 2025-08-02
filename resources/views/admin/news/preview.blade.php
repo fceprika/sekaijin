@@ -51,8 +51,8 @@
                 
                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{{ $news->title }}</h1>
                 
-                @if($news->excerpt)
-                    <p class="text-xl text-gray-600 mb-6">{{ $news->excerpt }}</p>
+                @if($news->summary)
+                    <p class="text-xl text-gray-600 mb-6">{{ $news->summary }}</p>
                 @endif
 
                 <!-- Author Info -->

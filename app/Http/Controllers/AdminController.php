@@ -29,8 +29,8 @@ class AdminController extends Controller
             'articles_published' => Article::where('is_published', true)->count(),
             'articles_draft' => Article::where('is_published', false)->count(),
             'news_total' => News::count(),
-            'news_published' => News::where('is_published', true)->count(),
-            'news_draft' => News::where('is_published', false)->count(),
+            'news_published' => News::where('status', 'published')->count(),
+            'news_draft' => News::where('status', 'draft')->count(),
             'users_total' => User::count(),
             'countries_active' => Country::count(),
         ];
@@ -86,7 +86,7 @@ class AdminController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', '%' . addcslashes($search, '%_\\') . '%')
-                    ->orWhere('excerpt', 'like', '%' . addcslashes($search, '%_\\') . '%');
+                    ->orWhere('summary', 'like', '%' . addcslashes($search, '%_\\') . '%');
             });
         }
 
@@ -336,7 +336,7 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
-            'excerpt' => 'nullable|string|max:500',
+            'summary' => 'nullable|string|max:500',
             'content' => 'required|string',
             'category' => 'nullable|string|in:' . implode(',', array_keys(config('content.news_categories'))),
             'country_id' => 'nullable|exists:countries,id',
@@ -358,7 +358,7 @@ class AdminController extends Controller
         // Set attributes directly with validated data (ID not needed for preview)
         $news->title = $validatedData['title'];
         $news->slug = $validatedData['slug'] ?? \Str::slug($validatedData['title']);
-        $news->excerpt = $validatedData['excerpt'] ?? null;
+        $news->summary = $validatedData['summary'] ?? null;
         $news->content = $validatedData['content'];
         $news->category = $validatedData['category'] ?? 'administrative';
         $news->country_id = $validatedData['country_id'] ?? null;
@@ -411,7 +411,7 @@ class AdminController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', '%' . addcslashes($search, '%_\\') . '%')
-                    ->orWhere('excerpt', 'like', '%' . addcslashes($search, '%_\\') . '%');
+                    ->orWhere('summary', 'like', '%' . addcslashes($search, '%_\\') . '%');
             });
         }
 
@@ -485,6 +485,9 @@ class AdminController extends Controller
     public function editNews(News $news)
     {
         $this->authorize('update', $news);
+
+        // Load the country relationship if not already loaded
+        $news->load(['author', 'country']);
 
         $countries = Country::all();
         $categories = array_keys(config('content.news_categories'));
